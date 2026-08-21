@@ -1,67 +1,31 @@
-import { findBembaWord } from "../data/bembaDictionary";
+import { bembaDictionary } from "../data/bembaDictionary";
 
-export type TranslationResult = {
-  original: string;
-  translated: string;
-  matchedWords: number;
-  totalWords: number;
-  confidence: number;
-};
-
-const punctuationRegex = /[.,!?;:()[\]{}"]/g;
-
-function cleanWord(word: string): string {
-  return word
+function normalize(text: string): string {
+  return text
     .toLowerCase()
-    .replace(punctuationRegex, "")
-    .trim();
+    .trim()
+    .replace(/[.,!?;:]/g, "")
+    .replace(/\s+/g, " ");
 }
 
-export function translateEnglishToBemba(
-  text: string
-): TranslationResult {
-  const original = text.trim();
+export function translateEnglishToBemba(text: string): string {
+  const input = normalize(text);
 
-  if (!original) {
-    return {
-      original: "",
-      translated: "",
-      matchedWords: 0,
-      totalWords: 0,
-      confidence: 0,
-    };
+  if (!input) {
+    return "";
   }
 
-  const words = original
-    .split(/\s+/)
-    .filter(Boolean);
+  if (bembaDictionary[input]) {
+    return bembaDictionary[input];
+  }
 
-  let matchedWords = 0;
+  const words = input.split(" ");
 
-  const translatedWords = words.map((word) => {
-    const cleaned = cleanWord(word);
-    const entry = findBembaWord(cleaned);
+  return words
+    .map((word) => bembaDictionary[word] ?? word)
+    .join(" ");
+}
 
-    if (entry) {
-      matchedWords++;
-      return entry.bemba;
-    }
-
-    return word;
-  });
-
-  const translated = translatedWords.join(" ");
-
-  const confidence =
-    words.length === 0
-      ? 0
-      : Math.round((matchedWords / words.length) * 100);
-
-  return {
-    original,
-    translated,
-    matchedWords,
-    totalWords: words.length,
-    confidence,
-  };
+export function translateWithFallback(text: string): string {
+  return translateEnglishToBemba(text);
 }
