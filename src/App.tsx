@@ -19,9 +19,7 @@ import {
   Volume2,
   X,
 } from "lucide-react";
-import {
-  translateWithFallback,
-} from "./engine/bembaTranslator";
+import { translateWithFallback } from "./engine/bembaTranslator";
 
 type Page = "home" | "translate" | "learn" | "history" | "settings";
 
@@ -57,7 +55,7 @@ const learningCategories = [
   },
   {
     title: "Food & drink",
-    text: "Useful vocabulary when eating, shopping or ordering food.",
+    text: "Useful vocabulary for eating and shopping.",
   },
   {
     title: "Travel",
@@ -93,7 +91,7 @@ function App() {
         setFavorites(JSON.parse(savedFavorites));
       }
     } catch {
-      // Ignore invalid local storage data.
+      // Ignore invalid local data.
     }
   }, []);
 
@@ -106,11 +104,18 @@ function App() {
   }, [favorites]);
 
   const pageTitle = useMemo(() => {
-    if (page === "translate") return "Translate";
-    if (page === "learn") return "Learn Bemba";
-    if (page === "history") return "History";
-    if (page === "settings") return "Settings";
-    return "BembaTranslate";
+    switch (page) {
+      case "translate":
+        return "Translate";
+      case "learn":
+        return "Learn Bemba";
+      case "history":
+        return "History";
+      case "settings":
+        return "Settings";
+      default:
+        return "BembaTranslate";
+    }
   }, [page]);
 
   function navigate(nextPage: Page) {
@@ -124,8 +129,9 @@ function App() {
     setTargetLanguage(sourceLanguage);
 
     if (result) {
+      const oldInput = input;
       setInput(result);
-      setResult(input);
+      setResult(oldInput);
     }
   }
 
@@ -138,11 +144,8 @@ function App() {
     }
 
     try {
-      const translated = translateWithFallback(
-        cleanText,
-        sourceLanguage,
-        targetLanguage
-      );
+      // bembaTranslator currently accepts one argument.
+      const translated = translateWithFallback(cleanText);
 
       setResult(translated);
 
@@ -156,14 +159,15 @@ function App() {
         }),
       };
 
-      setHistory((current) => [
-        item,
-        ...current.filter(
+      setHistory((current) => {
+        const filtered = current.filter(
           (oldItem) =>
             oldItem.source !== cleanText ||
             oldItem.result !== translated
-        ),
-      ].slice(0, 30));
+        );
+
+        return [item, ...filtered].slice(0, 30);
+      });
     } catch {
       setResult(
         "Translation could not be completed. Please check the text and try again."
@@ -177,7 +181,10 @@ function App() {
     try {
       await navigator.clipboard.writeText(result);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
+
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 1600);
     } catch {
       // Clipboard unavailable.
     }
@@ -189,7 +196,6 @@ function App() {
     window.speechSynthesis.cancel();
 
     const speech = new SpeechSynthesisUtterance(text);
-    speech.lang = targetLanguage === "Bemba" ? "en-US" : "en-US";
     speech.rate = 0.9;
 
     window.speechSynthesis.speak(speech);
@@ -212,8 +218,8 @@ function App() {
 
   function usePhrase(phrase: string) {
     setInput(phrase);
-    setPage("translate");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setResult("");
+    navigate("translate");
   }
 
   function deleteHistory(id: number) {
@@ -265,18 +271,22 @@ function App() {
               <Home size={17} />
               Home
             </button>
+
             <button onClick={() => navigate("translate")}>
               <Languages size={17} />
               Translate
             </button>
+
             <button onClick={() => navigate("learn")}>
               <BookOpen size={17} />
               Learn
             </button>
+
             <button onClick={() => navigate("history")}>
               <Clock3 size={17} />
               History
             </button>
+
             <button onClick={() => navigate("settings")}>
               <Settings size={17} />
               Settings
@@ -292,7 +302,7 @@ function App() {
               <div className="hero-content">
                 <span className="eyebrow">
                   <Sparkles size={13} />
-                  YOUR OFFLINE BEMBA ASSISTANT
+                  OFFLINE BEMBA ASSISTANT
                 </span>
 
                 <h1>
@@ -303,7 +313,7 @@ function App() {
 
                 <p>
                   Translate everyday English and Bemba phrases,
-                  save your translations and learn useful words
+                  save translations and learn useful words
                   without depending on an internet connection.
                 </p>
 
@@ -338,11 +348,14 @@ function App() {
                 <span className="feature-icon green">
                   <Languages size={22} />
                 </span>
+
                 <strong>Translate</strong>
+
                 <span>
                   Convert words and sentences between English
                   and Bemba.
                 </span>
+
                 <ChevronRight size={17} />
               </button>
 
@@ -353,11 +366,14 @@ function App() {
                 <span className="feature-icon gold">
                   <BookOpen size={22} />
                 </span>
+
                 <strong>Learn Bemba</strong>
+
                 <span>
                   Explore useful vocabulary and everyday
                   expressions.
                 </span>
+
                 <ChevronRight size={17} />
               </button>
 
@@ -368,11 +384,14 @@ function App() {
                 <span className="feature-icon blue">
                   <Clock3 size={22} />
                 </span>
+
                 <strong>My History</strong>
+
                 <span>
-                  Quickly return to translations you have already
-                  made.
+                  Quickly return to translations you have
+                  already made.
                 </span>
+
                 <ChevronRight size={17} />
               </button>
             </div>
@@ -406,34 +425,35 @@ function App() {
             </div>
 
             {history.length > 0 && (
-              <div className="section-heading compact">
-                <div>
-                  <span className="section-kicker">RECENT</span>
-                  <h2>Continue where you stopped</h2>
+              <>
+                <div className="section-heading compact">
+                  <div>
+                    <span className="section-kicker">RECENT</span>
+                    <h2>Continue where you stopped</h2>
+                  </div>
                 </div>
-              </div>
-            )}
 
-            {history.length > 0 && (
-              <div className="recent-list">
-                {history.slice(0, 3).map((item) => (
-                  <button
-                    className="recent-card"
-                    key={item.id}
-                    onClick={() => {
-                      setInput(item.source);
-                      setResult(item.result);
-                      navigate("translate");
-                    }}
-                  >
-                    <span>
-                      <strong>{item.source}</strong>
-                      <small>{item.result}</small>
-                    </span>
-                    <ChevronRight size={18} />
-                  </button>
-                ))}
-              </div>
+                <div className="recent-list">
+                  {history.slice(0, 3).map((item) => (
+                    <button
+                      className="recent-card"
+                      key={item.id}
+                      onClick={() => {
+                        setInput(item.source);
+                        setResult(item.result);
+                        navigate("translate");
+                      }}
+                    >
+                      <span>
+                        <strong>{item.source}</strong>
+                        <small>{item.result}</small>
+                      </span>
+
+                      <ChevronRight size={18} />
+                    </button>
+                  ))}
+                </div>
+              </>
             )}
           </section>
         )}
@@ -441,10 +461,14 @@ function App() {
         {page === "translate" && (
           <section className="page">
             <div className="page-header">
-              <span className="section-kicker">TRANSLATION STUDIO</span>
+              <span className="section-kicker">
+                TRANSLATION STUDIO
+              </span>
+
               <h1>{pageTitle}</h1>
+
               <p>
-                Translate naturally and keep your useful phrases
+                Translate naturally and keep useful phrases
                 available offline.
               </p>
             </div>
@@ -474,6 +498,7 @@ function App() {
                 <div className="translation-panel">
                   <div className="panel-heading">
                     <span>Your text</span>
+
                     <button
                       className="small-icon"
                       onClick={clearTranslation}
@@ -486,13 +511,16 @@ function App() {
 
                   <textarea
                     value={input}
-                    onChange={(event) => setInput(event.target.value)}
+                    onChange={(event) =>
+                      setInput(event.target.value)
+                    }
                     placeholder="Type something to translate..."
                     spellCheck={false}
                   />
 
                   <div className="panel-footer">
                     <span>{input.length} characters</span>
+
                     <button
                       className="small-icon"
                       onClick={() => speak(input)}
@@ -578,7 +606,9 @@ function App() {
 
             <div className="section-heading compact">
               <div>
-                <span className="section-kicker">SUGGESTIONS</span>
+                <span className="section-kicker">
+                  SUGGESTIONS
+                </span>
                 <h2>Try a phrase</h2>
               </div>
             </div>
@@ -605,7 +635,9 @@ function App() {
           <section className="page">
             <div className="page-header">
               <span className="section-kicker">LEARNING</span>
+
               <h1>Learn Bemba</h1>
+
               <p>
                 Build your vocabulary with practical categories
                 for everyday conversations.
@@ -614,6 +646,7 @@ function App() {
 
             <div className="search-box">
               <Search size={18} />
+
               <input
                 placeholder="Search Bemba lessons..."
                 aria-label="Search lessons"
@@ -630,8 +663,11 @@ function App() {
                   <span className="learning-icon">
                     <BookOpen size={20} />
                   </span>
+
                   <strong>{category.title}</strong>
+
                   <span>{category.text}</span>
+
                   <ChevronRight size={17} />
                 </button>
               ))}
@@ -639,8 +675,10 @@ function App() {
 
             <div className="info-card">
               <Star size={20} />
+
               <div>
                 <strong>Build your personal phrasebook</strong>
+
                 <p>
                   Favorite useful translations and they will stay
                   available on your device.
@@ -654,8 +692,12 @@ function App() {
           <section className="page">
             <div className="page-header row-header">
               <div>
-                <span className="section-kicker">YOUR ACTIVITY</span>
+                <span className="section-kicker">
+                  YOUR ACTIVITY
+                </span>
+
                 <h1>Translation history</h1>
+
                 <p>
                   Your recent translations are stored locally on
                   this device.
@@ -676,11 +718,14 @@ function App() {
             {history.length === 0 ? (
               <div className="empty-card">
                 <Clock3 size={34} />
+
                 <strong>No translations yet</strong>
+
                 <span>
                   Start translating and your recent activity will
                   appear here.
                 </span>
+
                 <button
                   className="primary-action small"
                   onClick={() => navigate("translate")}
@@ -703,9 +748,11 @@ function App() {
                       <span className="history-source">
                         {item.source}
                       </span>
+
                       <span className="history-result">
                         {item.result}
                       </span>
+
                       <small>{item.time}</small>
                     </button>
 
@@ -725,7 +772,9 @@ function App() {
               <>
                 <div className="section-heading compact">
                   <div>
-                    <span className="section-kicker">SAVED</span>
+                    <span className="section-kicker">
+                      SAVED
+                    </span>
                     <h2>Favorites</h2>
                   </div>
                 </div>
@@ -746,9 +795,15 @@ function App() {
         {page === "settings" && (
           <section className="page">
             <div className="page-header">
-              <span className="section-kicker">PREFERENCES</span>
+              <span className="section-kicker">
+                PREFERENCES
+              </span>
+
               <h1>Settings</h1>
-              <p>Manage your offline language experience.</p>
+
+              <p>
+                Manage your offline language experience.
+              </p>
             </div>
 
             <div className="settings-list">
@@ -756,12 +811,15 @@ function App() {
                 <span className="setting-symbol">
                   <Languages size={20} />
                 </span>
+
                 <div>
                   <strong>Offline translation</strong>
+
                   <p>
                     Translation data stays on your device.
                   </p>
                 </div>
+
                 <span className="status">ON</span>
               </div>
 
@@ -769,12 +827,15 @@ function App() {
                 <span className="setting-symbol">
                   <Volume2 size={20} />
                 </span>
+
                 <div>
                   <strong>Voice controls</strong>
+
                   <p>
                     Listen to text manually whenever you want.
                   </p>
                 </div>
+
                 <span className="status">READY</span>
               </div>
 
@@ -782,13 +843,16 @@ function App() {
                 <span className="setting-symbol">
                   <Heart size={20} />
                 </span>
+
                 <div>
                   <strong>Saved phrases</strong>
+
                   <p>
                     {favorites.length} favorite translation
                     {favorites.length === 1 ? "" : "s"} saved.
                   </p>
                 </div>
+
                 <button
                   className="text-button"
                   onClick={() => navigate("history")}
@@ -801,11 +865,13 @@ function App() {
                 <span className="setting-symbol">
                   <Settings size={20} />
                 </span>
+
                 <div>
                   <strong>Local data</strong>
+
                   <p>
                     History and favorites are stored in your
-                    browser/device storage.
+                    browser or device storage.
                   </p>
                 </div>
               </div>
