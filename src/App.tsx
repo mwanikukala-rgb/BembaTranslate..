@@ -6,8 +6,8 @@ import {
   Globe2,
   Home,
   Languages,
-  Library,
   Menu,
+  Search,
   Settings,
   Sparkles,
   Volume2,
@@ -17,12 +17,12 @@ import "./styles/global.css";
 
 type Page = "home" | "translate" | "dictionary" | "history" | "settings";
 
-const navigation: { id: Page; label: string; icon: typeof Home }[] = [
-  { id: "home", label: "Home", icon: Home },
-  { id: "translate", label: "Translate", icon: Languages },
-  { id: "dictionary", label: "Dictionary", icon: Library },
-  { id: "history", label: "History", icon: Clock3 },
-  { id: "settings", label: "Settings", icon: Settings },
+const navigation = [
+  { id: "home" as Page, label: "Home", icon: Home },
+  { id: "translate" as Page, label: "Translate", icon: Languages },
+  { id: "dictionary" as Page, label: "Dictionary", icon: BookOpen },
+  { id: "history" as Page, label: "History", icon: Clock3 },
+  { id: "settings" as Page, label: "Settings", icon: Settings },
 ];
 
 function App() {
@@ -30,19 +30,69 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [englishText, setEnglishText] = useState("");
   const [bembaText, setBembaText] = useState("");
-  const [search, setSearch] = useState("");
+  const [searchText, setSearchText] = useState("");
 
-  const openPage = (next: Page) => {
-    setPage(next);
+  const openPage = (nextPage: Page) => {
+    setPage(nextPage);
     setMenuOpen(false);
   };
 
   const translate = () => {
     if (!englishText.trim()) return;
 
+    const text = englishText.trim().toLowerCase();
+
+    const dictionary: Record<string, string> = {
+      hello: "Mwashibukeni",
+      "good morning": "Mwashibukeni",
+      "good afternoon": "Mwasana",
+      "good evening": "Mwaiseni",
+      "how are you": "Muli shani?",
+      "thank you": "Natotela",
+      thanks: "Natotela",
+      yes: "Eyo",
+      no: "Iyo",
+      please: "Nomba",
+      welcome: "Mwaiseni",
+      "my name is": "Ishina lyandi ni",
+      "what is your name": "Ishina lyenu ninshi?",
+      "i love you": "Nalitemwa",
+      "god is good": "Lesa alisuma",
+      "good night": "Mwalale bwino",
+      goodbye: "Mwapoleni",
+      friend: "Munensu",
+      child: "Mwana",
+      mother: "Mayo",
+      father: "Tata",
+      water: "Amenshi",
+      food: "Ifyakulya",
+      house: "Ingo",
+      school: "Isukulu",
+      today: "Lelo",
+      tomorrow: "Mailo",
+      yesterday: "Mailo yapita",
+    };
+
+    if (dictionary[text]) {
+      setBembaText(dictionary[text]);
+      return;
+    }
+
     setBembaText(
-      "Translation engine will be connected here. This app is prepared for the offline Bemba translation model."
+      "Translation available when the full offline Bemba language model is connected."
     );
+  };
+
+  const speak = () => {
+    if (!bembaText || !("speechSynthesis" in window)) return;
+
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(bembaText);
+    utterance.lang = "en-US";
+    utterance.rate = 0.85;
+
+    window.speechSynthesis.speak(utterance);
   };
 
   return (
@@ -77,22 +127,24 @@ function App() {
       </header>
 
       {menuOpen && (
-        <>
-          <div
-            className="sidebar-overlay"
-            onClick={() => setMenuOpen(false)}
-          />
-
-          <aside className="sidebar open">
+        <div
+          className="sidebar-overlay"
+          onClick={() => setMenuOpen(false)}
+        >
+          <aside
+            className="sidebar open"
+            onClick={(event) => event.stopPropagation()}
+          >
             <button
               className="icon-button close-menu"
               onClick={() => setMenuOpen(false)}
-              aria-label="Close menu"
             >
               <X size={21} />
             </button>
 
-            <div className="sidebar-header">Navigation</div>
+            <div className="sidebar-header">
+              BembaTranslate
+            </div>
 
             <nav>
               {navigation.map((item) => {
@@ -116,19 +168,22 @@ function App() {
             <div className="sidebar-footer">
               <div className="offline-badge">
                 <div className="status-dot" />
+
                 <div>
                   <strong>Offline mode</strong>
-                  <small>Ready for local models</small>
+                  <small>Ready to work locally</small>
                 </div>
               </div>
             </div>
           </aside>
-        </>
+        </div>
       )}
 
       <div className="layout">
         <aside className="sidebar">
-          <div className="sidebar-header">Navigation</div>
+          <div className="sidebar-header">
+            LANGUAGE
+          </div>
 
           <nav>
             {navigation.map((item) => {
@@ -152,9 +207,10 @@ function App() {
           <div className="sidebar-footer">
             <div className="offline-badge">
               <div className="status-dot" />
+
               <div>
                 <strong>Offline mode</strong>
-                <small>Ready for local models</small>
+                <small>No internet required</small>
               </div>
             </div>
           </div>
@@ -173,13 +229,12 @@ function App() {
                     <h1>
                       Speak English.
                       <br />
-                      Understand Bemba.
+                      <span>Understand Bemba.</span>
                     </h1>
 
                     <p>
-                      Translate English into Bemba privately and
-                      prepare the app for completely offline language
-                      tools.
+                      Translate English into Bemba privately,
+                      directly on your device.
                     </p>
 
                     <button
@@ -188,7 +243,7 @@ function App() {
                     >
                       <Languages size={18} />
                       Start translating
-                      <ChevronRight size={18} />
+                      <ChevronRight size={17} />
                     </button>
                   </div>
 
@@ -198,15 +253,16 @@ function App() {
 
                     <div className="book-page book-front">
                       <div className="book-symbol">
-                        <Languages size={27} />
+                        <Languages size={28} />
                       </div>
 
                       <span>English</span>
-                      <strong>Bemba</strong>
+                      <strong>↔</strong>
+                      <span>Bemba</span>
 
                       <div className="book-line" />
 
-                      <small>OFFLINE LANGUAGE</small>
+                      <small>OFFLINE DICTIONARY</small>
                     </div>
                   </div>
                 </div>
@@ -294,27 +350,39 @@ function App() {
                       <label>English</label>
 
                       <textarea
-                        rows={8}
                         value={englishText}
-                        onChange={(e) =>
-                          setEnglishText(e.target.value)
+                        onChange={(event) =>
+                          setEnglishText(event.target.value)
                         }
                         placeholder="Type or paste English text..."
+                        rows={8}
                         maxLength={1000}
                       />
 
                       <div className="panel-footer">
-                        <span>
-                          {englishText.length}/1000
-                        </span>
-
                         <button
                           className="text-button"
-                          onClick={() => setEnglishText("")}
+                          onClick={() => {
+                            setEnglishText("");
+                            setBembaText("");
+                          }}
                         >
                           Clear
                         </button>
+
+                        <span>
+                          {englishText.length}/1000
+                        </span>
                       </div>
+
+                      <button
+                        className="translate-button"
+                        disabled={!englishText.trim()}
+                        onClick={translate}
+                      >
+                        <Sparkles size={17} />
+                        Translate
+                      </button>
                     </div>
 
                     <div className="output-panel">
@@ -322,21 +390,28 @@ function App() {
 
                       {bembaText ? (
                         <>
-                          <p>{bembaText}</p>
+                          <div
+                            style={{
+                              fontSize: "20px",
+                              lineHeight: 1.6,
+                            }}
+                          >
+                            {bembaText}
+                          </div>
 
                           <div className="audio-controls">
                             <button
                               className="play-button"
-                              disabled
+                              onClick={speak}
                             >
-                              <Volume2 size={16} />
-                              Voice coming soon
+                              <Volume2 size={17} />
+                              Play pronunciation
                             </button>
                           </div>
                         </>
                       ) : (
                         <div className="translation-placeholder">
-                          <Sparkles size={25} />
+                          <Languages size={27} />
                           <span>
                             Your Bemba translation will appear
                             here.
@@ -345,15 +420,6 @@ function App() {
                       )}
                     </div>
                   </div>
-
-                  <button
-                    className="translate-button"
-                    onClick={translate}
-                    disabled={!englishText.trim()}
-                  >
-                    <Sparkles size={18} />
-                    Translate to Bemba
-                  </button>
                 </div>
               </section>
             )}
@@ -364,16 +430,18 @@ function App() {
                   <span className="eyebrow">REFERENCE</span>
                   <h2>Bemba Dictionary</h2>
                   <p>
-                    Search your offline English–Bemba vocabulary.
+                    Search your local English–Bemba vocabulary.
                   </p>
                 </div>
 
                 <div className="search-box">
-                  <Library size={19} />
+                  <Search size={20} />
 
                   <input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    value={searchText}
+                    onChange={(event) =>
+                      setSearchText(event.target.value)
+                    }
                     placeholder="Search English or Bemba..."
                   />
                 </div>
@@ -381,11 +449,15 @@ function App() {
                 <div className="empty-card">
                   <BookOpen size={32} />
 
-                  <strong>Offline dictionary</strong>
+                  <strong>
+                    {searchText
+                      ? `Searching for "${searchText}"`
+                      : "Offline dictionary"}
+                  </strong>
 
                   <span>
-                    The local English–Bemba dictionary will be
-                    connected here.
+                    The full Bemba vocabulary database will be
+                    added to the app next.
                   </span>
                 </div>
               </section>
@@ -394,8 +466,12 @@ function App() {
             {page === "history" && (
               <section>
                 <div className="page-heading">
-                  <span className="eyebrow">YOUR ACTIVITY</span>
+                  <span className="eyebrow">
+                    YOUR ACTIVITY
+                  </span>
+
                   <h2>Translation History</h2>
+
                   <p>
                     Your recent translations will appear here.
                   </p>
@@ -425,8 +501,12 @@ function App() {
             {page === "settings" && (
               <section>
                 <div className="page-heading">
-                  <span className="eyebrow">PREFERENCES</span>
+                  <span className="eyebrow">
+                    PREFERENCES
+                  </span>
+
                   <h2>Settings</h2>
+
                   <p>
                     Control your offline language experience.
                   </p>
@@ -440,6 +520,7 @@ function App() {
 
                     <div className="setting-copy">
                       <strong>Offline mode</strong>
+
                       <span>
                         Translation models stay on your device.
                       </span>
@@ -457,6 +538,7 @@ function App() {
 
                     <div className="setting-copy">
                       <strong>Manual audio</strong>
+
                       <span>
                         Audio never plays automatically.
                       </span>
@@ -473,9 +555,10 @@ function App() {
                     </div>
 
                     <div className="setting-copy">
-                      <strong>Bemba language</strong>
+                      <strong>Bemba voice</strong>
+
                       <span>
-                        Local language model will be connected
+                        Local voice model will be connected
                         later.
                       </span>
                     </div>
