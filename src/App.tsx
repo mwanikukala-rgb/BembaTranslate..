@@ -27,6 +27,33 @@ const navigation = [
   { id: "settings" as Page, label: "Settings", icon: Settings },
 ];
 
+const dictionary: Record<string, string> = {
+  hello: "Mwashibukeni",
+  "good morning": "Mwashibukeni",
+  "good afternoon": "Mwapoleni",
+  "good evening": "Mwabilapo",
+  goodbye: "Shalenipo",
+  yes: "Ee",
+  no: "Awe",
+  thanks: "Natotela",
+  "thank you": "Natotela",
+  water: "Amenshi",
+  food: "Ifyakulya",
+  house: "Ingo",
+  child: "Umwana",
+  children: "Abana",
+  mother: "Bama",
+  father: "Tata",
+  friend: "Munandi",
+  love: "Kutemwa",
+  God: "Lesa",
+  church: "Cikuta",
+  "how are you": "Muli shani?",
+  "i am fine": "Ndi bwino.",
+  "i understand": "Ndeumfwa.",
+  "i don't understand": "Tashingaumfwa.",
+};
+
 function App() {
   const [page, setPage] = useState<Page>("home");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -34,101 +61,69 @@ function App() {
   const [bembaText, setBembaText] = useState("");
   const [search, setSearch] = useState("");
   const [history, setHistory] = useState<string[]>([]);
-  const [isTranslating, setIsTranslating] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
 
-  const openPage = (nextPage: Page) => {
+  function openPage(nextPage: Page) {
     setPage(nextPage);
     setMenuOpen(false);
-  };
+  }
 
-  const translate = async () => {
+  async function translate() {
     const text = englishText.trim();
 
-    if (!text || isTranslating) return;
+    if (!text || loading) return;
 
-    setIsTranslating(true);
+    setLoading(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 400));
 
-    const dictionary: Record<string, string> = {
-      hello: "Mwashibukeni",
-      "good morning": "Mwashibukeni",
-      "good afternoon": "Mwapoleni",
-      "good evening": "Mwabilapo",
-      goodbye: "Shalenipo",
-      yes: "Ee",
-      no: "Awe",
-      thank: "Natotela",
-      thanks: "Natotela",
-      "thank you": "Natotela",
-      please: "Nomba",
-      welcome: "Mwaiseni",
-      "how are you": "Muli shani?",
-      "i am fine": "Ndi bwino.",
-      "what is your name": "Ishina lyenu ni nani?",
-      "my name is": "Ishina lyandi ni",
-      water: "Amenshi",
-      food: "Ifyakulya",
-      house: "Ingo",
-      child: "Umwana",
-      children: "Abana",
-      mother: "Bama",
-      father: "Tata",
-      friend: "Munandi",
-      love: "Kutemwa",
-      God: "Lesa",
-      church: "Cikuta",
-      "come here": "Iseni kuno.",
-      "go home": "Yani ku ng'anda.",
-      "i understand": "Ndeumfwa.",
-      "i don't understand": "Tashingaumfwa.",
-    };
+    const key = text
+      .toLowerCase()
+      .replace(/[.,!?]/g, "")
+      .trim();
 
-    const normalized = text.toLowerCase().replace(/[.!?,]/g, "").trim();
-
-    let result = dictionary[normalized];
+    let result = dictionary[key];
 
     if (!result) {
-      const words = normalized.split(/\s+/);
+      const words = key.split(/\s+/);
 
-      const translatedWords = words.map((word) => {
-        return dictionary[word] || word;
-      });
-
-      result = translatedWords.join(" ");
+      result = words
+        .map((word) => dictionary[word] || word)
+        .join(" ");
     }
 
-    if (!result || result === normalized) {
+    if (!result || result === key) {
       result =
-        "This phrase is not yet in the offline vocabulary. More Bemba language data will be added to the local translation engine.";
+        "This phrase is not yet available in the offline vocabulary.";
     }
 
     setBembaText(result);
-    setHistory((current) => [text, ...current.filter((item) => item !== text)].slice(0, 20));
-    setIsTranslating(false);
-  };
+    setHistory((old) => [
+      text,
+      ...old.filter((item) => item !== text),
+    ]);
+    setLoading(false);
+  }
 
-  const speak = () => {
-    if (!bembaText || isSpeaking) return;
+  function speak() {
+    if (!bembaText || speaking) return;
 
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
+    if (!("speechSynthesis" in window)) return;
 
-      const voice = new SpeechSynthesisUtterance(bembaText);
-      voice.rate = 0.82;
-      voice.pitch = 1;
+    window.speechSynthesis.cancel();
 
-      voice.onstart = () => setIsSpeaking(true);
-      voice.onend = () => setIsSpeaking(false);
-      voice.onerror = () => setIsSpeaking(false);
+    const speech = new SpeechSynthesisUtterance(bembaText);
 
-      window.speechSynthesis.speak(voice);
-    } else {
-      setIsSpeaking(true);
-      setTimeout(() => setIsSpeaking(false), 1000);
-    }
-  };
+    speech.rate = 0.8;
+    speech.pitch = 1;
+
+    speech.onstart = () => setSpeaking(true);
+    speech.onend = () => setSpeaking(false);
+    speech.onerror = () => setSpeaking(false);
+
+    window.speechSynthesis.speak(speech);
+  }
 
   return (
     <div className="app-shell">
@@ -136,12 +131,14 @@ function App() {
         <button
           className="icon-button"
           onClick={() => setMenuOpen(true)}
-          aria-label="Open menu"
         >
           <Menu size={22} />
         </button>
 
-        <button className="brand" onClick={() => openPage("home")}>
+        <button
+          className="brand"
+          onClick={() => openPage("home")}
+        >
           <div className="brand-mark">
             <Languages size={21} />
           </div>
@@ -155,7 +152,6 @@ function App() {
         <button
           className="icon-button"
           onClick={() => openPage("settings")}
-          aria-label="Settings"
         >
           <Settings size={20} />
         </button>
@@ -164,16 +160,4 @@ function App() {
       {menuOpen && (
         <div
           className="drawer-backdrop"
-          onClick={() => setMenuOpen(false)}
-        >
-          <aside
-            className="drawer"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="drawer-header">
-              <div className="brand-mark">
-                <Languages size={21} />
-              </div>
-
-              <div>
-                <strong>BembaTranslate
+          on
