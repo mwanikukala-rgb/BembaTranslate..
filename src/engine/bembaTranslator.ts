@@ -1,8 +1,9 @@
 import { bembaDictionary } from "../data/bembaDictionary";
 
-type Dictionary = Record<string, string>;
-
-const dictionary = bembaDictionary as Dictionary;
+type BembaEntry = {
+  english: string;
+  bemba: string;
+};
 
 function normalize(text: string): string {
   return text
@@ -12,6 +13,16 @@ function normalize(text: string): string {
     .replace(/\s+/g, " ");
 }
 
+function findTranslation(word: string): string | undefined {
+  const normalizedWord = normalize(word);
+
+  const entry = (bembaDictionary as BembaEntry[]).find(
+    (item) => normalize(item.english) === normalizedWord
+  );
+
+  return entry?.bemba;
+}
+
 export function translateEnglishToBemba(text: string): string {
   const input = normalize(text);
 
@@ -19,14 +30,18 @@ export function translateEnglishToBemba(text: string): string {
     return "";
   }
 
-  if (dictionary[input]) {
-    return dictionary[input];
+  const exact = (bembaDictionary as BembaEntry[]).find(
+    (item) => normalize(item.english) === input
+  );
+
+  if (exact) {
+    return exact.bemba;
   }
 
   const words = input.split(" ");
 
   return words
-    .map((word) => dictionary[word] ?? word)
+    .map((word) => findTranslation(word) ?? word)
     .join(" ");
 }
 
