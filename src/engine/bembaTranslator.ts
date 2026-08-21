@@ -1,5 +1,9 @@
 import { bembaDictionary } from "../data/bembaDictionary";
 
+type Dictionary = Record<string, string>;
+
+const dictionary = bembaDictionary as Dictionary;
+
 function normalize(text: string): string {
   return text
     .toLowerCase()
@@ -15,14 +19,14 @@ export function translateEnglishToBemba(text: string): string {
     return "";
   }
 
-  if (bembaDictionary[input]) {
-    return bembaDictionary[input];
+  if (dictionary[input]) {
+    return dictionary[input];
   }
 
   const words = input.split(" ");
 
   return words
-    .map((word) => bembaDictionary[word] ?? word)
+    .map((word) => dictionary[word] ?? word)
     .join(" ");
 }
 
