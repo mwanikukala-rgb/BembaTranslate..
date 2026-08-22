@@ -1485,4 +1485,81 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "take", bemba: "sè:ndá" },
   { english: "draw", bemba: "lè:ŋgá" },
   { english: "warthog", bemba: "í:nd͡ʒìlí" },
+    // =========================================================
+  // BEMBA EVERYDAY VOCABULARY & EXPRESSIONS
+  // =========================================================
+
+  { english: "yes", bemba: "ee" },
+  { english: "no", bemba: "awe" },
+
+  // GREETINGS & COMMON EXPRESSIONS
+  { english: "how are you informal", bemba: "Uli shani?" },
+  { english: "how are you formal", bemba: "Muli shani?" },
+  { english: "goodbye", bemba: "Shaleenipo" },
+  { english: "my name is", bemba: "Ishina lyandi ni..." },
+
+  // PEOPLE
+  { english: "person", bemba: "umuntu" },
+  { english: "friend", bemba: "umunandi" },
+  { english: "child", bemba: "umwana" },
+  { english: "man", bemba: "Umwaume" },
+  { english: "boy", bemba: "Umulumendo" },
+  { english: "girl", bemba: "Umukashana" },
+
+  // LANGUAGE & CONNECTORS
+  { english: "the Bemba language", bemba: "iciBemba" },
+  { english: "and", bemba: "na" },
+  { english: "with", bemba: "na" },
+  { english: "like", bemba: "nga" },
+  { english: "as", bemba: "nga" },
+
+  // DESCRIPTORS
+  { english: "good", bemba: "suma" },
+  { english: "beautiful", bemba: "suma" },
+  { english: "you are beautiful", bemba: "ulimusuma" },
+  { english: "all", bemba: "onse" },
+  { english: "everyone", bemba: "Bonse" },
+
+  // TIME
+  { english: "morning", bemba: "uluceelo" },
+  { english: "afternoon", bemba: "Akasuba" },
+  { english: "evening", bemba: "Ichungulo" },
+  { english: "night", bemba: "Ubushiku" },
+
+  // COURTESY & THANKS
+  { english: "thank you", bemba: "Natotela" },
+  { english: "a lot", bemba: "Saana" },
+  { english: "a lot alternative", bemba: "Ifingi" },
+  { english: "thanks a lot", bemba: "Natotela saana" },
+  { english: "please", bemba: "Twapapata" },
+  { english: "we are begging you", bemba: "Twamipapata" },
+
+  // RELIGION / EXPRESSIONS
+  { english: "God", bemba: "Lesa" },
+  { english: "God is for everyone", bemba: "Lesa wabonse" },
+  { english: "is", bemba: "Wa-" },
+  { english: "praise", bemba: "Malumbo" },
+  { english: "praise alternative", bemba: "Amalaila" },
+  { english: "a blesser", bemba: "Kapala" },
+
+  // COMMON EXPRESSIONS
+  { english: "Zambia to the World", bemba: "Zambia Ku Chalo" },
+  { english: "world", bemba: "Chalo" },
+  { english: "it is you", bemba: "Nimwebo" },
+  { english: "only", bemba: "Yeka" },
+  { english: "only alternative", bemba: "Weka" },
+
+  // OBJECTS / OTHER WORDS
+  { english: "bag", bemba: "Chola" },
+  { english: "fool", bemba: "Ichipuba" },
+  { english: "stupid", bemba: "Ukutumpa" },
+
+  // ANIMALS
+  { english: "dog", bemba: "Imbwa" },
+  { english: "rat", bemba: "Koswe" },
+  { english: "monkey", bemba: "Kolwe" },
+
+  // BODY / INFORMAL VOCABULARY
+  { english: "faeces", bemba: "Amafi" },
+  { english: "urine", bemba: "Imisu" },
 ];
