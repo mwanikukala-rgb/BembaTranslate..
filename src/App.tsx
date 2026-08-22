@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   BookOpen,
   Check,
@@ -7,17 +7,15 @@ import {
   Heart,
   History,
   Languages,
-  Menu,
   Search,
   Settings,
   Sparkles,
   Volume2,
-  X,
 } from "lucide-react";
 import { translateWithFallback } from "./engine/bembaTranslator";
 import "./styles/global.css";
 
-type Page = "translate" | "dictionary" | "history" | "settings";
+type Page = "translate" | "dictionary" | "learn" | "history" | "settings";
 
 type HistoryItem = {
   id: number;
@@ -35,17 +33,43 @@ const quickPhrases = [
   { english: "I'm angry", bemba: "Nimfulwa" },
 ];
 
+const learnCategories = [
+  {
+    title: "Greetings",
+    description: "Everyday greetings",
+  },
+  {
+    title: "Family",
+    description: "Family vocabulary",
+  },
+  {
+    title: "Food & Drink",
+    description: "Useful food words",
+  },
+  {
+    title: "Travel",
+    description: "Words for travelling",
+  },
+  {
+    title: "Numbers",
+    description: "Learn Bemba numbers",
+  },
+  {
+    title: "Everyday Life",
+    description: "Common expressions",
+  },
+];
+
 const navItems = [
   { id: "translate" as Page, label: "Translate", icon: Languages },
   { id: "dictionary" as Page, label: "Dictionary", icon: BookOpen },
+  { id: "learn" as Page, label: "Learn", icon: Sparkles },
   { id: "history" as Page, label: "History", icon: History },
   { id: "settings" as Page, label: "Settings", icon: Settings },
 ];
 
 function App() {
-  const [launching, setLaunching] = useState(true);
   const [page, setPage] = useState<Page>("translate");
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const [englishText, setEnglishText] = useState("");
   const [bembaText, setBembaText] = useState("");
@@ -58,14 +82,6 @@ function App() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [dictionarySearch, setDictionarySearch] = useState("");
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setLaunching(false);
-    }, 1500);
-
-    return () => window.clearTimeout(timer);
-  }, []);
-
   const filteredQuickPhrases = useMemo(() => {
     const query = englishText.trim().toLowerCase();
 
@@ -76,9 +92,23 @@ function App() {
     return quickPhrases.filter(
       (item) =>
         item.english.toLowerCase().includes(query) ||
-        item.bemba.toLowerCase().includes(query)
+        item.bemba.toLowerCase().includes(query),
     );
   }, [englishText]);
+
+  const dictionaryItems = useMemo(() => {
+    const query = dictionarySearch.trim().toLowerCase();
+
+    if (!query) {
+      return quickPhrases;
+    }
+
+    return quickPhrases.filter(
+      (item) =>
+        item.english.toLowerCase().includes(query) ||
+        item.bemba.toLowerCase().includes(query),
+    );
+  }, [dictionarySearch]);
 
   const translate = () => {
     const input = englishText.trim();
@@ -92,7 +122,7 @@ function App() {
 
     window.setTimeout(() => {
       const quickMatch = quickPhrases.find(
-        (item) => item.english.toLowerCase() === input.toLowerCase()
+        (item) => item.english.toLowerCase() === input.toLowerCase(),
       );
 
       const result =
@@ -124,6 +154,7 @@ function App() {
     setBembaText(bemba);
     setCopied(false);
     setFavourite(false);
+    setPage("translate");
   };
 
   const clearTranslation = () => {
@@ -173,55 +204,23 @@ function App() {
 
   const openPage = (nextPage: Page) => {
     setPage(nextPage);
-    setMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
-  if (launching) {
-    return (
-      <div className="launch-screen">
-        <div className="launch-glow launch-glow-one" />
-        <div className="launch-glow launch-glow-two" />
-
-        <div className="launch-content">
-          <div className="launch-logo">
-            <Languages size={32} strokeWidth={1.7} />
-          </div>
-
-          <h1>BembaTranslate</h1>
-          <p>English • Bemba</p>
-
-          <div className="launch-loader">
-            <span />
-          </div>
-
-          <small>Preparing offline dictionary</small>
-        </div>
-
-        <div className="launch-bottom">
-          <span className="online-dot" />
-          Works offline
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="app">
       <div className="wallpaper" />
 
+      {/* =====================================================
+          HEADER
+      ===================================================== */}
+
       <header className="topbar">
         <div className="topbar-inner">
           <button
-            className="icon-button mobile-menu-button"
-            onClick={() => setMenuOpen(true)}
-            aria-label="Open menu"
-          >
-            <Menu size={19} />
-          </button>
-
-          <button
             className="brand"
             onClick={() => openPage("translate")}
+            aria-label="Go to translation"
           >
             <div className="brand-mark">
               <Languages size={20} />
@@ -250,160 +249,129 @@ function App() {
         </div>
       </header>
 
-      {menuOpen && (
-        <>
-          <div
-            className="drawer-overlay"
-            onClick={() => setMenuOpen(false)}
-          />
+      {/* =====================================================
+          MAIN
+      ===================================================== */}
 
-          <aside className="mobile-drawer">
-            <div className="drawer-header">
-              <div className="brand">
-                <div className="brand-mark">
-                  <Languages size={19} />
-                </div>
+      <main className="layout">
+        <div className="main-content">
+          {/* =================================================
+              TRANSLATE PAGE
+          ================================================= */}
 
-                <div>
-                  <strong>BembaTranslate</strong>
-                  <span>English → Bemba</span>
-                </div>
-              </div>
-
-              <button
-                className="icon-button"
-                onClick={() => setMenuOpen(false)}
-                aria-label="Close menu"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <nav className="drawer-navigation">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-
-                return (
-                  <button
-                    key={item.id}
-                    className={`drawer-nav-item ${
-                      page === item.id ? "active" : ""
-                    }`}
-                    onClick={() => openPage(item.id)}
-                  >
-                    <Icon size={18} />
-                    {item.label}
-                  </button>
-                );
-              })}
-            </nav>
-
-            <div className="drawer-offline">
-              <span className="online-dot" />
-
-              <div>
-                <strong>Offline mode</strong>
-                <small>No internet required</small>
-              </div>
-            </div>
-          </aside>
-        </>
-      )}
-
-      <div className="layout">
-        <aside className="side-navigation">
-          <div className="side-caption">BEMBA LANGUAGE</div>
-
-          <nav>
-            {navItems.map((item) => {
-              const Icon = item.icon;
-
-              return (
-                <button
-                  key={item.id}
-                  className={`side-nav-item ${
-                    page === item.id ? "active" : ""
-                  }`}
-                  onClick={() => openPage(item.id)}
-                >
-                  <Icon size={18} />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-
-          <div className="side-bottom">
-            <div className="side-offline">
-              <span className="online-dot" />
-
-              <div>
-                <strong>Offline ready</strong>
-                <small>Private on your device</small>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        <main className="content">
           {page === "translate" && (
-            <section className="translator-page">
-              <div className="intro">
-                <div>
-                  <div className="section-label">
-                    <Sparkles size={12} />
-                    QUICK ENGLISH → BEMBA
-                  </div>
+            <>
+              {/* HERO */}
 
-                  <h1>Speak Bemba with confidence.</h1>
+              <section className="hero-panel">
+                <span className="hero-label">BEMBA LANGUAGE</span>
+
+                <h1>Speak Bemba with confidence.</h1>
+
+                <p>
+                  Translate everyday English into Bemba quickly,
+                  privately and without an internet connection.
+                </p>
+
+                <div style={{ marginTop: "22px" }}>
+                  <button
+                    className="primary-button"
+                    onClick={() =>
+                      document
+                        .getElementById("translator")
+                        ?.scrollIntoView({ behavior: "smooth" })
+                    }
+                  >
+                    <Languages size={17} />
+                    Start translating
+                  </button>
+                </div>
+              </section>
+
+              {/* QUICK ACCESS */}
+
+              <section className="section">
+                <div className="section-heading">
+                  <h2>Explore BembaTranslate</h2>
+                  <p>Everything you need in one place.</p>
+                </div>
+
+                <div className="feature-grid">
+                  <button
+                    className="feature-card"
+                    onClick={() => openPage("translate")}
+                  >
+                    <Languages size={22} />
+
+                    <h3>Translate</h3>
+
+                    <p>
+                      English to Bemba translation, completely offline.
+                    </p>
+                  </button>
+
+                  <button
+                    className="feature-card"
+                    onClick={() => openPage("dictionary")}
+                  >
+                    <BookOpen size={22} />
+
+                    <h3>Dictionary</h3>
+
+                    <p>
+                      Find useful English words and their Bemba meanings.
+                    </p>
+                  </button>
+
+                  <button
+                    className="feature-card"
+                    onClick={() => openPage("learn")}
+                  >
+                    <Sparkles size={22} />
+
+                    <h3>Learn Bemba</h3>
+
+                    <p>
+                      Explore useful vocabulary and everyday expressions.
+                    </p>
+                  </button>
+                </div>
+              </section>
+
+              {/* TRANSLATOR */}
+
+              <section
+                className="section"
+                id="translator"
+              >
+                <div className="section-heading">
+                  <h2>Translate</h2>
 
                   <p>
-                    Fast everyday translations, available even when
-                    you are offline.
+                    Enter an English word or phrase and translate it to
+                    Bemba.
                   </p>
                 </div>
 
-                {(englishText || bembaText) && (
-                  <button
-                    className="clear-button"
-                    onClick={clearTranslation}
-                  >
-                    Clear
-                  </button>
-                )}
-              </div>
-
-              <div className="language-switcher">
-                <div>
-                  <span>FROM</span>
-                  <strong>English</strong>
-                </div>
-
-                <button
-                  className="swap-button"
-                  onClick={swapLanguages}
-                  aria-label="Swap languages"
-                >
-                  <Languages size={17} />
-                </button>
-
-                <div>
-                  <span>TO</span>
-                  <strong>Bemba</strong>
-                </div>
-              </div>
-
-              <div className="translator-panel">
-                <div className="input-section">
-                  <div className="panel-heading">
-                    <div className="language-name">
-                      <span className="language-dot english" />
-                      English
+                <div className="translation-card">
+                  <div className="language-row">
+                    <div className="language-box">
+                      <small>From</small>
+                      <strong>English</strong>
                     </div>
 
-                    <span className="character-count">
-                      {englishText.length}/5000
-                    </span>
+                    <button
+                      className="swap-button"
+                      onClick={swapLanguages}
+                      aria-label="Swap languages"
+                    >
+                      <Languages size={17} />
+                    </button>
+
+                    <div className="language-box">
+                      <small>To</small>
+                      <strong>Bemba</strong>
+                    </div>
                   </div>
 
                   <textarea
@@ -423,355 +391,522 @@ function App() {
                     aria-label="English input"
                   />
 
-                  <div className="input-footer">
-                    <span>
-                      Quick translation is available offline
-                    </span>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: "10px",
+                      marginTop: "9px",
+                      color: "#7a827a",
+                      fontSize: "10px",
+                    }}
+                  >
+                    <span>Available offline</span>
 
-                    <button
-                      onClick={() => setEnglishText("")}
-                      disabled={!englishText}
-                    >
-                      Clear
-                    </button>
-                  </div>
-                </div>
-
-                <div className="result-section">
-                  <div className="panel-heading">
-                    <div className="language-name">
-                      <span className="language-dot bemba" />
-                      Bemba
-                    </div>
-
-                    <span className="translation-tag">LOCAL</span>
+                    <span>{englishText.length}/5000</span>
                   </div>
 
-                  <div className="result-body">
+                  <button
+                    className="primary-button"
+                    onClick={translate}
+                    disabled={!englishText.trim() || isTranslating}
+                    style={{ width: "100%" }}
+                  >
+                    <Languages size={17} />
+
+                    {isTranslating
+                      ? "Translating..."
+                      : "Translate to Bemba"}
+                  </button>
+
+                  <div className="translation-result">
+                    <h3>Bemba translation</h3>
+
                     {isTranslating ? (
-                      <div className="translation-loading">
-                        <span className="small-spinner" />
-                        Translating...
-                      </div>
+                      <p>Translating...</p>
                     ) : bembaText ? (
-                      <div className="translation-answer">
-                        <span className="answer-label">
-                          Bemba translation
-                        </span>
-
-                        <strong>{bembaText}</strong>
-                      </div>
+                      <p>{bembaText}</p>
                     ) : (
-                      <div className="result-placeholder">
-                        <div className="placeholder-icon">
-                          <BookOpen size={20} />
-                        </div>
+                      <p
+                        style={{
+                          color: "#899189",
+                          fontSize: "13px",
+                          fontWeight: 500,
+                        }}
+                      >
+                        Your Bemba translation will appear here.
+                      </p>
+                    )}
 
-                        <strong>Translation appears here</strong>
+                    {bembaText && (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          marginTop: "15px",
+                        }}
+                      >
+                        <button
+                          className="icon-button"
+                          onClick={() =>
+                            setFavourite((value) => !value)
+                          }
+                          aria-label="Favourite"
+                        >
+                          <Heart
+                            size={16}
+                            fill={favourite ? "currentColor" : "none"}
+                          />
+                        </button>
 
-                        <span>
-                          Enter a word or phrase above.
-                        </span>
+                        <button
+                          className="icon-button"
+                          onClick={copyText}
+                          aria-label="Copy translation"
+                        >
+                          {copied ? (
+                            <Check size={16} />
+                          ) : (
+                            <Copy size={16} />
+                          )}
+                        </button>
+
+                        <button
+                          className="primary-button"
+                          onClick={speakBemba}
+                          disabled={isSpeaking}
+                          style={{
+                            marginTop: 0,
+                            minHeight: "38px",
+                            padding: "8px 13px",
+                          }}
+                        >
+                          <Volume2 size={15} />
+                          {isSpeaking ? "Playing" : "Listen"}
+                        </button>
+
+                        <button
+                          className="icon-button"
+                          onClick={clearTranslation}
+                          aria-label="Clear translation"
+                        >
+                          ×
+                        </button>
                       </div>
                     )}
                   </div>
-
-                  <div className="result-footer">
-                    <button
-                      className={`result-action ${
-                        favourite ? "selected" : ""
-                      }`}
-                      onClick={() =>
-                        setFavourite((value) => !value)
-                      }
-                      disabled={!bembaText}
-                      aria-label="Favourite"
-                    >
-                      <Heart
-                        size={16}
-                        fill={favourite ? "currentColor" : "none"}
-                      />
-                    </button>
-
-                    <button
-                      className="result-action"
-                      onClick={copyText}
-                      disabled={!bembaText}
-                      aria-label="Copy translation"
-                    >
-                      {copied ? (
-                        <Check size={16} />
-                      ) : (
-                        <Copy size={16} />
-                      )}
-                    </button>
-
-                    <button
-                      className="listen-button"
-                      onClick={speakBemba}
-                      disabled={!bembaText}
-                    >
-                      <Volume2 size={16} />
-                      {isSpeaking ? "Playing" : "Listen"}
-                    </button>
-                  </div>
                 </div>
-              </div>
+              </section>
 
-              <button
-                className="main-translate-button"
-                onClick={translate}
-                disabled={!englishText.trim() || isTranslating}
-              >
-                <Languages size={18} />
+              {/* QUICK PHRASES */}
 
-                {isTranslating
-                  ? "Translating..."
-                  : "Translate to Bemba"}
-              </button>
+              <section className="section">
+                <div className="section-heading">
+                  <h2>Popular phrases</h2>
 
-              <section className="quick-section">
-                <div className="quick-heading">
-                  <div>
-                    <h2>Quick phrases</h2>
-                    <p>Common English expressions in Bemba</p>
-                  </div>
-
-                  <span>{quickPhrases.length} phrases</span>
+                  <p>
+                    Start with useful expressions you can use every day.
+                  </p>
                 </div>
 
-                <div className="quick-grid">
+                <div className="quick-phrases">
                   {filteredQuickPhrases.map((phrase) => (
                     <button
                       key={phrase.english}
-                      className="quick-card"
+                      className="phrase-card"
                       onClick={() =>
                         usePhrase(phrase.english, phrase.bemba)
                       }
+                      style={{
+                        textAlign: "left",
+                        cursor: "pointer",
+                      }}
                     >
-                      <span>{phrase.english}</span>
-                      <strong>{phrase.bemba}</strong>
+                      <span className="english">
+                        {phrase.english}
+                      </span>
+
+                      <span className="bemba">
+                        {phrase.bemba}
+                      </span>
                     </button>
                   ))}
                 </div>
               </section>
 
-              <div className="trust-row">
-                <div>
-                  <span className="trust-icon">
-                    <Languages size={14} />
-                  </span>
+              {/* LEARNING */}
 
-                  <span>
-                    <strong>Offline</strong>
-                    Local translation
-                  </span>
+              <section className="section">
+                <div className="section-heading">
+                  <h2>Learn Bemba</h2>
+
+                  <p>
+                    Build your vocabulary through everyday topics.
+                  </p>
                 </div>
 
-                <div>
-                  <span className="trust-icon">
-                    <BookOpen size={14} />
-                  </span>
-
-                  <span>
-                    <strong>Dictionary</strong>
-                    Built into the app
-                  </span>
+                <div className="category-grid">
+                  {learnCategories.map((category) => (
+                    <button
+                      key={category.title}
+                      className="category-card"
+                      onClick={() => openPage("learn")}
+                      style={{
+                        textAlign: "left",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <strong>{category.title}</strong>
+                      <span>{category.description}</span>
+                    </button>
+                  ))}
                 </div>
+              </section>
 
-                <div>
-                  <span className="trust-icon">
-                    <Volume2 size={14} />
-                  </span>
+              {/* OFFLINE INFORMATION */}
 
-                  <span>
-                    <strong>Bemba voice</strong>
-                    Manual playback
-                  </span>
+              <section className="section">
+                <div className="feature-grid">
+                  <div className="feature-card">
+                    <Languages size={20} />
+                    <h3>Works offline</h3>
+                    <p>
+                      Translation resources are available directly
+                      inside the application.
+                    </p>
+                  </div>
+
+                  <div className="feature-card">
+                    <BookOpen size={20} />
+                    <h3>Built-in dictionary</h3>
+                    <p>
+                      Keep useful English and Bemba vocabulary close
+                      at hand.
+                    </p>
+                  </div>
+
+                  <div className="feature-card">
+                    <Volume2 size={20} />
+                    <h3>Manual voice</h3>
+                    <p>
+                      Listen to Bemba audio when you choose. Nothing
+                      plays automatically.
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
+            </>
           )}
+
+          {/* =================================================
+              DICTIONARY
+          ================================================= */}
 
           {page === "dictionary" && (
-            <section className="inner-page">
-              <div className="intro">
-                <div>
-                  <div className="section-label">
-                    <BookOpen size={12} />
-                    BEMBA DICTIONARY
-                  </div>
+            <>
+              <section className="hero-panel">
+                <span className="hero-label">BEMBA DICTIONARY</span>
 
-                  <h1>Dictionary</h1>
+                <h1>Discover new words.</h1>
 
-                  <p>
-                    Find English words and their Bemba meanings.
-                  </p>
-                </div>
-              </div>
+                <p>
+                  Search useful English expressions and explore their
+                  Bemba meanings.
+                </p>
+              </section>
 
-              <div className="search-box">
-                <Search size={17} />
-
-                <input
-                  value={dictionarySearch}
-                  onChange={(event) =>
-                    setDictionarySearch(event.target.value)
-                  }
-                  placeholder="Search the dictionary..."
-                />
-              </div>
-
-              <div className="dictionary-preview">
-                <div className="dictionary-entry">
-                  <span>How are you?</span>
-                  <strong>Mulishani</strong>
+              <section className="section">
+                <div className="section-heading">
+                  <h2>Dictionary</h2>
+                  <p>Search the words available on your device.</p>
                 </div>
 
-                <div className="dictionary-entry">
-                  <span>Good morning</span>
-                  <strong>Mwashibukeni</strong>
-                </div>
-
-                <div className="dictionary-entry">
-                  <span>I want money</span>
-                  <strong>Ndefwaya indalama</strong>
-                </div>
-
-                <div className="dictionary-entry">
-                  <span>Where are you?</span>
-                  <strong>Ulikwisa</strong>
-                </div>
-
-                <div className="dictionary-entry">
-                  <span>Where are they?</span>
-                  <strong>Balikwisa</strong>
-                </div>
-
-                <div className="dictionary-entry">
-                  <span>I'm angry</span>
-                  <strong>Nimfulwa</strong>
-                </div>
-              </div>
-            </section>
-          )}
-
-          {page === "history" && (
-            <section className="inner-page">
-              <div className="intro">
-                <div>
-                  <div className="section-label">
-                    <Clock3 size={12} />
-                    LOCAL HISTORY
-                  </div>
-
-                  <h1>History</h1>
-
-                  <p>
-                    Your recent translations are stored locally.
-                  </p>
-                </div>
-
-                {history.length > 0 && (
-                  <button
-                    className="clear-button"
-                    onClick={() => setHistory([])}
+                <div
+                  className="translation-card"
+                  style={{ marginBottom: "16px" }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
                   >
-                    Clear history
-                  </button>
-                )}
-              </div>
+                    <Search size={18} />
 
-              {history.length === 0 ? (
-                <div className="empty-page">
-                  <History size={26} />
-
-                  <strong>No translation history yet</strong>
-
-                  <span>
-                    Your translations will appear here.
-                  </span>
+                    <input
+                      value={dictionarySearch}
+                      onChange={(event) =>
+                        setDictionarySearch(event.target.value)
+                      }
+                      placeholder="Search the dictionary..."
+                      style={{
+                        width: "100%",
+                        border: 0,
+                        background: "transparent",
+                        fontSize: "14px",
+                        outline: "none",
+                      }}
+                    />
+                  </div>
                 </div>
-              ) : (
-                <div className="history-list">
-                  {history.map((item) => (
+
+                <div className="list">
+                  {dictionaryItems.map((item) => (
                     <button
-                      className="history-card"
-                      key={item.id}
+                      key={item.english}
+                      className="list-item"
                       onClick={() =>
                         usePhrase(item.english, item.bemba)
                       }
+                      style={{
+                        textAlign: "left",
+                        cursor: "pointer",
+                      }}
                     >
                       <div>
-                        <small>{item.time}</small>
-                        <span>{item.english}</span>
-                        <strong>{item.bemba}</strong>
+                        <strong>{item.english}</strong>
+                        <br />
+                        <span>{item.bemba}</span>
                       </div>
 
                       <Languages size={17} />
                     </button>
                   ))}
                 </div>
-              )}
-            </section>
+              </section>
+            </>
           )}
 
-          {page === "settings" && (
-            <section className="inner-page">
-              <div className="intro">
-                <div>
-                  <div className="section-label">
-                    <Settings size={12} />
-                    PREFERENCES
-                  </div>
+          {/* =================================================
+              LEARN
+          ================================================= */}
 
-                  <h1>Settings</h1>
+          {page === "learn" && (
+            <>
+              <section className="hero-panel">
+                <span className="hero-label">LEARN BEMBA</span>
+
+                <h1>Learn a little every day.</h1>
+
+                <p>
+                  Explore practical Bemba vocabulary organized around
+                  everyday life.
+                </p>
+              </section>
+
+              <section className="section">
+                <div className="section-heading">
+                  <h2>Learning topics</h2>
+                  <p>Choose a category to begin.</p>
+                </div>
+
+                <div className="category-grid">
+                  {learnCategories.map((category) => (
+                    <div
+                      className="category-card"
+                      key={category.title}
+                    >
+                      <strong>{category.title}</strong>
+                      <span>{category.description}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section className="section">
+                <div className="section-heading">
+                  <h2>Start with these phrases</h2>
+                  <p>Useful expressions for everyday conversations.</p>
+                </div>
+
+                <div className="quick-phrases">
+                  {quickPhrases.map((phrase) => (
+                    <button
+                      key={phrase.english}
+                      className="phrase-card"
+                      onClick={() =>
+                        usePhrase(phrase.english, phrase.bemba)
+                      }
+                      style={{
+                        textAlign: "left",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <span className="english">
+                        {phrase.english}
+                      </span>
+
+                      <span className="bemba">
+                        {phrase.bemba}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            </>
+          )}
+
+          {/* =================================================
+              HISTORY
+          ================================================= */}
+
+          {page === "history" && (
+            <>
+              <section className="hero-panel">
+                <span className="hero-label">LOCAL HISTORY</span>
+
+                <h1>Your translations.</h1>
+
+                <p>
+                  Your recent translations stay on this device for easy
+                  access.
+                </p>
+              </section>
+
+              <section className="section">
+                <div className="section-heading">
+                  <h2>Recent translations</h2>
 
                   <p>
-                    Control your BembaTranslate experience.
+                    {history.length === 0
+                      ? "No translations yet."
+                      : `${history.length} saved translation${
+                          history.length === 1 ? "" : "s"
+                        }`}
                   </p>
                 </div>
-              </div>
 
-              <div className="settings-card">
-                <div className="setting">
-                  <div>
-                    <strong>Offline translation</strong>
+                {history.length === 0 ? (
+                  <div className="feature-card">
+                    <History size={24} />
 
-                    <span>
-                      Translation works without an internet connection.
-                    </span>
+                    <h3>No translation history yet</h3>
+
+                    <p>
+                      Translate something and your recent translations
+                      will appear here.
+                    </p>
                   </div>
+                ) : (
+                  <>
+                    <div className="list">
+                      {history.map((item) => (
+                        <button
+                          className="list-item"
+                          key={item.id}
+                          onClick={() =>
+                            usePhrase(item.english, item.bemba)
+                          }
+                          style={{
+                            textAlign: "left",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <div>
+                            <span>{item.time}</span>
+                            <br />
+                            <strong>{item.english}</strong>
+                            <br />
+                            <span>{item.bemba}</span>
+                          </div>
 
-                  <b>ON</b>
-                </div>
+                          <Languages size={17} />
+                        </button>
+                      ))}
+                    </div>
 
-                <div className="setting">
-                  <div>
-                    <strong>Automatic audio</strong>
-
-                    <span>
-                      Audio will never play automatically.
-                    </span>
-                  </div>
-
-                  <b className="off">OFF</b>
-                </div>
-
-                <div className="setting">
-                  <div>
-                    <strong>Translation direction</strong>
-
-                    <span>English → Bemba</span>
-                  </div>
-
-                  <Languages size={18} />
-                </div>
-              </div>
-            </section>
+                    <button
+                      className="primary-button"
+                      onClick={() => setHistory([])}
+                    >
+                      Clear history
+                    </button>
+                  </>
+                )}
+              </section>
+            </>
           )}
-        </main>
-      </div>
+
+          {/* =================================================
+              SETTINGS
+          ================================================= */}
+
+          {page === "settings" && (
+            <>
+              <section className="hero-panel">
+                <span className="hero-label">PREFERENCES</span>
+
+                <h1>Your app, your way.</h1>
+
+                <p>
+                  BembaTranslate is designed to keep your translation
+                  experience simple, private and offline.
+                </p>
+              </section>
+
+              <section className="section">
+                <div className="section-heading">
+                  <h2>Settings</h2>
+                  <p>Application preferences.</p>
+                </div>
+
+                <div className="settings-card">
+                  <div className="setting-row">
+                    <div>
+                      <strong>Offline translation</strong>
+                      <br />
+                      <span>
+                        Translation works without an internet connection.
+                      </span>
+                    </div>
+
+                    <strong style={{ color: "#397244" }}>ON</strong>
+                  </div>
+
+                  <div className="setting-row">
+                    <div>
+                      <strong>Automatic audio</strong>
+                      <br />
+                      <span>
+                        Audio never plays automatically.
+                      </span>
+                    </div>
+
+                    <span>OFF</span>
+                  </div>
+
+                  <div className="setting-row">
+                    <div>
+                      <strong>Translation direction</strong>
+                      <br />
+                      <span>English → Bemba</span>
+                    </div>
+
+                    <Languages size={18} />
+                  </div>
+
+                  <div className="setting-row">
+                    <div>
+                      <strong>Privacy</strong>
+                      <br />
+                      <span>Your translations remain on this device.</span>
+                    </div>
+
+                    <BookOpen size={18} />
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
+        </div>
+      </main>
+
+      {/* =====================================================
+          SINGLE BOTTOM NAVIGATION
+      ===================================================== */}
 
       <nav className="bottom-navigation">
         {navItems.map((item) => {
@@ -782,6 +917,7 @@ function App() {
               key={item.id}
               className={page === item.id ? "active" : ""}
               onClick={() => openPage(item.id)}
+              aria-label={item.label}
             >
               <Icon size={18} />
               <span>{item.label}</span>
