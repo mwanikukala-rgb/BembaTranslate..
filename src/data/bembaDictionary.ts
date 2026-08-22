@@ -1922,7 +1922,6 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "lighten", bemba: "-angushish-" },
   { english: "become despised", bemba: "-anguk-" },
   { english: "tease edible leaves", bemba: "-angul-" },
-  { english: "become sympathetic towards a person", bemba "-angw-" },
 
   { english: "grass", bemba: "ícaani" },
   { english: "spread in the sun", bemba: "-ánik-" },
@@ -1936,7 +1935,6 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "spread", bemba: "-áns-" },
   { english: "arrange branches in ash garden", bemba: "-áns-" },
   { english: "make small ash gardens", bemba "-áns-" },
-  { english: "spread a bed", bemba: "-anshik-" },
   { english: "very extended village", bemba: "ícaanshaale" },
   { english: "piling up branches in ash garden", bemba: "ícaanshilo" },
 
@@ -1985,7 +1983,6 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "become abrupt", bemba: "-áuk-" },
   { english: "ululate", bemba "-aul-" },
   { english: "welcome a person", bemba: "-aul-" },
-  { english: "yawn", bemba: "-ául-" },
   { english: "yawn", bemba: "ùmwáú" },
 
   // =========================================================
