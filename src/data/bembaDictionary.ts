@@ -99,7 +99,7 @@ export const bembaDictionary: BembaEntry[] = [
   { english: "Man friend", bemba: "Munandi wa mulume" },
   { english: "Woman friend", bemba: "Munandi wa mukashana" },
   { english: "Neighbor", bemba: "Umunyina" },
-
+  { english: "Everyone", bemba: "Bonse" },
   // =========================================================
   // FAMILY
   // =========================================================
