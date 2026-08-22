@@ -4,13 +4,16 @@ import {
   Check,
   Copy,
   Heart,
-  History,
+  History as HistoryIcon,
   Languages,
   Search,
   Settings,
+  ShieldCheck,
+  Smartphone,
   Sparkles,
   Volume2,
 } from "lucide-react";
+
 import { bembaDictionary } from "./data/bembaDictionary";
 import { translateWithFallback } from "./engine/bembaTranslator";
 import "./styles/global.css";
@@ -30,12 +33,30 @@ type HistoryItem = {
 };
 
 const quickPhrases = [
-  { english: "How are you?", bemba: "Mulishani" },
-  { english: "Good morning", bemba: "Mwashibukeni" },
-  { english: "I want money", bemba: "Ndefwaya indalama" },
-  { english: "Where are you?", bemba: "Ulikwisa" },
-  { english: "Where are they?", bemba: "Balikwisa" },
-  { english: "I'm angry", bemba: "Nimfulwa" },
+  {
+    english: "How are you?",
+    bemba: "Mulishani",
+  },
+  {
+    english: "Good morning",
+    bemba: "Mwashibukeni",
+  },
+  {
+    english: "I want money",
+    bemba: "Ndefwaya indalama",
+  },
+  {
+    english: "Where are you?",
+    bemba: "Ulikwisa",
+  },
+  {
+    english: "Where are they?",
+    bemba: "Balikwisa",
+  },
+  {
+    english: "I'm angry",
+    bemba: "Nimfulwa",
+  },
 ];
 
 const navItems = [
@@ -57,7 +78,7 @@ const navItems = [
   {
     id: "history" as Page,
     label: "History",
-    icon: History,
+    icon: HistoryIcon,
   },
   {
     id: "settings" as Page,
@@ -69,6 +90,7 @@ const navItems = [
 function App() {
   const [launching, setLaunching] = useState(true);
   const [progress, setProgress] = useState(0);
+
   const [page, setPage] = useState<Page>("translate");
 
   const [englishText, setEnglishText] = useState("");
@@ -82,25 +104,28 @@ function App() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [dictionarySearch, setDictionarySearch] = useState("");
 
-  /* -------------------------------------------------------
-     Launch screen
-  ------------------------------------------------------- */
+  /*
+   * =======================================================
+   * LAUNCH SCREEN
+   * =======================================================
+   */
 
   useEffect(() => {
     let value = 0;
 
     const interval = window.setInterval(() => {
-      value += Math.floor(Math.random() * 8) + 4;
+      value += 5;
 
       if (value >= 100) {
         value = 100;
+
         setProgress(100);
+
+        window.clearInterval(interval);
 
         window.setTimeout(() => {
           setLaunching(false);
-        }, 450);
-
-        window.clearInterval(interval);
+        }, 350);
       } else {
         setProgress(value);
       }
@@ -111,9 +136,11 @@ function App() {
     };
   }, []);
 
-  /* -------------------------------------------------------
-     Full dictionary search
-  ------------------------------------------------------- */
+  /*
+   * =======================================================
+   * DICTIONARY SEARCH
+   * =======================================================
+   */
 
   const filteredDictionary = useMemo(() => {
     const query = dictionarySearch.trim().toLowerCase();
@@ -135,9 +162,11 @@ function App() {
       .slice(0, 200);
   }, [dictionarySearch]);
 
-  /* -------------------------------------------------------
-     Translation
-  ------------------------------------------------------- */
+  /*
+   * =======================================================
+   * TRANSLATION
+   * =======================================================
+   */
 
   const translate = () => {
     const input = englishText.trim();
@@ -164,17 +193,26 @@ function App() {
       setBembaText(result);
 
       if (result) {
+        const newItem: HistoryItem = {
+          id: Date.now(),
+          english: input,
+          bemba: result,
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        };
+
         setHistory((old) => [
-          {
-            id: Date.now(),
-            english: input,
-            bemba: result,
-            time: new Date().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-          },
-          ...old,
+          newItem,
+          ...old.filter(
+            (item) =>
+              !(
+                item.english.toLowerCase() ===
+                  input.toLowerCase() &&
+                item.bemba === result
+              )
+          ),
         ]);
       }
 
@@ -182,9 +220,11 @@ function App() {
     }, 160);
   };
 
-  /* -------------------------------------------------------
-     Use dictionary / phrase
-  ------------------------------------------------------- */
+  /*
+   * =======================================================
+   * USE PHRASE
+   * =======================================================
+   */
 
   const usePhrase = (
     english: string,
@@ -197,9 +237,11 @@ function App() {
     setPage("translate");
   };
 
-  /* -------------------------------------------------------
-     Clipboard
-  ------------------------------------------------------- */
+  /*
+   * =======================================================
+   * COPY TRANSLATION
+   * =======================================================
+   */
 
   const copyTranslation = async () => {
     if (!bembaText) {
@@ -208,6 +250,7 @@ function App() {
 
     try {
       await navigator.clipboard.writeText(bembaText);
+
       setCopied(true);
 
       window.setTimeout(() => {
@@ -218,9 +261,11 @@ function App() {
     }
   };
 
-  /* -------------------------------------------------------
-     Manual audio placeholder
-  ------------------------------------------------------- */
+  /*
+   * =======================================================
+   * MANUAL AUDIO
+   * =======================================================
+   */
 
   const speak = () => {
     if (!bembaText || isSpeaking) {
@@ -234,9 +279,21 @@ function App() {
     }, 900);
   };
 
-  /* -------------------------------------------------------
-     Launch screen
-  ------------------------------------------------------- */
+  /*
+   * =======================================================
+   * HISTORY
+   * =======================================================
+   */
+
+  const clearHistory = () => {
+    setHistory([]);
+  };
+
+  /*
+   * =======================================================
+   * LAUNCH SCREEN
+   * =======================================================
+   */
 
   if (launching) {
     return (
@@ -292,23 +349,28 @@ function App() {
 
         <div className="launch-footer">
           <span className="offline-dot" />
+
           Ready for everyday Bemba
         </div>
       </div>
     );
   }
 
-  /* -------------------------------------------------------
-     Main application
-  ------------------------------------------------------- */
+  /*
+   * =======================================================
+   * MAIN APPLICATION
+   * =======================================================
+   */
 
   return (
     <div className="app">
       <div className="wallpaper" />
 
       <main className="app-content">
+        {/* =================================================
+            HEADER
+        ================================================= */}
 
-        {/* Header */}
         <header className="app-header">
           <div className="header-title">
             <span className="header-icon">
@@ -317,8 +379,7 @@ function App() {
 
             <div>
               <strong>
-                {page === "translate" &&
-                  "Translate"}
+                {page === "translate" && "Translate"}
 
                 {page === "dictionary" &&
                   "Dictionary"}
@@ -326,16 +387,12 @@ function App() {
                 {page === "learn" &&
                   "Learn Bemba"}
 
-                {page === "history" &&
-                  "History"}
+                {page === "history" && "History"}
 
-                {page === "settings" &&
-                  "Settings"}
+                {page === "settings" && "Settings"}
               </strong>
 
-              <span>
-                English → Bemba
-              </span>
+              <span>English → Bemba</span>
             </div>
           </div>
 
@@ -345,13 +402,12 @@ function App() {
           </div>
         </header>
 
-        {/* ==================================================
+        {/* =================================================
             TRANSLATE
-        ================================================== */}
+        ================================================= */}
 
         {page === "translate" && (
           <section className="page">
-
             <div className="welcome-card">
               <div className="welcome-icon">
                 <Sparkles size={20} />
@@ -369,8 +425,9 @@ function App() {
                 </h1>
 
                 <p>
-                  Translate everyday English privately,
-                  quickly and completely offline.
+                  Translate everyday English
+                  privately, quickly and completely
+                  offline.
                 </p>
               </div>
             </div>
@@ -378,20 +435,22 @@ function App() {
             <div className="section-title">
               <div>
                 <h2>Translate</h2>
+
                 <p>English to Bemba</p>
               </div>
 
               <span className="local-pill">
                 <Check size={12} />
+
                 Local
               </span>
             </div>
 
             <div className="translation-card">
-
               <div className="language-strip">
                 <div>
                   <small>FROM</small>
+
                   <strong>English</strong>
                 </div>
 
@@ -401,12 +460,14 @@ function App() {
 
                 <div>
                   <small>TO</small>
+
                   <strong>Bemba</strong>
                 </div>
               </div>
 
               <div className="input-label-row">
                 <span>English text</span>
+
                 <span>
                   {englishText.length}/5000
                 </span>
@@ -414,11 +475,11 @@ function App() {
 
               <textarea
                 value={englishText}
-                onChange={(e) =>
+                onChange={(event) => {
                   setEnglishText(
-                    e.target.value.slice(0, 5000)
-                  )
-                }
+                    event.target.value.slice(0, 5000)
+                  );
+                }}
                 placeholder="Type something in English..."
               />
 
@@ -441,12 +502,14 @@ function App() {
                 <div className="result-heading">
                   <span>
                     <span className="bemba-dot" />
+
                     Bemba translation
                   </span>
 
                   {bembaText && (
                     <span className="ready-label">
                       <Check size={11} />
+
                       Ready
                     </span>
                   )}
@@ -464,10 +527,9 @@ function App() {
                           )
                         }
                         className={
-                          favourite
-                            ? "selected"
-                            : ""
+                          favourite ? "selected" : ""
                         }
+                        aria-label="Favourite translation"
                       >
                         <Heart
                           size={16}
@@ -481,6 +543,7 @@ function App() {
 
                       <button
                         onClick={copyTranslation}
+                        aria-label="Copy translation"
                       >
                         {copied ? (
                           <Check size={16} />
@@ -489,7 +552,10 @@ function App() {
                         )}
                       </button>
 
-                      <button onClick={speak}>
+                      <button
+                        onClick={speak}
+                        aria-label="Listen to translation"
+                      >
                         <Volume2 size={16} />
 
                         {isSpeaking
@@ -516,7 +582,7 @@ function App() {
               </div>
             </div>
 
-            {/* Popular phrases */}
+            {/* POPULAR PHRASES */}
 
             <div className="section-title">
               <div>
@@ -544,13 +610,9 @@ function App() {
                     )
                   }
                 >
-                  <span>
-                    {phrase.english}
-                  </span>
+                  <span>{phrase.english}</span>
 
-                  <strong>
-                    {phrase.bemba}
-                  </strong>
+                  <strong>{phrase.bemba}</strong>
                 </button>
               ))}
             </div>
@@ -574,13 +636,12 @@ function App() {
           </section>
         )}
 
-        {/* ==================================================
+        {/* =================================================
             DICTIONARY
-        ================================================== */}
+        ================================================= */}
 
         {page === "dictionary" && (
           <section className="page">
-
             <div className="page-intro">
               <span className="eyebrow">
                 BEMBA LANGUAGE
@@ -599,9 +660,9 @@ function App() {
 
               <input
                 value={dictionarySearch}
-                onChange={(e) =>
+                onChange={(event) =>
                   setDictionarySearch(
-                    e.target.value
+                    event.target.value
                   )
                 }
                 placeholder="Search words or phrases..."
@@ -651,8 +712,7 @@ function App() {
                   </strong>
 
                   <span>
-                    Try another English or Bemba
-                    word.
+                    Try another English or Bemba word.
                   </span>
                 </div>
               )}
@@ -660,13 +720,12 @@ function App() {
           </section>
         )}
 
-        {/* ==================================================
+        {/* =================================================
             LEARN
-        ================================================== */}
+        ================================================= */}
 
         {page === "learn" && (
           <section className="page">
-
             <div className="page-intro">
               <span className="eyebrow">
                 LEARN BEMBA
@@ -683,7 +742,6 @@ function App() {
             </div>
 
             <div className="learn-grid">
-
               <button className="learn-card">
                 <span className="learn-number">
                   01
@@ -701,16 +759,4 @@ function App() {
                   02
                 </span>
 
-                <strong>Family</strong>
-
-                <small>
-                  Family vocabulary
-                </small>
-              </button>
-
-              <button className="learn-card">
-                <span className="learn-number">
-                  03
-                </span>
-
-                <
+                <strong>Family
