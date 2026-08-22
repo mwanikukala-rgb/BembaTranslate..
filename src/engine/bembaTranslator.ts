@@ -1,5 +1,3 @@
-Improved Offline Translation Engine
-
 import { bembaDictionary } from "../data/bembaDictionary";
 
 export type BembaEntry = {
@@ -11,10 +9,6 @@ const dictionary = bembaDictionary as BembaEntry[];
 
 /**
  * Normalize text for reliable offline matching.
- *
- * Examples:
- * "Good Morning!" -> "good morning"
- * "  Where are you? " -> "where are you"
  */
 function normalize(text: string): string {
   return text
@@ -25,15 +19,10 @@ function normalize(text: string): string {
 }
 
 /**
- * Build a fast dictionary lookup.
+ * Local dictionary lookup.
  *
- * Longer phrases are kept intact so that:
- *
- * "thank you very much"
- *
- * is translated as one phrase instead of:
- *
- * "thank" + "you" + "very" + "much"
+ * Everything stays inside the application.
+ * No internet, API, cloud service, or model is used.
  */
 const dictionaryLookup = new Map<string, string>();
 
@@ -41,7 +30,9 @@ for (const entry of dictionary) {
   const english = normalize(entry.english);
   const bemba = entry.bemba.trim();
 
-  if (!english || !bemba) continue;
+  if (!english || !bemba) {
+    continue;
+  }
 
   dictionaryLookup.set(english, bemba);
 }
@@ -62,8 +53,8 @@ function findExactTranslation(
 }
 
 /**
- * Find the longest dictionary phrase beginning
- * at the current word.
+ * Find the longest dictionary phrase starting
+ * at the specified word.
  */
 function findLongestMatch(
   words: string[],
@@ -97,14 +88,14 @@ function findLongestMatch(
 }
 
 /**
- * Main offline English → Bemba translator.
+ * Translate English to Bemba completely offline.
  *
  * Priority:
  *
- * 1. Exact complete phrase
+ * 1. Exact full phrase
  * 2. Longest known phrase
- * 3. Individual known word
- * 4. Unknown words are preserved
+ * 3. Individual known words
+ * 4. Unknown words remain unchanged
  */
 export function translateEnglishToBemba(
   text: string
@@ -115,22 +106,14 @@ export function translateEnglishToBemba(
     return "";
   }
 
-  // -------------------------------------------------------
-  // 1. Exact phrase match
-  // -------------------------------------------------------
-
+  // Exact phrase has highest priority.
   const exact = findExactTranslation(input);
 
   if (exact) {
     return exact;
   }
 
-  // -------------------------------------------------------
-  // 2. Phrase-by-phrase translation
-  // -------------------------------------------------------
-
   const words = input.split(" ");
-
   const result: string[] = [];
 
   let index = 0;
@@ -141,27 +124,18 @@ export function translateEnglishToBemba(
     if (match) {
       result.push(match.translation);
       index += match.length;
-      continue;
+    } else {
+      // Preserve words that are not yet in the dictionary.
+      result.push(words[index]);
+      index++;
     }
-
-    // -----------------------------------------------------
-    // 3. Unknown word
-    //
-    // Keep it instead of deleting it.
-    // -----------------------------------------------------
-
-    result.push(words[index]);
-    index++;
   }
 
   return result.join(" ");
 }
 
 /**
- * Safe application-level translation function.
- *
- * The UI should call this function rather than
- * accessing the dictionary directly.
+ * Safe translation function for the application UI.
  */
 export function translateWithFallback(
   text: string
@@ -179,8 +153,8 @@ export function translateWithFallback(
 }
 
 /**
- * Check whether a word or phrase exists
- * in the local dictionary.
+ * Check whether an exact English word or phrase
+ * exists in the local dictionary.
  */
 export function hasBembaTranslation(
   text: string
@@ -195,9 +169,7 @@ export function hasBembaTranslation(
 }
 
 /**
- * Get the dictionary translation directly.
- *
- * Returns undefined when the phrase is not found.
+ * Get an exact dictionary translation.
  */
 export function getBembaTranslation(
   text: string
