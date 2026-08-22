@@ -33,11 +33,15 @@ export const bembaDictionary: BembaEntry[] = [
   { english: "No", bemba: "Awe" },
   { english: "Maybe", bemba: "Limbi" },
   { english: "I don't know", bemba: "Nshishibe" },
-  { english: "I understand", bemba: "Na umfwa" },
+  { english: "I understand", bemba: "Naumfwa" },
   { english: "I don't understand", bemba: "Nshumfwile" },
   { english: "Speak slowly", bemba: "Landa panono panono" },
   { english: "Say that again", bemba: "Bwekeshapo" },
   { english: "Speak Bemba", bemba: "Landa mu Cibemba" },
+  { english: "Welcome home", bemba: "Mwaiseni ku nganda" },
+  { english: "Have a good day", bemba: "Mube bwino" },
+  { english: "Take care", bemba: "Mube bwino" },
+  { english: "Good luck", bemba: "Imwe mutwalilile bwino" },
 
   // =========================================================
   // QUESTIONS
@@ -61,6 +65,15 @@ export const bembaDictionary: BembaEntry[] = [
   { english: "Where are you from?", bemba: "Wafumakwisa?" },
   { english: "Where is the toilet?", bemba: "Indupule ili kwisa?" },
   { english: "How much is this?", bemba: "Shinga?" },
+  { english: "What do you want?", bemba: "Mufwaya cinshi?" },
+  { english: "What are you doing?", bemba: "Mucita cinshi?" },
+  { english: "Where are you going?", bemba: "Muleya kwisa?" },
+  { english: "Where did you go?", bemba: "Mwayile kwisa?" },
+  { english: "What happened?", bemba: "Cacitike nshi?" },
+  { english: "Are you okay?", bemba: "Muli bwino?" },
+  { english: "Do you understand?", bemba: "Mwaumfwa?" },
+  { english: "Do you know?", bemba: "Mwashiba?" },
+  { english: "Can you help me?", bemba: "Mungafwilapo?" },
 
   // =========================================================
   // PEOPLE
@@ -82,6 +95,10 @@ export const bembaDictionary: BembaEntry[] = [
   { english: "Children", bemba: "Abana" },
   { english: "Person", bemba: "Umuntu" },
   { english: "People", bemba: "Abantu" },
+  { english: "Baby", bemba: "Akana" },
+  { english: "Man friend", bemba: "Munandi wa mulume" },
+  { english: "Woman friend", bemba: "Munandi wa mukashana" },
+  { english: "Neighbor", bemba: "Umunyina" },
 
   // =========================================================
   // FAMILY
@@ -92,10 +109,19 @@ export const bembaDictionary: BembaEntry[] = [
   { english: "Brother", bemba: "Ndume" },
   { english: "Sister", bemba: "Nkashi" },
   { english: "Grandfather", bemba: "Shikulu" },
-  { english: "Grandmother", bemba: "Mama" },
+  { english: "Grandmother", bemba: "Bamayo" },
   { english: "Husband", bemba: "Mulume" },
   { english: "Wife", bemba: "Mukashi" },
   { english: "Family", bemba: "Umukowa" },
+  { english: "Son", bemba: "Mwana wa mulume" },
+  { english: "Daughter", bemba: "Mwana wa mukashana" },
+  { english: "Uncle", bemba: "Shikulu" },
+  { english: "Aunt", bemba: "Ba mayo" },
+  { english: "My father", bemba: "Tata wandi" },
+  { english: "My mother", bemba: "Mayo wandi" },
+  { english: "My brother", bemba: "Ndume wandi" },
+  { english: "My sister", bemba: "Nkashi wandi" },
+  { english: "My family", bemba: "Umukowa wandi" },
 
   // =========================================================
   // COMMON VERBS
@@ -129,9 +155,23 @@ export const bembaDictionary: BembaEntry[] = [
   { english: "To work", bemba: "Ukubomba" },
   { english: "To help", bemba: "Ukufwila" },
   { english: "To love", bemba: "Ukutemwa" },
+  { english: "To read", bemba: "Ukubelenga" },
+  { english: "To write", bemba: "Ukulemba" },
+  { english: "To listen", bemba: "Ukumfwa" },
+  { english: "To wait", bemba: "Ukulolela" },
+  { english: "To sit", bemba: "Ukukala" },
+  { english: "To stand", bemba: "Ukuma" },
+  { english: "To walk", bemba: "Ukutambala" },
+  { english: "To run", bemba: "Ukutampa" },
+  { english: "To buy", bemba: "Ukushita" },
+  { english: "To sell", bemba: "Ukushitisha" },
+  { english: "To open", bemba: "Ukufungula" },
+  { english: "To close", bemba: "Ukufunga" },
+  { english: "To stop", bemba: "Ukuleka" },
+  { english: "To start", bemba: "Ukutendeka" },
 
   // =========================================================
-  // USEFUL SENTENCES
+  // USEFUL EVERYDAY SENTENCES
   // =========================================================
 
   { english: "I want money", bemba: "Ndefwaya indalama" },
@@ -153,6 +193,22 @@ export const bembaDictionary: BembaEntry[] = [
   { english: "I am tired", bemba: "Nakapuka" },
   { english: "I am hungry", bemba: "Njala ileni" },
   { english: "I am thirsty", bemba: "Nalililwa amenshi" },
+  { english: "I am ready", bemba: "Ndi uwapangwa" },
+  { english: "Wait for me", bemba: "Nloleni" },
+  { english: "Come with me", bemba: "Iseni na ine" },
+  { english: "Follow me", bemba: "Nkonkeni" },
+  { english: "Wait here", bemba: "Loleni kuno" },
+  { english: "Don't go", bemba: "Mwaya" },
+  { english: "Don't worry", bemba: "Mutinafye" },
+  { english: "Don't do that", bemba: "Mucite ifyo" },
+  { english: "Be careful", bemba: "Moneni" },
+  { english: "I am here", bemba: "Ndi kuno" },
+  { english: "I am at home", bemba: "Ndi ku nganda" },
+  { english: "I am working", bemba: "Ndebomba" },
+  { english: "I am eating", bemba: "Ndelya" },
+  { english: "I am drinking water", bemba: "Ndemwa amenshi" },
+  { english: "I am going", bemba: "Ndeya" },
+  { english: "I am coming", bemba: "Ndeisa" },
 
   // =========================================================
   // HOME & EVERYDAY LIFE
@@ -160,6 +216,13 @@ export const bembaDictionary: BembaEntry[] = [
 
   { english: "Home", bemba: "Nganda" },
   { english: "House", bemba: "Nganda" },
+  { english: "Room", bemba: "Cikumbi" },
+  { english: "Door", bemba: "Mulyango" },
+  { english: "Window", bemba: "Iwindu" },
+  { english: "Bed", bemba: "Cilala" },
+  { english: "Chair", bemba: "Cikala" },
+  { english: "Table", bemba: "Tebulo" },
+  { english: "Kitchen", bemba: "Kitchini" },
   { english: "Water", bemba: "Amenshi" },
   { english: "Food", bemba: "Ifyakulya" },
   { english: "Money", bemba: "Indalama" },
@@ -170,6 +233,11 @@ export const bembaDictionary: BembaEntry[] = [
   { english: "Work", bemba: "Umulimo" },
   { english: "Road", bemba: "Inshila" },
   { english: "Car", bemba: "Imotoka" },
+  { english: "Clothes", bemba: "Amalaya" },
+  { english: "Shoes", bemba: "Ifyakufwala ku makasa" },
+  { english: "Key", bemba: "Ifungulo" },
+  { english: "Light", bemba: "Laiti" },
+  { english: "Fire", bemba: "Umulilo" },
 
   // =========================================================
   // FOOD & DRINK
@@ -186,6 +254,150 @@ export const bembaDictionary: BembaEntry[] = [
   { english: "Bread", bemba: "Umukate" },
   { english: "Salt", bemba: "Umunyu" },
   { english: "Sugar", bemba: "Isukala" },
+  { english: "Egg", bemba: "Ilyashi lya nkoko" },
+  { english: "Eggs", bemba: "Amayashi ya nkoko" },
+  { english: "Rice", bemba: "Umucere" },
+  { english: "Beans", bemba: "Ifisabi" },
+  { english: "Vegetables", bemba: "Ifyakulya fya mputi" },
+  { english: "Fruit", bemba: "Imisuma" },
+  { english: "Tea", bemba: "Tee" },
+  { english: "Coffee", bemba: "Kofi" },
+  { english: "Breakfast", bemba: "Ifyakulya fya mu nshita ya kushibuka" },
+  { english: "Lunch", bemba: "Ifyakulya fya musana" },
+  { english: "Dinner", bemba: "Ifyakulya fya cungulo" },
+  { english: "I want food", bemba: "Ndefwaya ifyakulya" },
+  { english: "I want water", bemba: "Ndefwaya amenshi" },
+  { english: "Give me water", bemba: "Mpelako amenshi" },
+  { english: "I am hungry", bemba: "Njala ileni" },
+  { english: "I am thirsty", bemba: "Nalililwa amenshi" },
+
+  // =========================================================
+  // MONEY & SHOPPING
+  // =========================================================
+
+  { english: "Money", bemba: "Indalama" },
+  { english: "Price", bemba: "Cena" },
+  { english: "How much?", bemba: "Shinga?" },
+  { english: "How much is it?", bemba: "Shinga?" },
+  { english: "How much is this?", bemba: "Shinga ici?" },
+  { english: "I want to buy", bemba: "Ndefwaya ukushita" },
+  { english: "I want this", bemba: "Ndefwaya ici" },
+  { english: "I don't want this", bemba: "Nshifwaya ici" },
+  { english: "Too expensive", bemba: "Cena yapya sana" },
+  { english: "Cheap", bemba: "Cena ipepi" },
+  { english: "Buy", bemba: "Shita" },
+  { english: "Sell", bemba: "Shitisha" },
+  { english: "Shop", bemba: "Shopu" },
+  { english: "Market", bemba: "Musika" },
+  { english: "Cash", bemba: "Indalama" },
+  { english: "Change", bemba: "Inshita" },
+  { english: "Give me", bemba: "Mpelako" },
+  { english: "I have money", bemba: "Nakwata indalama" },
+  { english: "I don't have money", bemba: "Shikwete indalama" },
+
+  // =========================================================
+  // TRANSPORT & TRAVEL
+  // =========================================================
+
+  { english: "Car", bemba: "Imotoka" },
+  { english: "Bus", bemba: "Basi" },
+  { english: "Taxi", bemba: "Taxi" },
+  { english: "Road", bemba: "Inshila" },
+  { english: "Travel", bemba: "Ukutambalala" },
+  { english: "Airport", bemba: "Pa airport" },
+  { english: "Station", bemba: "Pa station" },
+  { english: "Where is the bus?", bemba: "Basi ili kwisa?" },
+  { english: "Where is the taxi?", bemba: "Taxi ili kwisa?" },
+  { english: "Where are we going?", bemba: "Tuleya kwisa?" },
+  { english: "Stop here", bemba: "Imeni kuno" },
+  { english: "Go straight", bemba: "Yeni ukutwalilila" },
+  { english: "Turn left", bemba: "Pilibukeni ku kumalyashi" },
+  { english: "Turn right", bemba: "Pilibukeni ku kusuma" },
+  { english: "Here", bemba: "Kuno" },
+  { english: "There", bemba: "Kula" },
+  { english: "Near", bemba: "Pepe" },
+  { english: "Far", bemba: "Ukutali" },
+
+  // =========================================================
+  // SCHOOL & LEARNING
+  // =========================================================
+
+  { english: "School", bemba: "Sukulu" },
+  { english: "Teacher", bemba: "Mwalimu" },
+  { english: "Student", bemba: "Umusambilila" },
+  { english: "Book", bemba: "Icalo" },
+  { english: "Pen", bemba: "Peni" },
+  { english: "Paper", bemba: "Pepala" },
+  { english: "Read", bemba: "Belenga" },
+  { english: "Write", bemba: "Lemba" },
+  { english: "Learn", bemba: "Sambilila" },
+  { english: "Teach", bemba: "Sambilisha" },
+  { english: "Lesson", bemba: "Isambililo" },
+  { english: "Question", bemba: "Ipusho" },
+  { english: "Answer", bemba: "Impendulo" },
+  { english: "Language", bemba: "Ululimi" },
+  { english: "Bemba language", bemba: "Icibemba" },
+  { english: "English language", bemba: "Icishungu" },
+
+  // =========================================================
+  // WORK & DAILY ACTIVITIES
+  // =========================================================
+
+  { english: "Work", bemba: "Umulimo" },
+  { english: "Job", bemba: "Umulimo" },
+  { english: "Worker", bemba: "Umubomfi" },
+  { english: "Boss", bemba: "Mupashi" },
+  { english: "Office", bemba: "Ofesi" },
+  { english: "Meeting", bemba: "Insofu" },
+  { english: "Business", bemba: "Ubucende" },
+  { english: "Work today", bemba: "Bomba lelo" },
+  { english: "I am working", bemba: "Ndebomba" },
+  { english: "I am busy", bemba: "Ndi mu mulimo" },
+  { english: "I am free", bemba: "Ndi uwaluka" },
+  { english: "Come to work", bemba: "Iseni ku mulimo" },
+  { english: "Go to work", bemba: "Yani ku mulimo" },
+
+  // =========================================================
+  // HEALTH & COMMON NEEDS
+  // =========================================================
+
+  { english: "Hospital", bemba: "Cipatala" },
+  { english: "Doctor", bemba: "Dokota" },
+  { english: "Nurse", bemba: "Namusunga" },
+  { english: "Medicine", bemba: "Umuti" },
+  { english: "Sick", bemba: "Ukulwala" },
+  { english: "I am sick", bemba: "Ndilwala" },
+  { english: "I feel sick", bemba: "Ndelwala" },
+  { english: "Pain", bemba: "Ubwafya" },
+  { english: "Head", bemba: "Mutwe" },
+  { english: "Hand", bemba: "Kwata" },
+  { english: "Eye", bemba: "Liso" },
+  { english: "Eyes", bemba: "Ameso" },
+  { english: "Ear", bemba: "Kutwi" },
+  { english: "Mouth", bemba: "Kanwa" },
+  { english: "Help", bemba: "Ubwafwilisho" },
+  { english: "Help me", bemba: "Ngafweniko" },
+  { english: "Call a doctor", bemba: "Itani dokota" },
+  { english: "I need help", bemba: "Ndefwaikwa ubwafwilisho" },
+
+  // =========================================================
+  // FEELINGS & EMOTIONS
+  // =========================================================
+
+  { english: "Happy", bemba: "Ukusekelela" },
+  { english: "I am happy", bemba: "Ndemwa" },
+  { english: "Sad", bemba: "Ukulanda" },
+  { english: "I am sad", bemba: "Ndi wa malanda" },
+  { english: "Angry", bemba: "Ukufuluka" },
+  { english: "I am angry", bemba: "Nimfulwa" },
+  { english: "Tired", bemba: "Ukupuka" },
+  { english: "I am tired", bemba: "Nakapuka" },
+  { english: "Afraid", bemba: "Umutinya" },
+  { english: "I am afraid", bemba: "Ndi na minta" },
+  { english: "Love", bemba: "Kutemwa" },
+  { english: "I love you", bemba: "Nalatemwa" },
+  { english: "I miss you", bemba: "Ndekufuluka" },
+  { english: "Happy today", bemba: "Ndemwa lelo" },
 
   // =========================================================
   // TIME
@@ -197,8 +409,16 @@ export const bembaDictionary: BembaEntry[] = [
   { english: "Now", bemba: "Nomba" },
   { english: "Later", bemba: "Limbi" },
   { english: "Morning", bemba: "Ubushiku" },
+  { english: "Afternoon", bemba: "Cungulo" },
+  { english: "Evening", bemba: "Cungulo" },
   { english: "Night", bemba: "Ubushiku" },
   { english: "Day", bemba: "Ubushiku" },
+  { english: "Week", bemba: "Umulungu" },
+  { english: "Month", bemba: "Umweshi" },
+  { english: "Year", bemba: "Umwaka" },
+  { english: "Early", bemba: "Panshi" },
+  { english: "Late", bemba: "Ukufika panshi" },
+  { english: "Today morning", bemba: "Mwashibukeni lelo" },
 
   // =========================================================
   // NUMBERS
@@ -214,9 +434,19 @@ export const bembaDictionary: BembaEntry[] = [
   { english: "Eight", bemba: "Cisano na fitatu" },
   { english: "Nine", bemba: "Cisano na fikala" },
   { english: "Ten", bemba: "Ikumi" },
+  { english: "Eleven", bemba: "Ikumi na limo" },
+  { english: "Twelve", bemba: "Ikumi na fibili" },
+  { english: "Thirteen", bemba: "Ikumi na fitatu" },
+  { english: "Fourteen", bemba: "Ikumi na fikala" },
+  { english: "Fifteen", bemba: "Ikumi na fisano" },
+  { english: "Twenty", bemba: "Makumi yabili" },
+  { english: "Thirty", bemba: "Makumi yatatu" },
+  { english: "Forty", bemba: "Makumi yane" },
+  { english: "Fifty", bemba: "Makumi yasano" },
+  { english: "One hundred", bemba: "Cila cimo" },
 
   // =========================================================
-  // COMMON ADJECTIVES / DESCRIPTIONS
+  // COMMON DESCRIPTIONS
   // =========================================================
 
   { english: "Good", bemba: "Bwino" },
@@ -230,9 +460,17 @@ export const bembaDictionary: BembaEntry[] = [
   { english: "Old", bemba: "Kale" },
   { english: "Fast", bemba: "Bwangu" },
   { english: "Slow", bemba: "Panono" },
+  { english: "Hot", bemba: "Ukutalala" },
+  { english: "Cold", bemba: "Ukutalala" },
+  { english: "Clean", bemba: "Ukusuma" },
+  { english: "Dirty", bemba: "Ukutalala" },
+  { english: "Easy", bemba: "Pepe" },
+  { english: "Difficult", bemba: "Kufina" },
+  { english: "Strong", bemba: "Konkwa" },
+  { english: "Weak", bemba: "Kufooka" },
 
   // =========================================================
-  // IMPORTANT SHORT WORDS
+  // LOCATIONS & DIRECTIONS
   // =========================================================
 
   { english: "Here", bemba: "Kuno" },
@@ -241,16 +479,38 @@ export const bembaDictionary: BembaEntry[] = [
   { english: "Outside", bemba: "Pabweo" },
   { english: "Up", bemba: "Pa mulu" },
   { english: "Down", bemba: "Pa nshi" },
-  { english: "Today", bemba: "Ilelo" },
-  { english: "Tomorrow", bemba: "Mailo" },
+  { english: "Near", bemba: "Pepe" },
+  { english: "Far", bemba: "Ukutali" },
+  { english: "Left", bemba: "Kumalyashi" },
+  { english: "Right", bemba: "Kusuma" },
+  { english: "Front", bemba: "Pampala" },
+  { english: "Back", bemba: "Kunuma" },
+  { english: "Inside the house", bemba: "Mukati ka nganda" },
+  { english: "Outside the house", bemba: "Panse ya nganda" },
+  { english: "Come here", bemba: "Iseni kuno" },
+  { english: "Go there", bemba: "Yani kula" },
+
+  // =========================================================
+  // IMPORTANT SHORT WORDS
+  // =========================================================
+
   { english: "Why", bemba: "Mulandu nshi" },
   { english: "Because", bemba: "Pamulandu wa" },
   { english: "And", bemba: "Na" },
   { english: "But", bemba: "Lelo" },
   { english: "Or", bemba: "Nangu" },
+  { english: "Also", bemba: "Nangu na" },
+  { english: "Only", bemba: "Fye" },
+  { english: "Very", bemba: "Sana" },
+  { english: "Again", bemba: "Limbi" },
+  { english: "Always", bemba: "Inshita yonse" },
+  { english: "Never", bemba: "Kanshi nangu limo" },
+  { english: "Today", bemba: "Ilelo" },
+  { english: "Tomorrow", bemba: "Mailo" },
+  { english: "Now", bemba: "Nomba" },
 
   // =========================================================
-  // YOUR ORIGINAL QUICK PHRASES
+  // QUICK PHRASES
   // =========================================================
 
   { english: "How are you?", bemba: "Mulishani" },
