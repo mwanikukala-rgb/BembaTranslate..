@@ -823,4 +823,388 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "wrist", bemba: "Inkolokoso" },
 
   { english: "forehead", bemba: "Impumi" },
+    // =========================================================
+  // ADJECTIVES
+  // =========================================================
+
+  // Examples
+
+  { english: "a green house", bemba: "inganda ya katapakatapa" },
+  { english: "a tall building", bemba: "Ichikuulwa ichitali" },
+  { english: "a very old man", bemba: "Umwaume umukote saana" },
+  { english: "the old red house", bemba: "Inganda ya kale iyakashika" },
+  { english: "a very nice friend", bemba: "Chibusa umusuma saana" },
+
+  // ---------------------------------------------------------
+  // COLORS — Amalangi
+  // ---------------------------------------------------------
+
+  { english: "colors", bemba: "Amalangi" },
+  { english: "black", bemba: "-fiita" },
+  { english: "brown", bemba: "-kashikila" },
+  { english: "red", bemba: "-kashika" },
+  { english: "white", bemba: "-buuta" },
+  { english: "blue", bemba: "blue" },
+  { english: "grey", bemba: "grey" },
+  { english: "purple", bemba: "Pepo" },
+  { english: "orange", bemba: "olenji" },
+  { english: "yellow", bemba: "yelo" },
+
+  // ---------------------------------------------------------
+  // SIZES — Ubukulu
+  // ---------------------------------------------------------
+
+  { english: "sizes", bemba: "UBUKULU" },
+  { english: "big", bemba: "-kulu" },
+  { english: "small", bemba: "-nono" },
+  { english: "small alternative", bemba: "-cepa" },
+  { english: "long", bemba: "-leepa" },
+  { english: "tall", bemba: "-leepa" },
+  { english: "short", bemba: "-ipipa" },
+  { english: "narrow", bemba: "-ipipa" },
+  { english: "deep", bemba: "-shika" },
+
+  // ---------------------------------------------------------
+  // FOOD TASTE — -Sonda
+  // ---------------------------------------------------------
+
+  { english: "food taste", bemba: "-SONDA" },
+  { english: "taste", bemba: "-sonda" },
+  { english: "sweet", bemba: "-lowa" },
+  { english: "sour", bemba: "-sasamina" },
+  { english: "taste sour like lemon", bemba: "-sasamina" },
+  { english: "bitter", bemba: "-lula" },
+    // =========================================================
+  // NAMES OF TREES
+  // =========================================================
+
+  { english: "Erythrophleum", bemba: "Kaimbi" },
+  { english: "Erythrophleum tree", bemba: "Kaimbi" },
+  { english: "Erythrophleum trees", bemba: "Bakaimbi" },
+
+  { english: "carpentry tree", bemba: "Mululu" },
+  { english: "carpentry trees", bemba: "Imilulu" },
+
+  { english: "Entandrophragma delevoyi Guerke", bemba: "Mofu" },
+  { english: "Entandrophragma delevoyi tree", bemba: "Mofu" },
+  { english: "Entandrophragma delevoyi trees", bemba: "Imyofu" },
+
+  { english: "Pterocarpus angolensis", bemba: "Mulombwa" },
+  { english: "Pterocarpus angolensis tree", bemba: "Umulombwa" },
+  { english: "Pterocarpus angolensis trees", bemba: "Imilombwa" },
+
+  { english: "Afzelia quanzensis Welw", bemba: "Mupapa" },
+  { english: "Afzelia quanzensis tree", bemba: "Umupapa" },
+  { english: "Afzelia quanzensis trees", bemba: "Imipapa" },
+
+  { english: "Parinarium mobola Oliv", bemba: "Mupundu" },
+  { english: "Parinarium mobola tree", bemba: "Umupundu" },
+  { english: "Parinarium mobola trees", bemba: "Imipundu" },
+
+  { english: "Faurea speciosa Welw", bemba: "Saninga" },
+  { english: "Faurea speciosa tree", bemba: "Saninga" },
+  { english: "Faurea speciosa trees", bemba: "Basaninga" },
+
+  { english: "Afromosia angolensis", bemba: "Mubanga" },
+  { english: "Afromosia angolensis tree", bemba: "Umubanga" },
+  { english: "Afromosia angolensis trees", bemba: "Imibanga" },
+
+  { english: "Monotes oblongifolius Hutch", bemba: "Cipampa" },
+  { english: "Monotes oblongifolius tree", bemba: "Cipampa" },
+  { english: "Monotes oblongifolius trees", bemba: "Ficipampa" },
+
+  { english: "Syzygium tree", bemba: "Lwamba" },
+  { english: "Syzygium trees", bemba: "Balwamba" },
+
+  { english: "Diospyros tree", bemba: "Mucenja" },
+  { english: "Diospyros trees", bemba: "Imicenja" },
+
+  { english: "Hirtella bangweolensis", bemba: "Mukuwe" },
+  { english: "Hirtella bangweolensis tree", bemba: "Umukuww" },
+  { english: "Hirtella bangweolensis trees", bemba: "Imikuwe" },
+
+  { english: "Marquesia macroura Gilg", bemba: "Museshi" },
+  { english: "Marquesia macroura tree", bemba: "Umuseshi" },
+  { english: "Marquesia macroura trees", bemba: "Imiseshi" },
+
+  { english: "Xylopiya", bemba: "Mwengele" },
+  { english: "Xylopiya tree", bemba: "Umwengele" },
+  { english: "Xylopiya trees", bemba: "Imyengele" },
+
+  { english: "Albizzia sericocephala Benth", bemba: "Musase" },
+  { english: "Albizzia sericocephala tree", bemba: "Umusase" },
+  { english: "Albizzia sericocephala trees", bemba: "Imisase" },
+
+  { english: "Barlinia craibiana Bark.f.", bemba: "Mutobo" },
+  { english: "Barlinia craibiana tree", bemba: "Umutobo" },
+  { english: "Barlinia craibiana trees", bemba: "Imitobo" },
+
+  { english: "Erythrina abyssinica Lam", bemba: "Mulunguti" },
+  { english: "Erythrina abyssinica tree", bemba: "Umulunguti" },
+  { english: "Erythrina abyssinica trees", bemba: "Imilunguti" },
+
+  { english: "Swartzia madagacahensis", bemba: "Ndale" },
+  { english: "Swartzia madagacahensis tree", bemba: "Indale" },
+  { english: "Swartzia madagacahensis trees", bemba: "Indale" },
+
+  { english: "Dalbergia nitidula Welw", bemba: "Kalongwe" },
+  { english: "Dalbergia nitidula tree", bemba: "Kalongwe" },
+  { english: "Dalbergia nitidula trees", bemba: "Tukalongwe" },
+
+  { english: "Brachystegia allenii Burt Davy", bemba: "Mutondo" },
+  { english: "Brachystegia allenii tree", bemba: "Umutondo" },
+  { english: "Brachystegia allenii trees", bemba: "Imitondo" },
+
+  { english: "unknown tree mpaasa", bemba: "Mpaasa" },
+  { english: "mpaasa tree", bemba: "Mpaasa" },
+  { english: "mpaasa trees", bemba: "Bampaasa" },
+
+  { english: "unknown tree ciya", bemba: "Ciya" },
+  { english: "ciya tree", bemba: "Ciya" },
+  { english: "ciya trees", bemba: "Baciya" },
+
+  { english: "Brachystegia longifolia", bemba: "Muombo" },
+  { english: "Brachystegia longifolia tree", bemba: "Umuombo" },
+  { english: "Brachystegia longifolia trees", bemba: "Imiombo" },
+
+  { english: "Taxifolia Harws", bemba: "Ngalati" },
+  { english: "Taxifolia tree", bemba: "Ngalati" },
+  { english: "Taxifolia trees", bemba: "Ingalati" },
+
+  { english: "Microphylla Harms", bemba: "Mushike" },
+  { english: "Microphylla tree", bemba: "Mushike" },
+  { english: "Microphylla trees", bemba: "Imishike" },
+
+  { english: "Speciformis Benth", bemba: "Muputu" },
+  { english: "Speciformis tree", bemba: "Umuputu" },
+  { english: "Speciformis trees", bemba: "Imiputu" },
+
+  // =========================================================
+  // FRUIT TREES
+  // =========================================================
+
+  { english: "fruit trees", bemba: "Miti ya mbuto" },
+
+  { english: "Mupundu", bemba: "Umupundu" },
+  { english: "Mupundu tree", bemba: "Umupundu" },
+  { english: "Mupundu trees", bemba: "Imipundu" },
+    // =========================================================
+  // SNAKES
+  // =========================================================
+
+  { english: "night adder", bemba: "Icilambanshila" },
+  { english: "night adder plural", bemba: "Ifilambanshila" },
+
+  { english: "spitting cobra", bemba: "Kafi" },
+  { english: "spitting cobra plural", bemba: "Bakafi" },
+
+  { english: "kanshimonamitenge", bemba: "Kanshimonamitenge" },
+  { english: "kanshimonamitenge plural", bemba: "Tukanshimonamitenge" },
+
+  { english: "boomslang", bemba: "Ibalabala" },
+  { english: "boomslang plural", bemba: "Amabalabala" },
+
+  { english: "puff adder", bemba: "Ifwafwa" },
+  { english: "puff adder plural", bemba: "Amafwafwa" },
+
+  { english: "twig snake", bemba: "Nalukunilumo" },
+  { english: "twig snake plural", bemba: "Banalukunilumo" },
+
+  { english: "blind snake", bemba: "Luminuminu" },
+  { english: "blind snake plural", bemba: "Iminuminu" },
+
+  { english: "python", bemba: "Lusato" },
+  { english: "python plural", bemba: "Insato" },
+
+  { english: "forest cobra", bemba: "Maamba" },
+  { english: "forest cobra plural", bemba: "Imamba" },
+
+  { english: "water cobra", bemba: "Maambalushi" },
+  { english: "water cobra plural", bemba: "Imambalushi" },
+
+  { english: "gaboon viper", bemba: "Mbooma" },
+  { english: "gaboon viper plural", bemba: "Imbooma" },
+
+  { english: "two headed snake", bemba: "Mbulushi" },
+  { english: "two headed snake plural", bemba: "Imbulushi" },
+
+  { english: "hissing sand snake", bemba: "Mulalu" },
+  { english: "hissing sand snake plural", bemba: "Imilalu" },
+
+  { english: "file snake", bemba: "Mwendalwali" },
+  { english: "file snake plural", bemba: "Bamwendalwali" },
+
+  { english: "egg eating snake", bemba: "Namutukuta" },
+  { english: "egg eating snake plural", bemba: "Banamutukuta" },
+
+  { english: "house snake", bemba: "Indele" },
+  { english: "house snake plural", bemba: "Indele" },
+
+  { english: "white lipped snake", bemba: "Indele" },
+  { english: "white lipped snake plural", bemba: "Indele" },
+
+  { english: "common cobra", bemba: "Ngoshe" },
+  { english: "common cobra plural", bemba: "Bangoshe" },
+
+  { english: "grey beaked snake", bemba: "Ntunkamatumba" },
+  { english: "grey beaked snake plural", bemba: "Bantunkamatumba" },
+
+  { english: "unknown snake", bemba: "Impini" },
+  { english: "unknown snake plural", bemba: "Impini" },
+
+  { english: "unknown snake 2", bemba: "Iyongolo" },
+  { english: "unknown snake 2 plural", bemba: "Imiyongolo" },
+
+  { english: "unknown snake 3", bemba: "Itiya" },
+  { english: "unknown snake 3 plural", bemba: "Amatiya" },
+    // =========================================================
+  // BIRDS
+  // =========================================================
+
+  { english: "fish eagle", bemba: "Cembe" },
+  { english: "fish eagle plural", bemba: "Ba cembe" },
+
+  { english: "coracias", bemba: "Cikwekwe" },
+  { english: "coracias plural", bemba: "Fikwekwe" },
+
+  { english: "marabou stork", bemba: "Cipampa" },
+  { english: "marabou stork plural", bemba: "Ba cipampa" },
+
+  { english: "turtle dove", bemba: "Cipeele" },
+  { english: "turtle dove plural", bemba: "Fipeele" },
+
+  { english: "quail", bemba: "Cipingila" },
+  { english: "quail plural", bemba: "Fipingila" },
+
+  { english: "owl", bemba: "Cipululu" },
+  { english: "owl plural", bemba: "Fipululu" },
+
+  { english: "bateleur eagle", bemba: "Cipungu" },
+  { english: "bateleur eagle plural", bemba: "Fipûngu" },
+
+  { english: "weaver bird", bemba: "Cisokopela" },
+  { english: "weaver bird plural", bemba: "Fisokopela" },
+
+  { english: "wild duck", bemba: "Coso" },
+  { english: "wild duck plural", bemba: "Ifyoso" },
+
+  { english: "guinea fowl", bemba: "Ikanga" },
+  { english: "guinea fowl plural", bemba: "Amakanga" },
+
+  { english: "vulture", bemba: "Ikubi" },
+  { english: "vulture plural", bemba: "Amakubi" },
+
+  { english: "snipe", bemba: "Kakandamatipa" },
+  { english: "snipe plural", bemba: "Utukandamatipa" },
+
+  { english: "crowned plover", bemba: "Kakolenkole" },
+  { english: "crowned plover plural", bemba: "Utukolenkole" },
+
+  { english: "chanting go away bird", bemba: "Kakoshi" },
+  { english: "chanting go away bird plural", bemba: "Utukoshi" },
+
+  { english: "pale harrier", bemba: "Kakoshi ka nika" },
+  { english: "pale harrier plural", bemba: "Utukoshi twa nika" },
+
+  { english: "swallow", bemba: "Akamimbi" },
+  { english: "swallow plural", bemba: "Utumimbi" },
+
+  { english: "frankolin", bemba: "Akapeshi" },
+  { english: "frankolin plural", bemba: "Utupeshi" },
+
+  { english: "eagle", bemba: "Kapumpe" },
+  { english: "eagle plural", bemba: "Ba kapumpe" },
+
+  { english: "small dove", bemba: "Akatutwa" },
+  { english: "small dove plural", bemba: "Utututwa" },
+
+  { english: "wagtail", bemba: "Akatyetye" },
+  { english: "wagtail plural", bemba: "Ututyetye" },
+
+  { english: "go away bird", bemba: "Kuwe" },
+  { english: "go away bird plural", bemba: "Bakuwe" },
+
+  { english: "hornbill", bemba: "Ulukoma" },
+  { english: "hornbill plural", bemba: "Inkoma" },
+
+  { english: "hawk", bemba: "Ulukoshi" },
+  { english: "hawk plural", bemba: "Ink oshi" },
+
+  { english: "nightjar", bemba: "Ulumbasa" },
+  { english: "nightjar plural", bemba: "Bambasa" },
+
+  { english: "spurwing goose", bemba: "Imbata" },
+  { english: "spurwing goose plural", bemba: "Imbata" },
+
+  { english: "bee eater", bemba: "Milumbe" },
+  { english: "bee eater plural", bemba: "Milumbe" },
+
+  { english: "speckled coly", bemba: "Milumbelumbe" },
+  { english: "speckled coly plural", bemba: "Milumbelumbe" },
+
+  { english: "parrot", bemba: "Mucence" },
+  { english: "parrot plural", bemba: "Bamucence" },
+
+  { english: "pelican", bemba: "Mukanga" },
+  { english: "pelican plural", bemba: "Bamukanga" },
+
+  { english: "roller", bemba: "Mukufi" },
+  { english: "roller plural", bemba: "Mikufi" },
+
+  { english: "cougal", bemba: "Mukuta" },
+  { english: "cougal plural", bemba: "Mikuta" },
+
+  { english: "long tailed widow bird", bemba: "Muleya" },
+  { english: "long tailed widow bird plural", bemba: "Ba muleya" },
+
+  { english: "kingfisher", bemba: "Mulowa" },
+  { english: "kingfisher plural", bemba: "Milowa" },
+
+  { english: "drongo", bemba: "Mutengwe" },
+  { english: "drongo plural", bemba: "Mitengwe" },
+
+  { english: "ostrich", bemba: "Mwakatala" },
+  { english: "ostrich plural", bemba: "Myakatala" },
+
+  { english: "pied raven", bemba: "Mwankole" },
+  { english: "pied raven plural", bemba: "Ba mwankole" },
+
+  { english: "long legged koahaan", bemba: "Namungwa" },
+  { english: "long legged koahaan plural", bemba: "Ba namungwa" },
+
+  { english: "crested crane", bemba: "Ngoli" },
+  { english: "crested crane plural", bemba: "Ngoli" },
+
+  { english: "heron", bemba: "Nkooba" },
+  { english: "heron plural", bemba: "Nkooba" },
+
+  { english: "tickbird", bemba: "Nkooba" },
+  { english: "tickbird plural", bemba: "Nkooba" },
+
+  { english: "green pigeon", bemba: "Nkondonkondo" },
+  { english: "green pigeon plural", bemba: "Nkondonkondo" },
+
+  { english: "red necked frankolin", bemba: "Nkwale" },
+  { english: "red necked frankolin plural", bemba: "Nkwale" },
+
+  { english: "waxbill", bemba: "Nseba" },
+  { english: "waxbill plural", bemba: "Nseba" },
+
+  { english: "honey bird", bemba: "Nsolo" },
+  { english: "honey bird plural", bemba: "Nsolo" },
+
+  { english: "honey bird alternative", bemba: "Luuni" },
+  { english: "honey bird alternative plural", bemba: "Nguuni" },
+
+  { english: "falcon", bemba: "Pungwa" },
+  { english: "falcon plural", bemba: "Ba pungwa" },
+
+  { english: "sunbird", bemba: "Sosa" },
+  { english: "sunbird plural", bemba: "Ba sosa" },
+
+  { english: "small warbler", bemba: "Tiiti" },
+  { english: "small warbler plural", bemba: "Ba tiiti" },
+
+  { english: "woodpecker", bemba: "Tondwe" },
+  { english: "woodpecker plural", bemba: "Tondwe" },
 ];
