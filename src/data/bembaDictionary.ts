@@ -519,4 +519,14 @@ export const bembaDictionary: BembaEntry[] = [
   { english: "Where are you?", bemba: "Ulikwisa" },
   { english: "Where are they?", bemba: "Balikwisa" },
   { english: "I'm angry", bemba: "Nimfulwa" },
+    { english: "I'm angry", bemba: "Nimfulwa" },
+
+  // =========================================================
+  // DAILY CONVERSATION — EXPANSION
+  // =========================================================
+
+  { english: "Good morning everyone", bemba: "Mwashibukeni bonse" },
+  { english: "Good afternoon everyone", bemba: "Cungulo mukwai bonse" },
+  { english: "How are you today?", bemba: "Mulishani ubushiku bwa lelo?" },
+  // ...the rest of the new entries...
 ];
