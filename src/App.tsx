@@ -11,6 +11,7 @@ import {
   Sparkles,
   Volume2,
 } from "lucide-react";
+import { bembaDictionary } from "./data/bembaDictionary";
 import { translateWithFallback } from "./engine/bembaTranslator";
 import "./styles/global.css";
 
@@ -31,7 +32,6 @@ type HistoryItem = {
 const quickPhrases = [
   { english: "How are you?", bemba: "Mulishani" },
   { english: "Good morning", bemba: "Mwashibukeni" },
-  { english: "Good morning everyone", bemba: "Mwashibukeni bonse" },
   { english: "I want money", bemba: "Ndefwaya indalama" },
   { english: "Where are you?", bemba: "Ulikwisa" },
   { english: "Where are they?", bemba: "Balikwisa" },
@@ -39,11 +39,31 @@ const quickPhrases = [
 ];
 
 const navItems = [
-  { id: "translate" as Page, label: "Translate", icon: Languages },
-  { id: "dictionary" as Page, label: "Dictionary", icon: BookOpen },
-  { id: "learn" as Page, label: "Learn", icon: Sparkles },
-  { id: "history" as Page, label: "History", icon: History },
-  { id: "settings" as Page, label: "Settings", icon: Settings },
+  {
+    id: "translate" as Page,
+    label: "Translate",
+    icon: Languages,
+  },
+  {
+    id: "dictionary" as Page,
+    label: "Dictionary",
+    icon: BookOpen,
+  },
+  {
+    id: "learn" as Page,
+    label: "Learn",
+    icon: Sparkles,
+  },
+  {
+    id: "history" as Page,
+    label: "History",
+    icon: History,
+  },
+  {
+    id: "settings" as Page,
+    label: "Settings",
+    icon: Settings,
+  },
 ];
 
 function App() {
@@ -62,42 +82,62 @@ function App() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [dictionarySearch, setDictionarySearch] = useState("");
 
+  /* -------------------------------------------------------
+     Launch screen
+  ------------------------------------------------------- */
+
   useEffect(() => {
     let value = 0;
 
-    const interval = setInterval(() => {
+    const interval = window.setInterval(() => {
       value += Math.floor(Math.random() * 8) + 4;
 
       if (value >= 100) {
         value = 100;
-        setProgress(value);
+        setProgress(100);
 
-        setTimeout(() => {
+        window.setTimeout(() => {
           setLaunching(false);
         }, 450);
 
-        clearInterval(interval);
+        window.clearInterval(interval);
       } else {
         setProgress(value);
       }
     }, 55);
 
-    return () => clearInterval(interval);
+    return () => {
+      window.clearInterval(interval);
+    };
   }, []);
 
-  const filteredPhrases = useMemo(() => {
+  /* -------------------------------------------------------
+     Full dictionary search
+  ------------------------------------------------------- */
+
+  const filteredDictionary = useMemo(() => {
     const query = dictionarySearch.trim().toLowerCase();
 
     if (!query) {
-      return quickPhrases;
+      return bembaDictionary.slice(0, 100);
     }
 
-    return quickPhrases.filter(
-      (item) =>
-        item.english.toLowerCase().includes(query) ||
-        item.bemba.toLowerCase().includes(query)
-    );
+    return bembaDictionary
+      .filter((item) => {
+        const english = item.english.toLowerCase();
+        const bemba = item.bemba.toLowerCase();
+
+        return (
+          english.includes(query) ||
+          bemba.includes(query)
+        );
+      })
+      .slice(0, 200);
   }, [dictionarySearch]);
+
+  /* -------------------------------------------------------
+     Translation
+  ------------------------------------------------------- */
 
   const translate = () => {
     const input = englishText.trim();
@@ -109,20 +149,11 @@ function App() {
     setIsTranslating(true);
     setCopied(false);
 
-    setTimeout(() => {
-      const normalizedInput = input
-        .toLowerCase()
-        .replace(/[“”‘’"'.,!?;:()[\]{}]/g, "")
-        .replace(/\s+/g, " ")
-        .trim();
-
+    window.setTimeout(() => {
       const quickMatch = quickPhrases.find(
         (item) =>
-          item.english
-            .toLowerCase()
-            .replace(/[“”‘’"'.,!?;:()[\]{}]/g, "")
-            .replace(/\s+/g, " ")
-            .trim() === normalizedInput
+          item.english.toLowerCase() ===
+          input.toLowerCase()
       );
 
       const result =
@@ -151,13 +182,24 @@ function App() {
     }, 160);
   };
 
-  const usePhrase = (english: string, bemba: string) => {
+  /* -------------------------------------------------------
+     Use dictionary / phrase
+  ------------------------------------------------------- */
+
+  const usePhrase = (
+    english: string,
+    bemba: string
+  ) => {
     setEnglishText(english);
     setBembaText(bemba);
     setFavourite(false);
     setCopied(false);
     setPage("translate");
   };
+
+  /* -------------------------------------------------------
+     Clipboard
+  ------------------------------------------------------- */
 
   const copyTranslation = async () => {
     if (!bembaText) {
@@ -168,13 +210,17 @@ function App() {
       await navigator.clipboard.writeText(bembaText);
       setCopied(true);
 
-      setTimeout(() => {
+      window.setTimeout(() => {
         setCopied(false);
       }, 1400);
     } catch {
-      /* Clipboard unavailable */
+      // Clipboard unavailable.
     }
   };
+
+  /* -------------------------------------------------------
+     Manual audio placeholder
+  ------------------------------------------------------- */
 
   const speak = () => {
     if (!bembaText || isSpeaking) {
@@ -183,28 +229,14 @@ function App() {
 
     setIsSpeaking(true);
 
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-
-      const utterance = new SpeechSynthesisUtterance(bembaText);
-      utterance.rate = 0.85;
-      utterance.pitch = 1;
-
-      utterance.onend = () => {
-        setIsSpeaking(false);
-      };
-
-      utterance.onerror = () => {
-        setIsSpeaking(false);
-      };
-
-      window.speechSynthesis.speak(utterance);
-    } else {
-      setTimeout(() => {
-        setIsSpeaking(false);
-      }, 900);
-    }
+    window.setTimeout(() => {
+      setIsSpeaking(false);
+    }, 900);
   };
+
+  /* -------------------------------------------------------
+     Launch screen
+  ------------------------------------------------------- */
 
   if (launching) {
     return (
@@ -214,7 +246,10 @@ function App() {
 
         <div className="launch-content">
           <div className="launch-logo">
-            <Languages size={36} strokeWidth={1.7} />
+            <Languages
+              size={36}
+              strokeWidth={1.7}
+            />
           </div>
 
           <div className="launch-kicker">
@@ -227,14 +262,19 @@ function App() {
 
           <div className="launch-status">
             <div className="launch-status-row">
-              <span>Preparing your dictionary</span>
+              <span>
+                Preparing your dictionary
+              </span>
+
               <strong>{progress}%</strong>
             </div>
 
             <div className="progress-track">
               <div
                 className="progress-fill"
-                style={{ width: `${progress}%` }}
+                style={{
+                  width: `${progress}%`,
+                }}
               />
             </div>
           </div>
@@ -258,11 +298,17 @@ function App() {
     );
   }
 
+  /* -------------------------------------------------------
+     Main application
+  ------------------------------------------------------- */
+
   return (
     <div className="app">
       <div className="wallpaper" />
 
       <main className="app-content">
+
+        {/* Header */}
         <header className="app-header">
           <div className="header-title">
             <span className="header-icon">
@@ -271,14 +317,25 @@ function App() {
 
             <div>
               <strong>
-                {page === "translate" && "Translate"}
-                {page === "dictionary" && "Dictionary"}
-                {page === "learn" && "Learn Bemba"}
-                {page === "history" && "History"}
-                {page === "settings" && "Settings"}
+                {page === "translate" &&
+                  "Translate"}
+
+                {page === "dictionary" &&
+                  "Dictionary"}
+
+                {page === "learn" &&
+                  "Learn Bemba"}
+
+                {page === "history" &&
+                  "History"}
+
+                {page === "settings" &&
+                  "Settings"}
               </strong>
 
-              <span>English → Bemba</span>
+              <span>
+                English → Bemba
+              </span>
             </div>
           </div>
 
@@ -288,8 +345,13 @@ function App() {
           </div>
         </header>
 
+        {/* ==================================================
+            TRANSLATE
+        ================================================== */}
+
         {page === "translate" && (
           <section className="page">
+
             <div className="welcome-card">
               <div className="welcome-icon">
                 <Sparkles size={20} />
@@ -326,6 +388,7 @@ function App() {
             </div>
 
             <div className="translation-card">
+
               <div className="language-strip">
                 <div>
                   <small>FROM</small>
@@ -344,7 +407,9 @@ function App() {
 
               <div className="input-label-row">
                 <span>English text</span>
-                <span>{englishText.length}/5000</span>
+                <span>
+                  {englishText.length}/5000
+                </span>
               </div>
 
               <textarea
@@ -361,7 +426,8 @@ function App() {
                 className="translate-button"
                 onClick={translate}
                 disabled={
-                  !englishText.trim() || isTranslating
+                  !englishText.trim() ||
+                  isTranslating
                 }
               >
                 <Languages size={17} />
@@ -393,10 +459,14 @@ function App() {
                     <div className="result-actions">
                       <button
                         onClick={() =>
-                          setFavourite((value) => !value)
+                          setFavourite(
+                            (value) => !value
+                          )
                         }
                         className={
-                          favourite ? "selected" : ""
+                          favourite
+                            ? "selected"
+                            : ""
                         }
                       >
                         <Heart
@@ -409,7 +479,9 @@ function App() {
                         />
                       </button>
 
-                      <button onClick={copyTranslation}>
+                      <button
+                        onClick={copyTranslation}
+                      >
                         {copied ? (
                           <Check size={16} />
                         ) : (
@@ -419,6 +491,7 @@ function App() {
 
                       <button onClick={speak}>
                         <Volume2 size={16} />
+
                         {isSpeaking
                           ? "Playing"
                           : "Listen"}
@@ -430,20 +503,25 @@ function App() {
                     <BookOpen size={21} />
 
                     <strong>
-                      Your translation will appear here
+                      Your translation will appear
+                      here
                     </strong>
 
                     <span>
-                      Enter an English word or phrase above.
+                      Enter an English word or phrase
+                      above.
                     </span>
                   </div>
                 )}
               </div>
             </div>
 
+            {/* Popular phrases */}
+
             <div className="section-title">
               <div>
                 <h2>Popular phrases</h2>
+
                 <p>
                   Useful expressions for everyday life
                 </p>
@@ -466,8 +544,13 @@ function App() {
                     )
                   }
                 >
-                  <span>{phrase.english}</span>
-                  <strong>{phrase.bemba}</strong>
+                  <span>
+                    {phrase.english}
+                  </span>
+
+                  <strong>
+                    {phrase.bemba}
+                  </strong>
                 </button>
               ))}
             </div>
@@ -483,15 +566,21 @@ function App() {
                 </strong>
 
                 <span>
-                  Your translations stay on your device.
+                  Your translations stay on your
+                  device.
                 </span>
               </div>
             </div>
           </section>
         )}
 
+        {/* ==================================================
+            DICTIONARY
+        ================================================== */}
+
         {page === "dictionary" && (
           <section className="page">
+
             <div className="page-intro">
               <span className="eyebrow">
                 BEMBA LANGUAGE
@@ -500,8 +589,8 @@ function App() {
               <h1>Dictionary</h1>
 
               <p>
-                Find useful English words and their Bemba
-                meanings.
+                Search the complete built-in English →
+                Bemba dictionary.
               </p>
             </div>
 
@@ -511,93 +600,175 @@ function App() {
               <input
                 value={dictionarySearch}
                 onChange={(e) =>
-                  setDictionarySearch(e.target.value)
+                  setDictionarySearch(
+                    e.target.value
+                  )
                 }
                 placeholder="Search words or phrases..."
               />
             </div>
 
-            <div className="dictionary-list">
-              {filteredPhrases.map((item) => (
-                <button
-                  key={item.english}
-                  className="dictionary-card"
-                  onClick={() =>
-                    usePhrase(
-                      item.english,
-                      item.bemba
-                    )
-                  }
-                >
-                  <div>
-                    <span>{item.english}</span>
-                    <strong>{item.bemba}</strong>
-                  </div>
+            <div className="dictionary-count">
+              {dictionarySearch.trim()
+                ? `${filteredDictionary.length} results`
+                : `${bembaDictionary.length} dictionary entries`}
+            </div>
 
-                  <Languages size={16} />
-                </button>
-              ))}
+            <div className="dictionary-list">
+              {filteredDictionary.length > 0 ? (
+                filteredDictionary.map(
+                  (item, index) => (
+                    <button
+                      key={`${item.english}-${index}`}
+                      className="dictionary-card"
+                      onClick={() =>
+                        usePhrase(
+                          item.english,
+                          item.bemba
+                        )
+                      }
+                    >
+                      <div>
+                        <span>
+                          {item.english}
+                        </span>
+
+                        <strong>
+                          {item.bemba}
+                        </strong>
+                      </div>
+
+                      <Languages size={16} />
+                    </button>
+                  )
+                )
+              ) : (
+                <div className="large-empty">
+                  <Search size={30} />
+
+                  <strong>
+                    No dictionary entry found
+                  </strong>
+
+                  <span>
+                    Try another English or Bemba
+                    word.
+                  </span>
+                </div>
+              )}
             </div>
           </section>
         )}
 
+        {/* ==================================================
+            LEARN
+        ================================================== */}
+
         {page === "learn" && (
           <section className="page">
+
             <div className="page-intro">
               <span className="eyebrow">
                 LEARN BEMBA
               </span>
 
-              <h1>Build your vocabulary.</h1>
+              <h1>
+                Build your vocabulary.
+              </h1>
 
               <p>
-                Explore useful Bemba words and everyday
-                expressions.
+                Explore useful Bemba words and
+                everyday expressions.
               </p>
             </div>
 
             <div className="learn-grid">
               <button className="learn-card">
-                <span className="learn-number">01</span>
+                <span className="learn-number">
+                  01
+                </span>
+
                 <strong>Greetings</strong>
-                <small>Everyday greetings</small>
+
+                <small>
+                  Everyday greetings
+                </small>
               </button>
 
               <button className="learn-card">
-                <span className="learn-number">02</span>
+                <span className="learn-number">
+                  02
+                </span>
+
                 <strong>Family</strong>
-                <small>Family vocabulary</small>
+
+                <small>
+                  Family vocabulary
+                </small>
               </button>
 
               <button className="learn-card">
-                <span className="learn-number">03</span>
-                <strong>Food & Drink</strong>
-                <small>Useful food words</small>
+                <span className="learn-number">
+                  03
+                </span>
+
+                <strong>
+                  Food & Drink
+                </strong>
+
+                <small>
+                  Useful food words
+                </small>
               </button>
 
               <button className="learn-card">
-                <span className="learn-number">04</span>
+                <span className="learn-number">
+                  04
+                </span>
+
                 <strong>Travel</strong>
-                <small>Words for travelling</small>
+
+                <small>
+                  Words for travelling
+                </small>
               </button>
 
               <button className="learn-card">
-                <span className="learn-number">05</span>
+                <span className="learn-number">
+                  05
+                </span>
+
                 <strong>Numbers</strong>
-                <small>Learn Bemba numbers</small>
+
+                <small>
+                  Learn Bemba numbers
+                </small>
               </button>
 
               <button className="learn-card">
-                <span className="learn-number">06</span>
-                <strong>Everyday Life</strong>
-                <small>Common expressions</small>
+                <span className="learn-number">
+                  06
+                </span>
+
+                <strong>
+                  Everyday Life
+                </strong>
+
+                <small>
+                  Common expressions
+                </small>
               </button>
             </div>
           </section>
         )}
 
+        {/* ==================================================
+            HISTORY
+        ================================================== */}
+
         {page === "history" && (
           <section className="page">
+
             <div className="page-intro">
               <span className="eyebrow">
                 LOCAL HISTORY
@@ -606,7 +777,8 @@ function App() {
               <h1>History</h1>
 
               <p>
-                Your recent translations are stored locally.
+                Your recent translations are stored
+                locally.
               </p>
             </div>
 
@@ -614,10 +786,13 @@ function App() {
               <div className="large-empty">
                 <History size={30} />
 
-                <strong>No translations yet</strong>
+                <strong>
+                  No translations yet
+                </strong>
 
                 <span>
-                  Your recent translations will appear here.
+                  Your recent translations will
+                  appear here.
                 </span>
               </div>
             ) : (
@@ -634,9 +809,17 @@ function App() {
                     }
                   >
                     <div>
-                      <small>{item.time}</small>
-                      <span>{item.english}</span>
-                      <strong>{item.bemba}</strong>
+                      <small>
+                        {item.time}
+                      </small>
+
+                      <span>
+                        {item.english}
+                      </span>
+
+                      <strong>
+                        {item.bemba}
+                      </strong>
                     </div>
 
                     <Languages size={17} />
@@ -647,8 +830,13 @@ function App() {
           </section>
         )}
 
+        {/* ==================================================
+            SETTINGS
+        ================================================== */}
+
         {page === "settings" && (
           <section className="page">
+
             <div className="page-intro">
               <span className="eyebrow">
                 PREFERENCES
@@ -657,11 +845,13 @@ function App() {
               <h1>Settings</h1>
 
               <p>
-                Control your BembaTranslate experience.
+                Control your BembaTranslate
+                experience.
               </p>
             </div>
 
             <div className="settings-card">
+
               <div className="setting-row">
                 <div>
                   <strong>
@@ -681,7 +871,9 @@ function App() {
 
               <div className="setting-row">
                 <div>
-                  <strong>Automatic audio</strong>
+                  <strong>
+                    Automatic audio
+                  </strong>
 
                   <span>
                     Audio never plays automatically.
@@ -719,14 +911,16 @@ function App() {
                 </strong>
 
                 <span>
-                  BembaTranslate is designed to work
-                  locally on your device.
+                  BembaTranslate is designed to
+                  work locally on your device.
                 </span>
               </div>
             </div>
           </section>
         )}
       </main>
+
+      {/* Bottom navigation */}
 
       <nav className="bottom-navigation">
         {navItems.map((item) => {
@@ -736,15 +930,21 @@ function App() {
             <button
               key={item.id}
               className={
-                page === item.id ? "active" : ""
+                page === item.id
+                  ? "active"
+                  : ""
               }
-              onClick={() => setPage(item.id)}
+              onClick={() =>
+                setPage(item.id)
+              }
             >
               <span className="nav-icon">
                 <Icon size={18} />
               </span>
 
-              <span>{item.label}</span>
+              <span>
+                {item.label}
+              </span>
             </button>
           );
         })}
