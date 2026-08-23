@@ -1,13 +1,6 @@
 /* =========================================================
    BEMBATRANSLATE
    OFFLINE NAVIGATION MAP TYPES
-
-   Shared types for:
-   - GPS coordinates
-   - Zambia offline map
-   - Map nodes
-   - Map connections
-   - Route calculation
    ========================================================= */
 
 export type Coordinate = {
@@ -24,16 +17,16 @@ export type MapNode = {
   name: string;
 
   /*
-     Raw coordinates are kept directly on every map node.
-     This matches the locally packaged Zambia map data.
-  */
+   * Existing offline map data stores coordinates this way.
+   */
   latitude: number;
   longitude: number;
 
   /*
-     Convenience coordinate object used by the route engine.
-  */
-  coordinate: Coordinate;
+   * Optional convenience coordinate object.
+   * Existing map data does not need to define it.
+   */
+  coordinate?: Coordinate;
 };
 
 /* =========================================================
@@ -47,7 +40,7 @@ export type MapEdge = {
 };
 
 /* =========================================================
-   COMPLETE MAP DATA
+   MAP DATA
    ========================================================= */
 
 export type MapData = {
