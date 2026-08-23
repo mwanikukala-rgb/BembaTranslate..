@@ -1,10 +1,4 @@
-/* =========================================================
-   BEMBATRANSLATE
-   OFFLINE GPS SERVICE
-   Capacitor Geolocation
-   ========================================================= */
-
-import { Geolocation } from "@capacitor/geolocation";
+import { Geolocation, Position } from "@capacitor/geolocation";
 
 export type GPSPosition = {
   latitude: number;
@@ -15,139 +9,70 @@ export type GPSPosition = {
   heading: number | null;
 };
 
-let watchId: string | null = null;
+export async function requestLocationPermission(): Promise<void> {
+  const permissions = await Geolocation.requestPermissions();
+
+  const granted =
+    permissions.location === "granted" ||
+    permissions.coarseLocation === "granted";
+
+  if (!granted) {
+    throw new Error("Location permission was not granted.");
+  }
+}
+
+export async function getCurrentPosition(): Promise<GPSPosition> {
+  const position = await Geolocation.getCurrentPosition({
+    enableHighAccuracy: true,
+    timeout: 15000,
+    maximumAge: 3000,
+  });
+
+  return convertPosition(position);
+}
+
+export async function watchPosition(
+  callback: (position: GPSPosition) => void,
+  onError?: (error: unknown) => void
+): Promise<string> {
+  const watchId = await Geolocation.watchPosition(
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 2000,
+    },
+    (position, error) => {
+      if (error) {
+        onError?.(error);
+        return;
+      }
+
+      if (position) {
+        callback(convertPosition(position));
+      }
+    }
+  );
+
+  return watchId;
+}
+
+export async function clearPositionWatch(
+  watchId: string
+): Promise<void> {
+  await Geolocation.clearWatch({
+    id: watchId,
+  });
+}
 
 function convertPosition(
-  position: {
-    coords: {
-      latitude: number;
-      longitude: number;
-      accuracy: number;
-      altitude?: number | null;
-      speed?: number | null;
-      heading?: number | null;
-    };
-  }
+  position: Position
 ): GPSPosition {
   return {
     latitude: position.coords.latitude,
     longitude: position.coords.longitude,
     accuracy: position.coords.accuracy,
-    altitude:
-      position.coords.altitude ?? null,
-    speed:
-      position.coords.speed ?? null,
-    heading:
-      position.coords.heading ?? null,
+    altitude: position.coords.altitude ?? null,
+    speed: position.coords.speed ?? null,
+    heading: position.coords.heading ?? null,
   };
-}
-
-/* =========================================================
-   GET CURRENT LOCATION
-   ========================================================= */
-
-export async function getCurrentLocation(): Promise<GPSPosition> {
-  const permission =
-    await Geolocation.checkPermissions();
-
-  if (
-    permission.location !== "granted"
-  ) {
-    const requested =
-      await Geolocation.requestPermissions();
-
-    if (
-      requested.location !== "granted"
-    ) {
-      throw new Error(
-        "Location permission was not granted."
-      );
-    }
-  }
-
-  const position =
-    await Geolocation.getCurrentPosition({
-      enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 5000,
-    });
-
-  return convertPosition(position);
-}
-
-/* =========================================================
-   WATCH LOCATION
-   ========================================================= */
-
-export async function watchLocation(
-  onPosition: (
-    position: GPSPosition
-  ) => void,
-  onError: (
-    error: unknown
-  ) => void
-): Promise<void> {
-  clearPositionWatch();
-
-  try {
-    watchId =
-      await Geolocation.watchPosition(
-        {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 3000,
-        },
-        (position, error) => {
-          if (error) {
-            onError(error);
-            return;
-          }
-
-          if (!position) {
-            return;
-          }
-
-          onPosition(
-            convertPosition(position)
-          );
-        }
-      );
-  } catch (error) {
-    onError(error);
-  }
-}
-
-/* =========================================================
-   CLEAR GPS WATCH
-   ========================================================= */
-
-export function clearPositionWatch(): void {
-  if (!watchId) {
-    return;
-  }
-
-  const currentWatchId = watchId;
-
-  watchId = null;
-
-  void Geolocation.clearWatch({
-    id: currentWatchId,
-  });
-}
-
-/* =========================================================
-   GPS STATUS
-   ========================================================= */
-
-export async function checkLocationPermission(): Promise<boolean> {
-  try {
-    const permission =
-      await Geolocation.checkPermissions();
-
-    return (
-      permission.location === "granted"
-    );
-  } catch {
-    return false;
-  }
 }
