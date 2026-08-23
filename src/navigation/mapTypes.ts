@@ -19,17 +19,9 @@ export type MapNode = {
   id: string;
   name: string;
 
-  /*
-   * Keep latitude/longitude because the current map data
-   * and navigation UI use these directly.
-   */
   latitude: number;
   longitude: number;
 
-  /*
-   * Coordinate is the standard representation used by
-   * the route engine.
-   */
   coordinate: Coordinate;
 
   type?: MapNodeType;
