@@ -11,15 +11,16 @@ import type {
 } from "./mapTypes";
 
 /* =========================================================
-   HELPER
+   NODE CREATOR
    ========================================================= */
 
-function makeNode(
+function createNode(
   id: string,
   name: string,
   latitude: number,
   longitude: number,
   type: MapNode["type"],
+  description?: string,
 ): MapNode {
   const coordinate: Coordinate = {
     latitude,
@@ -33,6 +34,7 @@ function makeNode(
     longitude,
     coordinate,
     type,
+    description,
   };
 }
 
@@ -40,45 +42,49 @@ function makeNode(
    OFFLINE MAP NODES
    ========================================================= */
 
-export const zambiaMapNodes: MapNode[] = [
-  makeNode(
+export const mapNodes: MapNode[] = [
+  createNode(
     "lusaka-center",
     "Lusaka Centre",
     -15.4167,
     28.2833,
     "landmark",
+    "Central Lusaka.",
   ),
 
-  makeNode(
+  createNode(
     "cbu",
     "Copperbelt University",
     -12.8106,
     28.2132,
-    "building",
+    "campus",
+    "Copperbelt University campus.",
   ),
 
-  makeNode(
+  createNode(
     "ndola-center",
     "Ndola Centre",
     -12.9680,
     28.6337,
     "landmark",
+    "Ndola city centre.",
   ),
 
-  makeNode(
+  createNode(
     "kitwe-center",
     "Kitwe Centre",
     -12.8024,
     28.2132,
     "landmark",
+    "Kitwe city centre.",
   ),
 ];
 
 /* =========================================================
-   OFFLINE CONNECTIONS
+   OFFLINE MAP EDGES
    ========================================================= */
 
-export const zambiaMapEdges: MapEdge[] = [
+export const mapEdges: MapEdge[] = [
   {
     from: "lusaka-center",
     to: "cbu",
@@ -109,14 +115,27 @@ export const zambiaMapEdges: MapEdge[] = [
 ];
 
 /* =========================================================
-   COMPLETE OFFLINE MAP
+   OFFLINE MAP
    ========================================================= */
 
-export const zambiaOfflineMap: MapData = {
+export const offlineMap: MapData = {
   name: "Zambia Offline Map",
-  nodes: zambiaMapNodes,
-  edges: zambiaMapEdges,
+  nodes: mapNodes,
+  edges: mapEdges,
 };
+
+/* =========================================================
+   COMPATIBILITY EXPORTS
+   ========================================================= */
+
+export const zambiaMapNodes =
+  mapNodes;
+
+export const zambiaMapEdges =
+  mapEdges;
+
+export const zambiaOfflineMap =
+  offlineMap;
 
 /* =========================================================
    FIND NODE
@@ -125,13 +144,13 @@ export const zambiaOfflineMap: MapData = {
 export function getMapNode(
   id: string,
 ): MapNode | undefined {
-  return zambiaMapNodes.find(
+  return mapNodes.find(
     (node) => node.id === id,
   );
 }
 
 /* =========================================================
-   DISTANCE
+   HAVERSINE DISTANCE
    ========================================================= */
 
 export function calculateDistance(
@@ -177,26 +196,23 @@ export function calculateDistance(
 }
 
 /* =========================================================
-   NEAREST NODE
+   FIND NEAREST NODE
    ========================================================= */
 
 export function getNearestMapNode(
   latitude: number,
   longitude: number,
 ): MapNode | undefined {
-  if (
-    zambiaMapNodes.length === 0
-  ) {
+  if (mapNodes.length === 0) {
     return undefined;
   }
 
-  let nearest =
-    zambiaMapNodes[0];
+  let nearest = mapNodes[0];
 
   let nearestDistance =
     Number.POSITIVE_INFINITY;
 
-  for (const node of zambiaMapNodes) {
+  for (const node of mapNodes) {
     const distance =
       calculateDistance(
         latitude,
@@ -206,7 +222,8 @@ export function getNearestMapNode(
       );
 
     if (
-      distance < nearestDistance
+      distance <
+      nearestDistance
     ) {
       nearest = node;
       nearestDistance = distance;
