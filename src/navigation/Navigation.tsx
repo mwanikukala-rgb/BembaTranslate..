@@ -1,14 +1,10 @@
 /* =========================================================
    BEMBATRANSLATE
-   OFFLINE NAVIGATION
-   CLEAN MOBILE UI
+   CLEAN OFFLINE NAVIGATION
+   Mobile-first • GPS • Offline routes
    ========================================================= */
 
-import {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   ArrowLeft,
@@ -17,8 +13,6 @@ import {
   Navigation as NavigationIcon,
   RefreshCw,
   Route,
-  Search,
-  SquareArrowOutUpRight,
 } from "lucide-react";
 
 import {
@@ -29,17 +23,15 @@ import {
   type GPSWatchId,
 } from "./gps";
 
-import {
-  zambiaOfflineMap,
-} from "./mapData";
+import { zambiaOfflineMap } from "./mapData";
 
 import {
   calculateBearing,
   bearingToDirection,
+  estimateWalkingTime,
   findNearestNode,
   findRoute,
   formatDistance,
-  estimateWalkingTime,
 } from "./routeEngine";
 
 import type {
@@ -72,14 +64,11 @@ export default function Navigation({
   const [error, setError] =
     useState("");
 
-  const [search, setSearch] =
-    useState("");
-
   const watchIdRef =
     useRef<GPSWatchId | null>(null);
 
   /* =======================================================
-     CURRENT LOCATION
+     GET CURRENT LOCATION
      ======================================================= */
 
   const locateUser = async () => {
@@ -106,7 +95,7 @@ export default function Navigation({
   };
 
   /* =======================================================
-     START TRACKING
+     START GPS TRACKING
      ======================================================= */
 
   const startTracking = async () => {
@@ -133,7 +122,7 @@ export default function Navigation({
           (nextLocation) => {
             setLocation(nextLocation);
           },
-          (gpsError) => {
+          (gpsError: unknown) => {
             console.error(
               "GPS tracking error:",
               gpsError,
@@ -142,10 +131,13 @@ export default function Navigation({
             setError(
               "GPS tracking stopped.",
             );
+
+            setTracking(false);
           },
         );
 
-      watchIdRef.current = watchId;
+      watchIdRef.current =
+        watchId;
 
       setTracking(true);
     } catch (err) {
@@ -163,7 +155,7 @@ export default function Navigation({
   };
 
   /* =======================================================
-     STOP TRACKING
+     STOP GPS TRACKING
      ======================================================= */
 
   const stopTracking = async () => {
@@ -203,15 +195,12 @@ export default function Navigation({
   }, []);
 
   /* =======================================================
-     DESTINATION
+     CALCULATE ROUTE
      ======================================================= */
 
-  const chooseDestination = (
+  const calculateRouteTo = (
     node: MapNode,
   ) => {
-    setDestination(node);
-    setError("");
-
     if (!location) {
       setRoute(null);
 
@@ -257,6 +246,19 @@ export default function Navigation({
     }
 
     setRoute(newRoute);
+    setError("");
+  };
+
+  /* =======================================================
+     SELECT DESTINATION
+     ======================================================= */
+
+  const chooseDestination = (
+    node: MapNode,
+  ) => {
+    setDestination(node);
+
+    calculateRouteTo(node);
   };
 
   /* =======================================================
@@ -265,90 +267,53 @@ export default function Navigation({
 
   const recalculateRoute = () => {
     if (
-      !location ||
-      !destination
+      !destination ||
+      !location
     ) {
       return;
     }
 
-    const nearest =
-      findNearestNode(
-        zambiaOfflineMap,
-        location.latitude,
-        location.longitude,
-      );
-
-    if (!nearest) {
-      setRoute(null);
-
-      setError(
-        "Could not find a nearby offline map point.",
-      );
-
-      return;
-    }
-
-    const newRoute =
-      findRoute(
-        zambiaOfflineMap,
-        nearest.id,
-        destination.id,
-      );
-
-    setRoute(newRoute);
-
-    if (!newRoute) {
-      setError("No route found.");
-    } else {
-      setError("");
-    }
+    calculateRouteTo(
+      destination,
+    );
   };
 
   /* =======================================================
-     DIRECTION
+     CURRENT DIRECTION
      ======================================================= */
 
-  const getDirectionText = (): string => {
-    if (
-      !location ||
-      !route ||
-      route.nodes.length < 2
-    ) {
-      return "Select a destination";
-    }
+  const getDirectionText =
+    (): string => {
+      if (
+        !location ||
+        !route ||
+        route.nodes.length < 2
+      ) {
+        return "Select a destination";
+      }
 
-    const nextNode =
-      route.nodes[1];
+      const nextNode =
+        route.nodes[1];
 
-    const bearing =
-      calculateBearing(
-        location.latitude,
-        location.longitude,
-        nextNode.latitude,
-        nextNode.longitude,
-      );
+      const bearing =
+        calculateBearing(
+          location.latitude,
+          location.longitude,
+          nextNode.latitude,
+          nextNode.longitude,
+        );
 
-    return `Head ${bearingToDirection(
-      bearing,
-    )}`;
-  };
+      return `Head ${bearingToDirection(
+        bearing,
+      )}`;
+    };
 
   /* =======================================================
-     DESTINATIONS
+     AVAILABLE DESTINATIONS
      ======================================================= */
 
   const availableNodes =
     zambiaOfflineMap.nodes;
-
-  const filteredNodes =
-    availableNodes.filter(
-      (node) =>
-        node.name
-          .toLowerCase()
-          .includes(
-            search.toLowerCase(),
-          ),
-    );
 
   /* =======================================================
      RENDER
@@ -357,9 +322,7 @@ export default function Navigation({
   return (
     <section className="navigation-page">
 
-      {/* =================================================
-          HEADER
-         ================================================= */}
+      {/* HEADER */}
 
       <header className="navigation-header">
 
@@ -372,7 +335,8 @@ export default function Navigation({
           <ArrowLeft size={19} />
         </button>
 
-        <div className="navigation-header-text">
+        <div className="navigation-title">
+
           <span>
             OFFLINE NAVIGATION
           </span>
@@ -380,317 +344,246 @@ export default function Navigation({
           <h1>
             Find your way
           </h1>
+
+          <p>
+            GPS navigation with
+            offline routes.
+          </p>
+
         </div>
 
-        <div className="navigation-header-badge">
+        <div className="navigation-offline-badge">
           <span />
           Offline
         </div>
 
       </header>
 
-      {/* =================================================
-          MAP
-         ================================================= */}
+      {/* GPS STATUS */}
 
-      <div className="navigation-map-card">
+      <div className="navigation-status-card">
 
-        <div className="navigation-map-top">
-
-          <div>
-            <span className="navigation-map-label">
-              OFFLINE MAP
-            </span>
-
-            <strong>
-              {location
-                ? "Your position"
-                : "Location not found"}
-            </strong>
-          </div>
-
-          <button
-            type="button"
-            onClick={locateUser}
-            disabled={loading}
-            className="map-locate-button"
-            aria-label="Find my location"
-          >
-            <LocateFixed
-              size={17}
-            />
-          </button>
-
+        <div className="navigation-status-icon">
+          <LocateFixed size={19} />
         </div>
 
-        <div className="offline-map">
+        <div className="navigation-status-text">
 
-          <div className="map-grid" />
+          <strong>
+            {tracking
+              ? "GPS tracking active"
+              : location
+                ? "GPS location ready"
+                : "GPS tracking inactive"}
+          </strong>
 
-          <div className="map-road map-road-one" />
-          <div className="map-road map-road-two" />
-          <div className="map-road map-road-three" />
-
-          {location && (
-            <div className="user-location">
-              <span className="location-pulse" />
-              <span className="location-dot" />
-            </div>
-          )}
-
-          {route &&
-            route.nodes.map(
-              (
-                node,
-                index,
-              ) => (
-                <div
-                  key={node.id}
-                  className={
-                    index ===
-                    route.nodes.length - 1
-                      ? "route-destination"
-                      : "route-node"
-                  }
-                  style={{
-                    left: `${20 + index * 20}%`,
-                    top: `${65 - index * 13}%`,
-                  }}
-                >
-                  {index ===
-                    route.nodes.length - 1 && (
-                    <MapPin
-                      size={25}
-                    />
-                  )}
-                </div>
-              ),
-            )}
-
-          {!location && (
-            <div className="map-empty">
-
-              <div className="map-empty-icon">
-                <LocateFixed
-                  size={23}
-                />
-              </div>
-
-              <strong>
-                Your location
-              </strong>
-
-              <span>
-                Tap the location
-                button to find
-                yourself.
-              </span>
-
-            </div>
-          )}
-
-          {location && (
-            <div className="map-location-label">
-              <LocateFixed
-                size={13}
-              />
-              You are here
-            </div>
-          )}
-
-        </div>
-
-      </div>
-
-      {/* =================================================
-          GPS STATUS
-         ================================================= */}
-
-      <div className="navigation-gps-card">
-
-        <div className="gps-status-icon">
-          <LocateFixed
-            size={18}
-          />
-        </div>
-
-        <div className="gps-status-content">
-
-          <div className="gps-status-heading">
-
-            <strong>
-              GPS location
-            </strong>
-
-            <span
-              className={
-                tracking
-                  ? "gps-live"
-                  : "gps-idle"
-              }
-            >
-              <span />
-              {tracking
-                ? "Tracking"
-                : "Ready"}
-            </span>
-
-          </div>
-
-          <p>
+          <span>
             {location
               ? `Accuracy ±${Math.round(
                   location.accuracy,
                 )} m`
               : "Location not available"}
-          </p>
+          </span>
 
         </div>
 
-        <button
-          type="button"
-          className="gps-main-button"
-          onClick={
-            tracking
-              ? stopTracking
-              : startTracking
+        <span
+          className={
+            tracking || location
+              ? "gps-status-dot active"
+              : "gps-status-dot"
           }
-        >
-          {tracking
-            ? "Stop"
-            : "Start"}
-        </button>
+        />
 
       </div>
 
-      {/* =================================================
-          ERROR
-         ================================================= */}
+      {/* GPS CONTROLS */}
+
+      <div className="navigation-controls">
+
+        <button
+          type="button"
+          className="navigation-primary-button"
+          onClick={locateUser}
+          disabled={loading}
+        >
+          <LocateFixed size={17} />
+
+          {loading
+            ? "Locating..."
+            : "My location"}
+        </button>
+
+        {!tracking ? (
+          <button
+            type="button"
+            className="navigation-secondary-button"
+            onClick={startTracking}
+          >
+            <NavigationIcon size={17} />
+            Start tracking
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="navigation-secondary-button"
+            onClick={stopTracking}
+          >
+            Stop tracking
+          </button>
+        )}
+
+      </div>
+
+      {/* ERROR */}
 
       {error && (
         <div className="navigation-error">
-
-          <div>
-            <strong>
-              GPS notice
-            </strong>
-
-            <span>
-              {error}
-            </span>
-          </div>
-
+          {error}
         </div>
       )}
 
-      {/* =================================================
-          ROUTE SUMMARY
-         ================================================= */}
+      {/* MAP */}
+
+      <div className="offline-map-card">
+
+        <div className="offline-map-grid" />
+
+        {location && (
+          <div
+            className="map-user-location"
+            aria-label="Your location"
+          >
+            <span className="location-pulse" />
+            <span className="location-dot" />
+          </div>
+        )}
+
+        {route &&
+          route.nodes.map(
+            (node, index) => (
+              <div
+                key={node.id}
+                className={
+                  index ===
+                  route.nodes.length - 1
+                    ? "map-route-destination"
+                    : "map-route-node"
+                }
+                style={{
+                  left: `${18 + index * 20}%`,
+                  top: `${68 - index * 12}%`,
+                }}
+              >
+                {index ===
+                  route.nodes.length - 1 && (
+                  <MapPin size={24} />
+                )}
+              </div>
+            ),
+          )}
+
+        {!location && (
+          <div className="map-placeholder">
+
+            <LocateFixed size={30} />
+
+            <strong>
+              GPS location
+            </strong>
+
+            <span>
+              Tap “My location”
+              to find your position.
+            </span>
+
+          </div>
+        )}
+
+        {location && !route && (
+          <div className="map-location-label">
+            <span />
+            Your location
+          </div>
+        )}
+
+      </div>
+
+      {/* ROUTE SUMMARY */}
 
       {route && (
         <div className="route-summary">
 
-          <div className="route-summary-icon">
-            <Route size={18} />
-          </div>
+          <div className="route-summary-main">
 
-          <div className="route-summary-content">
+            <div className="route-icon">
+              <Route size={18} />
+            </div>
 
-            <span>
-              ROUTE READY
-            </span>
+            <div>
+              <strong>
+                {getDirectionText()}
+              </strong>
 
-            <strong>
-              {getDirectionText()}
-            </strong>
-
-            <small>
-              {formatDistance(
-                route.distance,
-              )}
-              {" · "}
-              {estimateWalkingTime(
-                route.distance,
-              )}{" "}
-              min walk
-            </small>
+              <span>
+                {formatDistance(
+                  route.distance,
+                )}
+                {" · "}
+                {estimateWalkingTime(
+                  route.distance,
+                )}
+                {" min walk"}
+              </span>
+            </div>
 
           </div>
 
           <button
             type="button"
+            className="route-refresh"
             onClick={
               recalculateRoute
             }
             aria-label="Recalculate route"
-            className="route-refresh"
           >
-            <RefreshCw
-              size={16}
-            />
+            <RefreshCw size={17} />
           </button>
 
         </div>
       )}
 
-      {/* =================================================
-          DESTINATION
-         ================================================= */}
+      {/* DESTINATIONS */}
 
       <div className="navigation-destinations">
 
-        <div className="navigation-section-title">
+        <div className="navigation-section-heading">
 
           <div>
             <span>
-              DESTINATION
+              OFFLINE PLACES
             </span>
 
             <h2>
-              Where do you want to go?
+              Choose a destination
             </h2>
           </div>
 
-          <span className="destination-count">
+          <small>
             {availableNodes.length}
-          </span>
+          </small>
 
         </div>
-
-        {/* SEARCH */}
-
-        <div className="navigation-search">
-
-          <Search
-            size={17}
-          />
-
-          <input
-            type="search"
-            value={search}
-            onChange={(event) =>
-              setSearch(
-                event.target.value,
-              )
-            }
-            placeholder="Search offline places..."
-            aria-label="Search offline places"
-          />
-
-        </div>
-
-        {/* PLACE LIST */}
 
         <div className="navigation-place-list">
 
-          {filteredNodes.map(
+          {availableNodes.map(
             (node) => (
               <button
                 key={node.id}
                 type="button"
                 className={
-                  destination?.id ===
-                  node.id
+                  destination?.id === node.id
                     ? "navigation-place selected"
                     : "navigation-place"
                 }
@@ -704,12 +597,10 @@ export default function Navigation({
                 <div className="place-main">
 
                   <div className="place-icon">
-                    <MapPin
-                      size={17}
-                    />
+                    <MapPin size={17} />
                   </div>
 
-                  <span className="place-text">
+                  <div className="place-text">
 
                     <strong>
                       {node.name}
@@ -720,66 +611,45 @@ export default function Navigation({
                         "Offline place"}
                     </small>
 
-                  </span>
+                  </div>
 
                 </div>
 
                 {destination?.id ===
-                  node.id ? (
+                  node.id && (
                   <span className="selected-label">
                     Selected
                   </span>
-                ) : (
-                  <SquareArrowOutUpRight
-                    size={15}
-                    className="place-arrow"
-                  />
                 )}
 
               </button>
             ),
           )}
 
-          {filteredNodes.length ===
-            0 && (
-            <div className="navigation-no-results">
-              <Search size={20} />
-              <strong>
-                No places found
-              </strong>
-              <span>
-                Try another search.
-              </span>
-            </div>
-          )}
-
         </div>
-
       </div>
 
-      {/* =================================================
-          OFFLINE NOTICE
-         ================================================= */}
+      {/* OFFLINE NOTICE */}
 
       <div className="navigation-offline-notice">
 
         <div className="offline-notice-icon">
-          <NavigationIcon
-            size={17}
-          />
+          <NavigationIcon size={18} />
         </div>
 
         <div>
+
           <strong>
-            Navigation works offline
+            Works offline
           </strong>
 
           <span>
-            Map points and walking
-            routes are stored inside
-            BembaTranslate. No internet
-            connection is required.
+            Map points and route
+            calculations are stored
+            inside BembaTranslate.
+            Internet is not required.
           </span>
+
         </div>
 
       </div>
