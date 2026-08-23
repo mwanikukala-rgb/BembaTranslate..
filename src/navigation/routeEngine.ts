@@ -1,77 +1,162 @@
+/* =========================================================
+   BEMBATRANSLATE
+   OFFLINE WALKING ROUTE ENGINE
+   ========================================================= */
+
 import type {
-  MapData,
   MapNode,
-  MapEdge,
+  MapPath,
   RouteResult,
 } from "./mapTypes";
 
-/*
- * Offline route engine
- *
- * This calculates routes using the map data
- * stored inside the application.
- *
- * No internet connection is required.
- */
+/* =========================================================
+   DISTANCE
+   ========================================================= */
 
-/* ---------------------------------------------------------
-   Find connected edges
---------------------------------------------------------- */
+export function distanceBetweenCoordinates(
+  latitude1: number,
+  longitude1: number,
+  latitude2: number,
+  longitude2: number,
+): number {
+  const earthRadius = 6371000;
 
-function getConnectedEdges(
-  nodeId: string,
-  edges: MapEdge[],
-): MapEdge[] {
-  return edges.filter(
-    (edge) =>
-      edge.from === nodeId ||
-      edge.to === nodeId,
-  );
-}
+  const lat1 = toRadians(latitude1);
+  const lat2 = toRadians(latitude2);
 
-/* ---------------------------------------------------------
-   Get the opposite node
---------------------------------------------------------- */
-
-function getOtherNode(
-  edge: MapEdge,
-  nodeId: string,
-): string {
-  return edge.from === nodeId
-    ? edge.to
-    : edge.from;
-}
-
-/* ---------------------------------------------------------
-   Find the shortest route
-   Dijkstra's algorithm
---------------------------------------------------------- */
-
-export function findRoute(
-  map: MapData,
-  startId: string,
-  destinationId: string,
-): RouteResult | null {
-  const startNode = map.nodes.find(
-    (node) => node.id === startId,
+  const deltaLat = toRadians(
+    latitude2 - latitude1,
   );
 
-  const destinationNode =
-    map.nodes.find(
-      (node) => node.id === destinationId,
+  const deltaLon = toRadians(
+    longitude2 - longitude1,
+  );
+
+  const a =
+    Math.sin(deltaLat / 2) ** 2 +
+    Math.cos(lat1) *
+      Math.cos(lat2) *
+      Math.sin(deltaLon / 2) ** 2;
+
+  const c =
+    2 *
+    Math.atan2(
+      Math.sqrt(a),
+      Math.sqrt(1 - a),
     );
 
-  if (!startNode || !destinationNode) {
+  return earthRadius * c;
+}
+
+function toRadians(value: number): number {
+  return (value * Math.PI) / 180;
+}
+
+/* =========================================================
+   GRAPH
+   ========================================================= */
+
+type GraphEdge = {
+  to: string;
+  distance: number;
+};
+
+function buildGraph(
+  nodes: MapNode[],
+  paths: MapPath[],
+): Map<string, GraphEdge[]> {
+  const graph = new Map<
+    string,
+    GraphEdge[]
+  >();
+
+  for (const node of nodes) {
+    graph.set(node.id, []);
+  }
+
+  for (const path of paths) {
+    const fromNode = nodes.find(
+      (node) => node.id === path.from,
+    );
+
+    const toNode = nodes.find(
+      (node) => node.id === path.to,
+    );
+
+    if (!fromNode || !toNode) {
+      continue;
+    }
+
+    const distance =
+      path.distance ??
+      distanceBetweenCoordinates(
+        fromNode.latitude,
+        fromNode.longitude,
+        toNode.latitude,
+        toNode.longitude,
+      );
+
+    graph.get(path.from)?.push({
+      to: path.to,
+      distance,
+    });
+
+    /*
+     * Walking paths are currently
+     * treated as bidirectional.
+     */
+    graph.get(path.to)?.push({
+      to: path.from,
+      distance,
+    });
+  }
+
+  return graph;
+}
+
+/* =========================================================
+   FIND NEAREST NODE
+   ========================================================= */
+
+export function findNearestNode(
+  latitude: number,
+  longitude: number,
+  nodes: MapNode[],
+): MapNode | null {
+  if (nodes.length === 0) {
     return null;
   }
 
-  if (startId === destinationId) {
-    return {
-      nodes: [startNode],
-      distance: 0,
-    };
+  let nearest: MapNode | null = null;
+  let shortestDistance = Infinity;
+
+  for (const node of nodes) {
+    const distance =
+      distanceBetweenCoordinates(
+        latitude,
+        longitude,
+        node.latitude,
+        node.longitude,
+      );
+
+    if (distance < shortestDistance) {
+      shortestDistance = distance;
+      nearest = node;
+    }
   }
 
+  return nearest;
+}
+
+/* =========================================================
+   DIJKSTRA
+   ========================================================= */
+
+function dijkstra(
+  graph: Map<string, GraphEdge[]>,
+  startId: string,
+  targetId: string,
+): string[] {
   const distances = new Map<
     string,
     number
@@ -84,29 +169,30 @@ export function findRoute(
 
   const unvisited = new Set<string>();
 
-  for (const node of map.nodes) {
-    distances.set(
-      node.id,
-      Number.POSITIVE_INFINITY,
-    );
+  for (const nodeId of graph.keys()) {
+    distances.set(nodeId, Infinity);
+    previous.set(nodeId, null);
+    unvisited.add(nodeId);
+  }
 
-    previous.set(node.id, null);
+  if (!graph.has(startId)) {
+    return [];
+  }
 
-    unvisited.add(node.id);
+  if (!graph.has(targetId)) {
+    return [];
   }
 
   distances.set(startId, 0);
 
   while (unvisited.size > 0) {
     let currentId: string | null = null;
-
-    let currentDistance =
-      Number.POSITIVE_INFINITY;
+    let currentDistance = Infinity;
 
     for (const nodeId of unvisited) {
       const distance =
         distances.get(nodeId) ??
-        Number.POSITIVE_INFINITY;
+        Infinity;
 
       if (distance < currentDistance) {
         currentDistance = distance;
@@ -118,26 +204,17 @@ export function findRoute(
       break;
     }
 
-    if (currentId === destinationId) {
+    unvisited.delete(currentId);
+
+    if (currentId === targetId) {
       break;
     }
 
-    unvisited.delete(currentId);
+    const neighbours =
+      graph.get(currentId) ?? [];
 
-    const connectedEdges =
-      getConnectedEdges(
-        currentId,
-        map.edges,
-      );
-
-    for (const edge of connectedEdges) {
-      const neighbourId =
-        getOtherNode(
-          edge,
-          currentId,
-        );
-
-      if (!unvisited.has(neighbourId)) {
+    for (const edge of neighbours) {
+      if (!unvisited.has(edge.to)) {
         continue;
       }
 
@@ -146,91 +223,194 @@ export function findRoute(
         edge.distance;
 
       const oldDistance =
-        distances.get(neighbourId) ??
-        Number.POSITIVE_INFINITY;
+        distances.get(edge.to) ??
+        Infinity;
 
       if (newDistance < oldDistance) {
         distances.set(
-          neighbourId,
+          edge.to,
           newDistance,
         );
 
         previous.set(
-          neighbourId,
+          edge.to,
           currentId,
         );
       }
     }
   }
 
-  const destinationDistance =
-    distances.get(destinationId);
-
   if (
-    destinationDistance === undefined ||
-    !Number.isFinite(
-      destinationDistance,
-    )
+    (distances.get(targetId) ??
+      Infinity) === Infinity
   ) {
-    return null;
+    return [];
   }
 
-  /* -------------------------------------------------------
-     Rebuild route
-  ------------------------------------------------------- */
-
-  const routeIds: string[] = [];
+  const route: string[] = [];
 
   let current: string | null =
-    destinationId;
+    targetId;
 
   while (current !== null) {
-    routeIds.unshift(current);
+    route.unshift(current);
 
-    current = previous.get(current) ?? null;
+    if (current === startId) {
+      break;
+    }
+
+    current =
+      previous.get(current) ??
+      null;
   }
 
-  if (
-    routeIds.length === 0 ||
-    routeIds[0] !== startId
-  ) {
+  if (route[0] !== startId) {
+    return [];
+  }
+
+  return route;
+}
+
+/* =========================================================
+   WALKING ROUTE
+   ========================================================= */
+
+export function calculateWalkingRoute(
+  start: MapNode,
+  destination: MapNode,
+  nodes: MapNode[],
+  paths: MapPath[],
+): RouteResult | null {
+  if (nodes.length === 0) {
     return null;
   }
 
-  const routeNodes: MapNode[] =
-    routeIds
-      .map((id) =>
-        map.nodes.find(
-          (node) => node.id === id,
-        ),
-      )
-      .filter(
-        (
-          node,
-        ): node is MapNode =>
-          node !== undefined,
+  const graph = buildGraph(
+    nodes,
+    paths,
+  );
+
+  const routeIds = dijkstra(
+    graph,
+    start.id,
+    destination.id,
+  );
+
+  if (routeIds.length === 0) {
+    return null;
+  }
+
+  const routeNodes: MapNode[] = [];
+
+  for (const nodeId of routeIds) {
+    const node = nodes.find(
+      (item) => item.id === nodeId,
+    );
+
+    if (node) {
+      routeNodes.push(node);
+    }
+  }
+
+  if (routeNodes.length === 0) {
+    return null;
+  }
+
+  let totalDistance = 0;
+
+  for (
+    let index = 1;
+    index < routeNodes.length;
+    index++
+  ) {
+    totalDistance +=
+      distanceBetweenCoordinates(
+        routeNodes[index - 1].latitude,
+        routeNodes[index - 1].longitude,
+        routeNodes[index].latitude,
+        routeNodes[index].longitude,
       );
+  }
+
+  /*
+   * Average walking speed:
+   * approximately 1.4 metres/second.
+   */
+  const walkingSpeed =
+    1.4;
+
+  const estimatedWalkingSeconds =
+    totalDistance /
+    walkingSpeed;
 
   return {
     nodes: routeNodes,
-    distance: destinationDistance,
+    distanceMeters: Math.round(
+      totalDistance,
+    ),
+    estimatedWalkingSeconds:
+      Math.round(
+        estimatedWalkingSeconds,
+      ),
   };
 }
 
-/* ---------------------------------------------------------
-   Find nearest map point
---------------------------------------------------------- */
+/* =========================================================
+   FORMAT DISTANCE
+   ========================================================= */
 
-export function findNearestNode(
-  map: MapData,
-  latitude: number,
-  longitude: number,
-): MapNode | null {
-  if (map.nodes.length === 0) {
-    return null;
+export function formatDistance(
+  meters: number,
+): string {
+  if (!Number.isFinite(meters)) {
+    return "0 m";
   }
 
-  let nearest =
-    map.nodes[0];
+  if (meters < 1000) {
+    return `${Math.round(meters)} m`;
+  }
 
-  let nearestDistance =
+  const kilometres =
+    meters / 1000;
+
+  return `${kilometres.toFixed(
+    kilometres >= 10 ? 0 : 1,
+  )} km`;
+}
+
+/* =========================================================
+   FORMAT WALKING TIME
+   ========================================================= */
+
+export function formatWalkingTime(
+  seconds: number,
+): string {
+  if (
+    !Number.isFinite(seconds) ||
+    seconds <= 0
+  ) {
+    return "0 min";
+  }
+
+  const minutes =
+    Math.max(
+      1,
+      Math.round(seconds / 60),
+    );
+
+  if (minutes < 60) {
+    return `${minutes} min`;
+  }
+
+  const hours =
+    Math.floor(minutes / 60);
+
+  const remainingMinutes =
+    minutes % 60;
+
+  if (remainingMinutes === 0) {
+    return `${hours} hr`;
+  }
+
+  return `${hours} hr ${remainingMinutes} min`;
+}
