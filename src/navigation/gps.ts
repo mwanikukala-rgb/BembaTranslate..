@@ -13,20 +13,32 @@ export type GPSLocation = {
   heading: number | null;
 };
 
-export async function requestLocationPermission() {
+function convertPosition(
+  position: Position,
+): GPSLocation {
+  return {
+    latitude: position.coords.latitude,
+    longitude: position.coords.longitude,
+    accuracy: position.coords.accuracy,
+    altitude: position.coords.altitude ?? null,
+    speed: position.coords.speed ?? null,
+    heading: position.coords.heading ?? null,
+  };
+}
+
+export async function requestLocationPermission(): Promise<void> {
   const permissions =
     await Geolocation.requestPermissions();
 
-  if (
-    permissions.location !== "granted" &&
-    permissions.coarseLocation !== "granted"
-  ) {
+  const granted =
+    permissions.location === "granted" ||
+    permissions.coarseLocation === "granted";
+
+  if (!granted) {
     throw new Error(
       "Location permission was not granted.",
     );
   }
-
-  return permissions;
 }
 
 export async function getCurrentLocation(): Promise<GPSLocation> {
@@ -52,8 +64,8 @@ export async function watchLocation(
     await Geolocation.watchPosition(
       {
         enableHighAccuracy: true,
-        maximumAge: 2000,
         timeout: 15000,
+        maximumAge: 2000,
       },
       (position, error) => {
         if (error) {
@@ -62,7 +74,9 @@ export async function watchLocation(
         }
 
         if (position) {
-          callback(convertPosition(position));
+          callback(
+            convertPosition(position),
+          );
         }
       },
     );
@@ -79,10 +93,10 @@ export async function stopWatchingLocation(
 }
 
 /*
- * Compatibility aliases.
+ * Compatibility exports.
  *
- * These allow older navigation code to continue
- * working while we transition to the new GPS API.
+ * These keep older navigation code
+ * working while we upgrade the system.
  */
 
 export const getCurrentPosition =
@@ -93,19 +107,3 @@ export const watchPosition =
 
 export const clearPositionWatch =
   stopWatchingLocation;
-
-function convertPosition(
-  position: Position,
-): GPSLocation {
-  return {
-    latitude: position.coords.latitude,
-    longitude: position.coords.longitude,
-    accuracy: position.coords.accuracy,
-    altitude:
-      position.coords.altitude ?? null,
-    speed:
-      position.coords.speed ?? null,
-    heading:
-      position.coords.heading ?? null,
-  };
-}.
