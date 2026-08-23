@@ -1,416 +1,269 @@
-/* =========================================================
-   BEMBATRANSLATE
-   OFFLINE WALKING ROUTE ENGINE
-   ========================================================= */
-
 import type {
   MapNode,
-  MapPath,
   RouteResult,
+  RouteStep,
+  Coordinate,
 } from "./mapTypes";
 
-/* =========================================================
-   DISTANCE
-   ========================================================= */
-
-export function distanceBetweenCoordinates(
-  latitude1: number,
-  longitude1: number,
-  latitude2: number,
-  longitude2: number,
+function distanceBetween(
+  a: Coordinate,
+  b: Coordinate
 ): number {
   const earthRadius = 6371000;
 
-  const lat1 = toRadians(latitude1);
-  const lat2 = toRadians(latitude2);
+  const lat1 = (a.latitude * Math.PI) / 180;
+  const lat2 = (b.latitude * Math.PI) / 180;
 
-  const deltaLat = toRadians(
-    latitude2 - latitude1,
-  );
+  const deltaLat =
+    ((b.latitude - a.latitude) * Math.PI) / 180;
 
-  const deltaLon = toRadians(
-    longitude2 - longitude1,
-  );
+  const deltaLon =
+    ((b.longitude - a.longitude) * Math.PI) / 180;
 
-  const a =
+  const value =
     Math.sin(deltaLat / 2) ** 2 +
     Math.cos(lat1) *
       Math.cos(lat2) *
       Math.sin(deltaLon / 2) ** 2;
 
-  const c =
+  const arc =
     2 *
     Math.atan2(
-      Math.sqrt(a),
-      Math.sqrt(1 - a),
+      Math.sqrt(value),
+      Math.sqrt(1 - value)
     );
 
-  return earthRadius * c;
+  return earthRadius * arc;
 }
 
-function toRadians(value: number): number {
-  return (value * Math.PI) / 180;
-}
-
-/* =========================================================
-   GRAPH
-   ========================================================= */
-
-type GraphEdge = {
-  to: string;
-  distance: number;
-};
-
-function buildGraph(
-  nodes: MapNode[],
-  paths: MapPath[],
-): Map<string, GraphEdge[]> {
-  const graph = new Map<
-    string,
-    GraphEdge[]
-  >();
-
-  for (const node of nodes) {
-    graph.set(node.id, []);
-  }
-
-  for (const path of paths) {
-    const fromNode = nodes.find(
-      (node) => node.id === path.from,
-    );
-
-    const toNode = nodes.find(
-      (node) => node.id === path.to,
-    );
-
-    if (!fromNode || !toNode) {
-      continue;
-    }
-
-    const distance =
-      path.distance ??
-      distanceBetweenCoordinates(
-        fromNode.latitude,
-        fromNode.longitude,
-        toNode.latitude,
-        toNode.longitude,
-      );
-
-    graph.get(path.from)?.push({
-      to: path.to,
-      distance,
-    });
-
-    /*
-     * Walking paths are currently
-     * treated as bidirectional.
-     */
-    graph.get(path.to)?.push({
-      to: path.from,
-      distance,
-    });
-  }
-
-  return graph;
-}
-
-/* =========================================================
-   FIND NEAREST NODE
-   ========================================================= */
-
-export function findNearestNode(
-  latitude: number,
-  longitude: number,
-  nodes: MapNode[],
+function findNearestNode(
+  position: Coordinate,
+  nodes: MapNode[]
 ): MapNode | null {
   if (nodes.length === 0) {
     return null;
   }
 
-  let nearest: MapNode | null = null;
-  let shortestDistance = Infinity;
+  let nearest = nodes[0];
+  let nearestDistance = distanceBetween(
+    position,
+    nearest.coordinate
+  );
 
-  for (const node of nodes) {
-    const distance =
-      distanceBetweenCoordinates(
-        latitude,
-        longitude,
-        node.latitude,
-        node.longitude,
-      );
+  for (let index = 1; index < nodes.length; index += 1) {
+    const node = nodes[index];
 
-    if (distance < shortestDistance) {
-      shortestDistance = distance;
+    const distance = distanceBetween(
+      position,
+      node.coordinate
+    );
+
+    if (distance < nearestDistance) {
       nearest = node;
+      nearestDistance = distance;
     }
   }
 
   return nearest;
 }
 
-/* =========================================================
-   DIJKSTRA
-   ========================================================= */
+function calculateTotalDistance(
+  nodes: MapNode[]
+): number {
+  let total = 0;
 
-function dijkstra(
-  graph: Map<string, GraphEdge[]>,
-  startId: string,
-  targetId: string,
-): string[] {
-  const distances = new Map<
-    string,
-    number
-  >();
-
-  const previous = new Map<
-    string,
-    string | null
-  >();
-
-  const unvisited = new Set<string>();
-
-  for (const nodeId of graph.keys()) {
-    distances.set(nodeId, Infinity);
-    previous.set(nodeId, null);
-    unvisited.add(nodeId);
+  for (let index = 1; index < nodes.length; index += 1) {
+    total += distanceBetween(
+      nodes[index - 1].coordinate,
+      nodes[index].coordinate
+    );
   }
 
-  if (!graph.has(startId)) {
-    return [];
-  }
-
-  if (!graph.has(targetId)) {
-    return [];
-  }
-
-  distances.set(startId, 0);
-
-  while (unvisited.size > 0) {
-    let currentId: string | null = null;
-    let currentDistance = Infinity;
-
-    for (const nodeId of unvisited) {
-      const distance =
-        distances.get(nodeId) ??
-        Infinity;
-
-      if (distance < currentDistance) {
-        currentDistance = distance;
-        currentId = nodeId;
-      }
-    }
-
-    if (currentId === null) {
-      break;
-    }
-
-    unvisited.delete(currentId);
-
-    if (currentId === targetId) {
-      break;
-    }
-
-    const neighbours =
-      graph.get(currentId) ?? [];
-
-    for (const edge of neighbours) {
-      if (!unvisited.has(edge.to)) {
-        continue;
-      }
-
-      const newDistance =
-        currentDistance +
-        edge.distance;
-
-      const oldDistance =
-        distances.get(edge.to) ??
-        Infinity;
-
-      if (newDistance < oldDistance) {
-        distances.set(
-          edge.to,
-          newDistance,
-        );
-
-        previous.set(
-          edge.to,
-          currentId,
-        );
-      }
-    }
-  }
-
-  if (
-    (distances.get(targetId) ??
-      Infinity) === Infinity
-  ) {
-    return [];
-  }
-
-  const route: string[] = [];
-
-  let current: string | null =
-    targetId;
-
-  while (current !== null) {
-    route.unshift(current);
-
-    if (current === startId) {
-      break;
-    }
-
-    current =
-      previous.get(current) ??
-      null;
-  }
-
-  if (route[0] !== startId) {
-    return [];
-  }
-
-  return route;
+  return total;
 }
 
-/* =========================================================
-   WALKING ROUTE
-   ========================================================= */
+function createStep(
+  from: MapNode,
+  to: MapNode
+): RouteStep {
+  const distance = distanceBetween(
+    from.coordinate,
+    to.coordinate
+  );
 
-export function calculateWalkingRoute(
-  start: MapNode,
-  destination: MapNode,
-  nodes: MapNode[],
-  paths: MapPath[],
+  return {
+    from: from.name,
+    to: to.name,
+    distance,
+  };
+}
+
+/*
+ * Simple offline route calculation.
+ *
+ * This first version uses the locally packaged map nodes.
+ * It does not require internet access.
+ *
+ * The map can later be expanded with:
+ * - roads
+ * - paths
+ * - buildings
+ * - campuses
+ * - towns
+ * - provinces
+ * - Zambia-wide road data
+ */
+
+export function calculateRoute(
+  start: Coordinate,
+  destination: Coordinate,
+  nodes: MapNode[]
 ): RouteResult | null {
   if (nodes.length === 0) {
     return null;
   }
 
-  const graph = buildGraph(
-    nodes,
-    paths,
+  const startNode = findNearestNode(start, nodes);
+  const destinationNode = findNearestNode(
+    destination,
+    nodes
   );
 
-  const routeIds = dijkstra(
-    graph,
-    start.id,
-    destination.id,
-  );
-
-  if (routeIds.length === 0) {
+  if (!startNode || !destinationNode) {
     return null;
   }
 
-  const routeNodes: MapNode[] = [];
-
-  for (const nodeId of routeIds) {
-    const node = nodes.find(
-      (item) => item.id === nodeId,
-    );
-
-    if (node) {
-      routeNodes.push(node);
-    }
-  }
-
-  if (routeNodes.length === 0) {
-    return null;
-  }
-
-  let totalDistance = 0;
-
-  for (
-    let index = 1;
-    index < routeNodes.length;
-    index++
-  ) {
-    totalDistance +=
-      distanceBetweenCoordinates(
-        routeNodes[index - 1].latitude,
-        routeNodes[index - 1].longitude,
-        routeNodes[index].latitude,
-        routeNodes[index].longitude,
-      );
+  if (startNode.id === destinationNode.id) {
+    return {
+      nodes: [startNode],
+      steps: [],
+      distance: 0,
+    };
   }
 
   /*
-   * Average walking speed:
-   * approximately 1.4 metres/second.
+   * For the first offline navigation layer,
+   * connect the nearest known points directly.
+   *
+   * A full road-network A* engine can replace this
+   * later without changing the GPS/user interface.
    */
-  const walkingSpeed =
-    1.4;
 
-  const estimatedWalkingSeconds =
-    totalDistance /
-    walkingSpeed;
+  const routeNodes: MapNode[] = [
+    startNode,
+    destinationNode,
+  ];
+
+  const steps: RouteStep[] = [
+    createStep(
+      startNode,
+      destinationNode
+    ),
+  ];
 
   return {
     nodes: routeNodes,
-    distanceMeters: Math.round(
-      totalDistance,
+    steps,
+    distance: calculateTotalDistance(
+      routeNodes
     ),
-    estimatedWalkingSeconds:
-      Math.round(
-        estimatedWalkingSeconds,
-      ),
   };
 }
 
-/* =========================================================
-   FORMAT DISTANCE
-   ========================================================= */
-
 export function formatDistance(
-  meters: number,
+  distance: number
 ): string {
-  if (!Number.isFinite(meters)) {
-    return "0 m";
+  if (distance < 1000) {
+    return `${Math.round(distance)} m`;
   }
 
-  if (meters < 1000) {
-    return `${Math.round(meters)} m`;
-  }
-
-  const kilometres =
-    meters / 1000;
-
-  return `${kilometres.toFixed(
-    kilometres >= 10 ? 0 : 1,
-  )} km`;
+  return `${(distance / 1000).toFixed(1)} km`;
 }
 
-/* =========================================================
-   FORMAT WALKING TIME
-   ========================================================= */
+export function estimateWalkingTime(
+  distance: number
+): number {
+  /*
+   * Average walking speed:
+   * approximately 1.4 metres per second.
+   */
+  const walkingSpeed = 1.4;
 
-export function formatWalkingTime(
-  seconds: number,
+  return Math.max(
+    1,
+    Math.ceil(distance / walkingSpeed / 60)
+  );
+}
+
+export function getDirectionText(
+  from: Coordinate,
+  to: Coordinate
 ): string {
+  const deltaLatitude =
+    to.latitude - from.latitude;
+
+  const deltaLongitude =
+    to.longitude - from.longitude;
+
+  const angle =
+    (Math.atan2(
+      deltaLongitude,
+      deltaLatitude
+    ) *
+      180) /
+    Math.PI;
+
+  const normalized =
+    (angle + 360) % 360;
+
   if (
-    !Number.isFinite(seconds) ||
-    seconds <= 0
+    normalized >= 337.5 ||
+    normalized < 22.5
   ) {
-    return "0 min";
+    return "Head north";
   }
 
-  const minutes =
-    Math.max(
-      1,
-      Math.round(seconds / 60),
-    );
-
-  if (minutes < 60) {
-    return `${minutes} min`;
+  if (
+    normalized >= 22.5 &&
+    normalized < 67.5
+  ) {
+    return "Head north-east";
   }
 
-  const hours =
-    Math.floor(minutes / 60);
-
-  const remainingMinutes =
-    minutes % 60;
-
-  if (remainingMinutes === 0) {
-    return `${hours} hr`;
+  if (
+    normalized >= 67.5 &&
+    normalized < 112.5
+  ) {
+    return "Head east";
   }
 
-  return `${hours} hr ${remainingMinutes} min`;
+  if (
+    normalized >= 112.5 &&
+    normalized < 157.5
+  ) {
+    return "Head south-east";
+  }
+
+  if (
+    normalized >= 157.5 &&
+    normalized < 202.5
+  ) {
+    return "Head south";
+  }
+
+  if (
+    normalized >= 202.5 &&
+    normalized < 247.5
+  ) {
+    return "Head south-west";
+  }
+
+  if (
+    normalized >= 247.5 &&
+    normalized < 292.5
+  ) {
+    return "Head west";
+  }
+
+  return "Head north-west";
 }
