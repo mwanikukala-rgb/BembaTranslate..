@@ -1,6 +1,6 @@
 /* =========================================================
    BEMBATRANSLATE
-   OFFLINE NAVIGATION MAP TYPES
+   OFFLINE NAVIGATION TYPES
    ========================================================= */
 
 export type Coordinate = {
@@ -8,59 +8,54 @@ export type Coordinate = {
   longitude: number;
 };
 
-/* =========================================================
-   MAP NODE
-   ========================================================= */
+export type MapNodeType =
+  | "landmark"
+  | "building"
+  | "road"
+  | "entrance"
+  | "campus";
 
 export type MapNode = {
   id: string;
   name: string;
 
   /*
-   * Existing offline map data stores coordinates this way.
+   * Keep latitude/longitude because the current map data
+   * and navigation UI use these directly.
    */
   latitude: number;
   longitude: number;
 
   /*
-   * Optional convenience coordinate object.
-   * Existing map data does not need to define it.
+   * Coordinate is the standard representation used by
+   * the route engine.
    */
-  coordinate?: Coordinate;
-};
+  coordinate: Coordinate;
 
-/* =========================================================
-   MAP EDGE
-   ========================================================= */
+  type?: MapNodeType;
+  description?: string;
+};
 
 export type MapEdge = {
   from: string;
   to: string;
   distance: number;
+  bidirectional?: boolean;
 };
 
-/* =========================================================
-   MAP DATA
-   ========================================================= */
-
 export type MapData = {
+  name: string;
   nodes: MapNode[];
   edges: MapEdge[];
 };
 
-/* =========================================================
-   ROUTE STEP
-   ========================================================= */
-
 export type RouteStep = {
-  from: string;
-  to: string;
+  from: MapNode;
+  to: MapNode;
   distance: number;
+  bearing?: number;
+  direction?: string;
 };
-
-/* =========================================================
-   ROUTE RESULT
-   ========================================================= */
 
 export type RouteResult = {
   nodes: MapNode[];
