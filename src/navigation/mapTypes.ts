@@ -1,8 +1,3 @@
-/* =========================================================
-   BEMBATRANSLATE
-   OFFLINE NAVIGATION TYPES
-   ========================================================= */
-
 export type Coordinate = {
   latitude: number;
   longitude: number;
@@ -11,8 +6,7 @@ export type Coordinate = {
 export type MapNode = {
   id: string;
   name: string;
-  latitude: number;
-  longitude: number;
+  coordinate: Coordinate;
 };
 
 export type MapEdge = {
@@ -27,13 +21,15 @@ export type MapData = {
 };
 
 export type RouteStep = {
-  from: string;
-  to: string;
+  nodeId: string;
+  name: string;
+  coordinate: Coordinate;
   distance: number;
 };
 
 export type RouteResult = {
-  nodes: MapNode[];
+  found: boolean;
+  distance: number;
   steps: RouteStep[];
-  totalDistance: number;
+  nodes: string[];
 };
