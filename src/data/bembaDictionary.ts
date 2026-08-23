@@ -1884,6 +1884,7 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "Please sweep the house", bemba: "Pyangeeniko mu ng'anda" },
   { english: "Please clean the plates", bemba: "Wamyeeniko imbale" },
   { english: "Please stop drinking beer", bemba: "Lekeeniko ukumwa ubwalwa" },
+{ english: "I/am", bemba: "ine" },
 ];
 
 
