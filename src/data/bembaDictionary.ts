@@ -379,4 +379,5 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "love", bemba: "temwa" },
   { english: "give", bemba: "pa" },
   { english: "take", bemba: "tola" },
+  ];
  
