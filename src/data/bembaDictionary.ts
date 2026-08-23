@@ -1529,7 +1529,6 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
 
   // COLOURS
   { english: "white", bemba: "buta/waiti" },
-  const vocabulary = [
   // DAYS OF THE WEEK
   { english: "week", bemba: "umulungu" },
   { english: "on Sunday", bemba: "pa mulungu" },
