@@ -1160,5 +1160,419 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "in John's", bemba: "Mwa John" },
   { english: "at or to Musa's", bemba: "Kwa Musa" },
   { english: "at or on Mulenga's", bemba: "Pa Mulenga" },
+    // =========================================================
+  // CUSTOMS / VISITING
+  // =========================================================
+
+  { english: "when visiting, a man should sit first", bemba: "Nga mwaya mukutandala abaume ebaballapo ukwikala pa cipuna" },
+  { english: "when visiting, women should wait until the man is seated", bemba: "Nga mwaya mukutandala banamayo balalolela" },
+
+  // =========================================================
+  // SAFETY AND SECURITY
+  // =========================================================
+
+  { english: "lock all the doors when going out", bemba: "Mulekoma ifiibi fyonse ilyo mulefumapo" },
+  { english: "leave the keys with a reliable person", bemba: "Mulesha amaki kumuntu wacishinka" },
+  { english: "close all the windows when going out", bemba: "Muleisala amawindo lyonse ilyo mulefumapo" },
+  { english: "be careful when drawing water from open wells", bemba: "Muleba abacenjela ilyo muletapa amenshi mu fishima" },
+  { english: "use commands appropriately", bemba: "Mufwile muleba abamucinshi ilyo muleeba abantu ifyakucita" },
+
+  // =========================================================
+  // HOUSEHOLD WORDS
+  // =========================================================
+
+  { english: "bed", bemba: "Beeti" },
+  { english: "bed alternative", bemba: "Bedi" },
+  { english: "reedmat", bemba: "Ubutanda" },
+  { english: "toilet", bemba: "Icimbusu" },
+  { english: "door", bemba: "Iciibi" },
+  { english: "chair", bemba: "Icipuna" },
+  { english: "house", bemba: "Ing'anda" },
+  { english: "table", bemba: "Itebulo" },
+  { english: "bathing shelter", bemba: "Ulusasa" },
+
+  // =========================================================
+  // CLASSROOM WORDS
+  // =========================================================
+
+  { english: "book", bemba: "Ibuuku" },
+  { english: "pen", bemba: "Bopeni" },
+  { english: "pencil", bemba: "Pensulo" },
+  { english: "board", bemba: "Icipampa" },
+  { english: "chalk", bemba: "Coko" },
+  { english: "bag", bemba: "Icoola" },
+
+  // =========================================================
+  // USEFUL EXPRESSIONS
+  // =========================================================
+
+  { english: "good", bemba: "Ciisuma" },
+  { english: "alright", bemba: "Ciisuma" },
+  { english: "OK", bemba: "Ciisuma" },
+  { english: "it's good", bemba: "Ciisuma" },
+  { english: "may I come in", bemba: "Odi" },
+  { english: "come in", bemba: "Kalibu" },
+  { english: "there", bemba: "Uko" },
+  { english: "to wash utensils or things", bemba: "Ukusuka" },
+  { english: "I did not get you", bemba: "Nshumfwile" },
+  { english: "excuse me", bemba: "Njeleleniko" },
+  { english: "repeat", bemba: "Bwekeshenipo" },
+  { english: "thank you", bemba: "Natotela" },
+  { english: "thank you alternative", bemba: "Natasha" },
+  { english: "show me", bemba: "Nangeeniko" },
+  { english: "this side", bemba: "Uku" },
+  { english: "that side", bemba: "Uko" },
+  { english: "over there", bemba: "Kulya" },
+  { english: "repeat alternative", bemba: "Bwekeshenipo" },
+  { english: "that", bemba: "Ukuti" },
+  { english: "that alternative", bemba: "Ati" },
+
+  // =========================================================
+  // VERBS
+  // =========================================================
+
+  { english: "to repeat", bemba: "Ukubwekeshapo" },
+  { english: "to wash clothes", bemba: "Ukuwasha" },
+  { english: "to prevent", bemba: "Ukucingilla" },
+  { english: "to welcome", bemba: "Ukupokelela" },
+  { english: "to be quick", bemba: "Ukwendesha" },
+  { english: "to hurry", bemba: "Ukwendesha" },
+  { english: "to ask", bemba: "Ukwipusha" },
+  { english: "to send", bemba: "Ukutuma" },
+  { english: "to listen", bemba: "Ukumfwa" },
+  { english: "to feel", bemba: "Ukumfwa" },
+  { english: "to hear", bemba: "Ukumfwa" },
+  { english: "to drink", bemba: "Ukunwa" },
+  { english: "to give", bemba: "Ukupeela" },
+  { english: "to laugh", bemba: "Ukuseka" },
+  { english: "to sit", bemba: "Ukwikala" },
+  { english: "to iron", bemba: "Ukuciisa" },
+  { english: "to stand up", bemba: "Ukwiminina" },
+  { english: "to cry", bemba: "Ukulila" },
+  { english: "to eat", bemba: "Ukulya" },
+  { english: "to open", bemba: "Ukwisula" },
+  { english: "to close", bemba: "Ukwisala" },
+  { english: "to send for or with", bemba: "Ukulaisha" },
+  { english: "to show", bemba: "Ukulanga" },
+  { english: "to wash plates or vegetables", bemba: "Ukusamfya" },
+  { english: "to bathe", bemba: "Ukusamba" },
+  { english: "to wash hands", bemba: "Ukusamba ku maboko" },
+  { english: "to enter", bemba: "Ukwingila" },
+  { english: "to go out", bemba: "Ukufuma" },
+    // =========================================================
+  // OTHER COMMON WORDS
+  // =========================================================
+
+  { english: "way of life", bemba: "Imikalile" },
+  { english: "way of staying", bemba: "Imikalile" },
+  { english: "way of living", bemba: "Imikalile" },
+
+  { english: "at the police station", bemba: "Ku Polisi" },
+  { english: "hospital", bemba: "Icipatala" },
+  { english: "market", bemba: "Maliketi" },
+  { english: "market alternative", bemba: "Icisankano" },
+  { english: "church", bemba: "Calici" },
+  { english: "well", bemba: "Iicishima" },
+  { english: "clinic", bemba: "Kiliniki" },
+
+  // =========================================================
+  // GARDEN TOOLS / IFIBOMBELO
+  // =========================================================
+
+  { english: "slasher", bemba: "Icikwakwa" },
+  { english: "sickle", bemba: "Icikwakwa" },
+  { english: "hoe", bemba: "Ulukasu" },
+  { english: "shovel", bemba: "Fosholo" },
+  { english: "spade", bemba: "Fosholo" },
+  { english: "rake", bemba: "Leki" },
+  { english: "axe", bemba: "Isembe" },
+  { english: "adze", bemba: "Imbaso" },
+  { english: "wheelbarrow", bemba: "Wilubala" },
+  { english: "bucket", bemba: "Imbeketi" },
+  { english: "rope", bemba: "Intambo" },
+  { english: "string", bemba: "Intambo" },
+  { english: "machete", bemba: "Ulupanga" },
+
+  // =========================================================
+  // STRONG COMMANDS
+  // =========================================================
+
+  { english: "dance", bemba: "Shana" },
+  { english: "dance alternative", bemba: "Cinda" },
+  { english: "give", bemba: "Peela" },
+  { english: "sit", bemba: "Ikala" },
+  { english: "open", bemba: "Isula" },
+  { english: "sleep", bemba: "Laala" },
+  { english: "sleep alternative", bemba: "Sendama" },
+  { english: "write", bemba: "Lemba" },
+  { english: "close", bemba: "Isala" },
+  { english: "wash", bemba: "Washa" },
+  { english: "cook", bemba: "Ipika" },
+
+  // =========================================================
+  // STRONG COMMAND EXAMPLES
+  // =========================================================
+
+  { english: "dance to rhumba", bemba: "Cinda rhumba" },
+  { english: "dance to rhumba alternative", bemba: "Shana rhumba" },
+  { english: "close the door", bemba: "Isala iciibi" },
+  { english: "wash the clothes", bemba: "Washa ifyakufwala" },
+  { english: "write the letter", bemba: "Lemba inkalata" },
+  { english: "sit on the chair", bemba: "Ikala pa cipuna" },
+  { english: "open the window", bemba: "Isula iwindo" },
+    // =========================================================
+  // STRONG COMMANDS - SECOND PERSON PLURAL / RESPECT
+  // =========================================================
+
+  { english: "enter respectfully", bemba: "Ingileeni" },
+  { english: "put respectfully", bemba: "Bikeeni" },
+  { english: "close respectfully", bemba: "Isaleeni" },
+  { english: "open respectfully", bemba: "Isuleeni" },
+  { english: "sweep respectfully", bemba: "Pyangeeni" },
+  { english: "stop respectfully", bemba: "Lekeeni" },
+
+  // =========================================================
+  // POLITE COMMANDS - SUFFIX [-KO]
+  // =========================================================
+
+  { english: "please enter", bemba: "Ingileeniko" },
+  { english: "please put", bemba: "Biikeeniko" },
+  { english: "please close", bemba: "Isaleeniko" },
+  { english: "please open", bemba: "Isuleeniko" },
+  { english: "please sweep", bemba: "Pyangeeniko" },
+  { english: "please stop", bemba: "Lekeeniko" },
+
+  // =========================================================
+  // POLITE COMMAND EXAMPLES
+  // =========================================================
+
+  { english: "please enter the hut", bemba: "Ingileeniko mu nsaka" },
+  { english: "please dance to rhumba", bemba: "Shaneeniko rhumba" },
+  { english: "please open the door", bemba: "Isuleeniko iciibi" },
+  { english: "please close the door", bemba: "Isaleeniko iciibi" },
+  { english: "please sweep the house", bemba: "Pyangeeniko mu ng'anda" },
+  { english: "please clean the plates", bemba: "Wamyeeniko imbale" },
+  { english: "please stop drinking beer", bemba: "Lekeeniko ukunwa ubwalwa" },
+
+  // =========================================================
+  // FIRST PERSON PLURAL COMMANDS
+  // =========================================================
+
+  { english: "let me eat", bemba: "Ndye" },
+  { english: "you eat", bemba: "Mulye" },
+  { english: "let them eat", bemba: "Balye" },
+  { english: "let us eat", bemba: "Tulye" },
+
+  // =========================================================
+  // FIRST PERSON PLURAL COMMAND EXAMPLES
+  // =========================================================
+
+  { english: "let me eat nshima", bemba: "Ndye ubwali" },
+  { english: "you eat bananas", bemba: "Mulye inkonde" },
+  { english: "let them eat rice", bemba: "Balye umupunga" },
+  { english: "let's eat chicken", bemba: "Tulye inkoko" },
+    // =========================================================
+  // POLITE REQUESTS WITHOUT IMPERATIVE
+  // =========================================================
+
+  { english: "may I eat please", bemba: "Ndyeeko" },
+  { english: "may you eat please", bemba: "Mulyeeko" },
+  { english: "may they eat please", bemba: "Balyeeko" },
+  { english: "may we eat please", bemba: "Tulyeeko" },
+
+  // =========================================================
+  // POLITE REQUEST EXAMPLES
+  // =========================================================
+
+  { english: "may I sit down please", bemba: "Njikaleko panshi?" },
+  { english: "may you eat nshima please", bemba: "Mulyeko ubwali?" },
+  { english: "may they go to the village please", bemba: "Bayeko ku mushi?" },
+  { english: "may we dance to rhumba please", bemba: "Tushaneko rhumba?" },
+
+  // =========================================================
+  // NEGATIVE COMMANDS
+  // =========================================================
+
+  { english: "I must not eat", bemba: "Niilya" },
+  { english: "you must not go", bemba: "Mwiya" },
+  { english: "he must not drink", bemba: "Beniwa" },
+  { english: "she must not drink", bemba: "Beniwa" },
+  { english: "they must not drink", bemba: "Beniwa" },
+  { english: "we must not write", bemba: "Twilemba" },
+
+  // =========================================================
+  // NEGATIVE COMMAND EXAMPLES
+  // =========================================================
+
+  { english: "don't eat fish", bemba: "Mwilya isabi" },
+  { english: "don't go to Kitwe", bemba: "Mwiya ku Kitwe" },
+  { english: "don't drink beer", bemba: "Mwinwa ubwalwa" },
+  { english: "don't dance rhumba", bemba: "Mwishana rhumba" },
+  { english: "we don't write a letter", bemba: "Twilemba inkalata" },
+
+  // =========================================================
+  // EXERCISE PHRASES
+  // =========================================================
+
+  { english: "open the door", bemba: "Isula iciibi" },
+  { english: "sit on the chair", bemba: "Ikala pa cipuna" },
+  { english: "write on the board", bemba: "Lemba pa cipampa" },
+  { english: "laugh", bemba: "Seka" },
+  { english: "dance to rhumba", bemba: "Cinda rhumba" },
+    // =========================================================
+  // SAFETY AND SECURITY
+  // =========================================================
+
+  { english: "be careful when you are offered drinks from people you don't know well",
+    bemba: "Mufwile ukuba abacenjela ilyo bamupeela ifyakunwa ku bantu mushishibe bwino bwino." },
+
+  // =========================================================
+  // FOOD WORDS
+  // =========================================================
+
+  { english: "maize", bemba: "Amataba" },
+  { english: "corn", bemba: "Amataba" },
+  { english: "water", bemba: "Amenshi" },
+  { english: "eggs", bemba: "Amani" },
+  { english: "egg", bemba: "Ilini" },
+  { english: "salt", bemba: "Umucele" },
+  { english: "salt alternative", bemba: "Soti" },
+  { english: "milk", bemba: "Umukaka" },
+  { english: "rice", bemba: "Umupunga" },
+  { english: "rice alternative", bemba: "Laisi" },
+  { english: "nshima", bemba: "Ubwali" },
+  { english: "banana", bemba: "Inkonde" },
+  { english: "bananas", bemba: "Inkonde" },
+  { english: "orange", bemba: "Amacungwa" },
+  { english: "oranges", bemba: "Amacungwa" },
+  { english: "orange alternative", bemba: "Amaolenji" },
+  { english: "mango", bemba: "Yembe" },
+  { english: "mangoes", bemba: "Yembe" },
+  { english: "lemon", bemba: "Indimu" },
+  { english: "lemons", bemba: "Indimu" },
+  { english: "avocado pear", bemba: "Kotapela" },
+  { english: "avocado pears", bemba: "Kotapela" },
+  { english: "guava", bemba: "Amapeela" },
+  { english: "guavas", bemba: "Amapeela" },
+  { english: "guava alternative", bemba: "Amaguava" },
+  { english: "apple", bemba: "Amaapo" },
+  { english: "groundnuts", bemba: "Imbalala" },
+  { english: "peanut butter", bemba: "Icikonko" },
+  { english: "peanut butter alternative", bemba: "Icimpondwa" },
+
+  // =========================================================
+  // OTHER WORDS
+  // =========================================================
+
+  { english: "that", bemba: "Ico" },
+  { english: "which", bemba: "Ico" },
+  { english: "thing", bemba: "Icintu" },
+  { english: "bad thing", bemba: "Icibi" },
+  { english: "thing without", bemba: "Icabula" },
+  { english: "visitor", bemba: "Umweni" },
+  { english: "guest", bemba: "Umweni" },
+  { english: "little things", bemba: "Utunono" },
+
+  // =========================================================
+  // MEAL RELATED WORDS
+  // =========================================================
+
+  { english: "fork", bemba: "Foloko" },
+  { english: "spoon", bemba: "Supuni" },
+  { english: "knife", bemba: "Umwele" },
+  { english: "knife alternative", bemba: "Naifi" },
+  { english: "plate", bemba: "Imbale" },
+  { english: "thirst", bemba: "Icilaka" },
+  { english: "food", bemba: "Icakulya" },
+  { english: "foods", bemba: "Ifyakulya" },
+  { english: "breakfast", bemba: "Umwikulo" },
+  { english: "breakfast alternative", bemba: "Icakulya ca lucelo" },
+  { english: "dinner", bemba: "Icakulya ca bushiku" },
+  { english: "lunch", bemba: "Icakulya kasuba" },
+  { english: "cup", bemba: "Kapu" },
+  { english: "hunger", bemba: "Insala" },
+
+  // =========================================================
+  // FOOD & MEAL VERBS
+  // =========================================================
+
+  { english: "to cook", bemba: "Ukwipika" },
+  { english: "to cook nshima", bemba: "Ukunaya" },
+  { english: "to eat", bemba: "Ukulya" },
+  { english: "to refuse", bemba: "Ukukaana" },
+  { english: "to deny", bemba: "Ukukaana" },
+  { english: "to be full", bemba: "Ukwikuta" },
+  { english: "to like", bemba: "Ukutemwa" },
+  { english: "to love", bemba: "Ukutemwa" },
+  { english: "to sniff", bemba: "Ukununsha" },
+  { english: "to agree", bemba: "Ukusumina" },
+  { english: "to accept", bemba: "Ukusumina" },
+  { english: "to be invited", bemba: "Ukwitwa" },
+  { english: "to be called", bemba: "Ukwitwa" },
+  { english: "to invite", bemba: "Ukwita" },
+  { english: "to call", bemba: "Ukwita" },
+  { english: "to drink", bemba: "Ukunwa" },
+    // =========================================================
+  // FOOD & HUNGER EXPRESSIONS
+  // =========================================================
+
+  { english: "I am now full", bemba: "Naikuta" },
+  { english: "I am full", bemba: "Ninjikuta" },
+  { english: "I am thirsty", bemba: "Ndi ne cilaka" },
+  { english: "I have eaten", bemba: "Nindya" },
+  { english: "I haven't eaten", bemba: "Nshilile" },
+  { english: "I am hungry", bemba: "Ndi ne nsala" },
+  { english: "I feel hungry", bemba: "Naumfwa insala" },
+
+  // =========================================================
+  // HABITUAL PRESENT TENSE — EXAMPLES
+  // =========================================================
+
+  { english: "I always eat nshima at 12:30", bemba: "Ndalya ubwali lyonse pa 12:30 koloko" },
+  { english: "I always brush my teeth every morning", bemba: "Ndakuusa ameeno lyonse ulucelo" },
+    // =========================================================
+  // HABITUAL PRESENT TENSE — AFFIRMATIVE
+  // =========================================================
+
+  { english: "I always eat nshima with meat", bemba: "Ndalya ubwali ne nama" },
+  { english: "you always eat chicken", bemba: "Mulalye inkoko" },
+  { english: "they always eat potatoes", bemba: "Balalya ifyumbu" },
+  { english: "we always eat rice", bemba: "Tulalya umupunga" },
+
+  // =========================================================
+  // HABITUAL PRESENT TENSE — NEGATIVE
+  // =========================================================
+
+  { english: "I don't always eat nshima with fish", bemba: "Nshilya ubwali ne sabi" },
+  { english: "you don't always eat beans", bemba: "Tamulya cilemba" },
+  { english: "they don't always eat groundnuts", bemba: "Tabalya imbalala" },
+  { english: "we don't always eat vegetables", bemba: "Tatulya umusalu" },
+
+  // =========================================================
+  // REQUESTS / POLITE COMMANDS — OBJECT PRONOUNS
+  // =========================================================
+
+  { english: "please give me", bemba: "Mpeeleniko" },
+  { english: "please give him or her", bemba: "Mupeeleniko" },
+  { english: "please give us", bemba: "Tupeeleniko" },
+  { english: "please give them", bemba: "Bapeeleniko" },
+
+  // =========================================================
+  // NEGATIVE REQUESTS / POLITE COMMANDS
+  // =========================================================
+
+  { english: "don't give me", bemba: "Mwimpeela" },
+  { english: "don't give him or her", bemba: "Mwimupeela" },
+  { english: "don't give us", bemba: "Mwitupeela" },
+  { english: "don't give them", bemba: "Mwibapeela" },
+
+  // =========================================================
+  // REQUEST / POLITE COMMAND EXAMPLES
+  // =========================================================
+
+  { english: "please give me salt", bemba: "Mpeeleniko umucele" },
+  { english: "please give him water", bemba: "Mupeeleniko amenshi" },
+  { english: "please give us nshima", bemba: "Tupeeleniko ubwali" },
+  { english: "please give them fruits", bemba: "Bapeeleniko ifisabo" },
   ];
 
