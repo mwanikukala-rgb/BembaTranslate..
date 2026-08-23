@@ -790,5 +790,202 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "sweet", bemba: "-lowa" },
   { english: "sour like lemon", bemba: "-sasamina" },
   { english: "bitter", bemba: "-lula" },
+    // =========================================================
+  // VERB "TO BE" - SECOND FORM [NI-] & [TE]
+  // =========================================================
+
+  { english: "it's me", bemba: "Nine" },
+  { english: "I am the teacher", bemba: "Nine Kafundisha" },
+  { english: "I am Mary", bemba: "Nine Mary" },
+  { english: "it's us", bemba: "Nifwe" },
+  { english: "we are the teachers", bemba: "Nifwe Bakafundisha" },
+  { english: "it's you", bemba: "Nimwe" },
+  { english: "you are John", bemba: "Nimwe ba John" },
+  { english: "it's not me", bemba: "Te ine" },
+  { english: "I am not Expeditor", bemba: "Te ine Expeditor" },
+  { english: "it's not him or her", bemba: "Te aba" },
+  { english: "it's Catherine", bemba: "Ni ba Catherine" },
+  { english: "she is Catherine", bemba: "Ni ba Catherine" },
+  { english: "is it you", bemba: "Bushe nimwe?" },
+  { english: "are you George", bemba: "Bushe nimwe ba George?" },
+  { english: "who are you", bemba: "Nimwe Banani?" },
+
+  // =========================================================
+  // VERB "TO BE" [-LI] - SIMPLE PAST
+  // =========================================================
+
+  { english: "I was", bemba: "Nali" },
+  { english: "you were", bemba: "Mwali" },
+  { english: "he or she was", bemba: "Baali" },
+  { english: "they were", bemba: "Baali" },
+  { english: "we were", bemba: "Twali" },
+
+  { english: "I was in Kabwe", bemba: "Nali ku Kabwe" },
+  { english: "you were at home", bemba: "Mwali ku ng'anda" },
+  { english: "he or she was fine", bemba: "Baali bwino" },
+  { english: "we were in America", bemba: "Twali ku Amelika" },
+  { english: "you were in the Insaka", bemba: "Mwali mu nsaka" },
+  { english: "they were in Kitwe", bemba: "Baali mu Kitwe" },
+
+  { english: "my father is in the house", bemba: "Bataata bali mu ng'anda" },
+  { english: "my father was in the house yesterday", bemba: "Bataata baali mu ng'anda mailo" },
+
+  // =========================================================
+  // VERB "TO BE" [UKUBA] - FUTURE TENSE
+  // =========================================================
+
+  { english: "I will be", bemba: "Nkaba" },
+    // =========================================================
+  // COMMON VERBS
+  // =========================================================
+
+  { english: "to know", bemba: "Ukwishiba" },
+  { english: "to sit", bemba: "Ukwikala" },
+  { english: "to stay", bemba: "Ukwikala" },
+  { english: "to live", bemba: "Ukwikala" },
+  { english: "to show", bemba: "Ukulanga" },
+  { english: "to call", bemba: "Ukwita" },
+  { english: "to marry for a man", bemba: "Ukuupa" },
+  { english: "to be married for a woman", bemba: "Ukuupwa" },
+
+  // =========================================================
+  // ORDINAL NUMBERS
+  // =========================================================
+
+  { english: "first", bemba: "Bumo" },
+  { english: "second", bemba: "Bubili" },
+  { english: "third", bemba: "Butatu" },
+  { english: "fourth", bemba: "Bune" },
+  { english: "fifth", bemba: "Busano" },
+  { english: "sixth", bemba: "Mutanda" },
+  { english: "seventh", bemba: "Cine lubali" },
+  { english: "eighth", bemba: "Cine konsekonse" },
+  { english: "ninth", bemba: "Pabula" },
+  { english: "tenth", bemba: "Ikumi" },
+
+  // =========================================================
+  // QUAZI NUMBERS
+  // =========================================================
+
+  { english: "I alone", bemba: "Neka" },
+  { english: "you alone", bemba: "Mweeka" },
+  { english: "he or she alone", bemba: "Beeka" },
+  { english: "they alone", bemba: "Beeka" },
+  { english: "we alone", bemba: "Fweeka" },
+  { english: "last", bemba: "Kulekelesha" },
+
+  // =========================================================
+  // NOUNS
+  // =========================================================
+
+  { english: "father", bemba: "Bataata" },
+  { english: "mother", bemba: "Bamaayo" },
+  { english: "uncle", bemba: "Bayama" },
+  { english: "brother", bemba: "Ndume" },
+  { english: "sister", bemba: "Nkashi" },
+  { english: "boy", bemba: "Umulumendo" },
+  { english: "girl", bemba: "Umukashana" },
+  { english: "doctor", bemba: "Bashing'anga" },
+  { english: "grandfather", bemba: "Bashikulu" },
+  { english: "grandmother", bemba: "Bamaama" },
+  { english: "chief", bemba: "Imfumu" },
+  { english: "cook", bemba: "Kapika" },
+  { english: "cook alternative", bemba: "Kuki" },
+  { english: "man", bemba: "Umwaume" },
+  { english: "male", bemba: "Umwaume" },
+  { english: "woman", bemba: "Umwanakashi" },
+  { english: "female", bemba: "Umwanakashi" },
+  { english: "person", bemba: "Umuntu" },
+  { english: "wife", bemba: "Umukashi" },
+  { english: "husband", bemba: "Umulume" },
+  { english: "aunt", bemba: "Bamayo senge" },
+  { english: "last born", bemba: "Kasuli" },
+  { english: "first born", bemba: "Ibeli" },
+  { english: "twins", bemba: "Bampundu" },
+  { english: "born after twins", bemba: "Chola" },
+  { english: "parents", bemba: "Abafyashi" },
+
+  // =========================================================
+  // OTHER COMMON WORDS
+  // =========================================================
+
+  { english: "all", bemba: "Fyonse" },
+  { english: "all people", bemba: "Bonse" },
+  { english: "everywhere", bemba: "Konse" },
+  { english: "or", bemba: "Limbi" },
+  { english: "maybe", bemba: "Limbi" },
+  { english: "another time", bemba: "Limbi" },
+  { english: "but", bemba: "Nomba" },
+  { english: "now", bemba: "Nomba" },
+  { english: "also", bemba: "Elyo" },
+  { english: "then", bemba: "Elyo" },
+  { english: "again", bemba: "Nakabili" },
+  { english: "and", bemba: "Na" },
+
+  // =========================================================
+  // USEFUL FAMILY EXPRESSIONS
+  // =========================================================
+
+  { english: "my family", bemba: "Ulupwa lwandi" },
+  { english: "your family", bemba: "Ulupwa lwenu" },
+  { english: "his or her family", bemba: "Ulupwa lwabo" },
+  { english: "their family", bemba: "Ulupwa lwabo" },
+  { english: "our family", bemba: "Ulupwa lweru" },
+
+  { english: "in my home", bemba: "Mu mwandi" },
+  { english: "in your home", bemba: "Mu mwenu" },
+    // =========================================================
+  // HOME / FAMILY EXPRESSIONS
+  // =========================================================
+
+  { english: "in their home", bemba: "Mu mwabo" },
+  { english: "in our home", bemba: "Mu mwesu" },
+  { english: "at my house", bemba: "Pa mwandi" },
+  { english: "at my home", bemba: "Pa mwandi" },
+
+  // =========================================================
+  // "TO HAVE" - COMMON EXPRESSIONS
+  // =========================================================
+
+  { english: "I don't have", bemba: "Nshakwata" },
+  { english: "I don't have now", bemba: "Nshikwete" },
+  { english: "I am not married male", bemba: "Nshaupa" },
+  { english: "I am not married female", bemba: "Nshaupwa" },
+
+  // =========================================================
+  // VERB "TO BE" [-LI] - PRESENT TENSE
+  // =========================================================
+
+  // Affirmative
+
+  { english: "I am in Kitwe", bemba: "Ine ndi mu Kitwe" },
+  { english: "you are in Lusaka", bemba: "Imwe muli ku Lusaka" },
+  { english: "they are in Zambia", bemba: "Aba bali mu Zambia" },
+  { english: "we are in the Insaka", bemba: "Ifwe tuli mu nsaka" },
+
+  // Negative
+
+  { english: "I am not in Ndola", bemba: "Ine nshili mu Ndola" },
+  { english: "you are not in Kitwe", bemba: "Imwe tamuli mu Kitwe" },
+  { english: "they are not in Zambia", bemba: "Aba tabali mu Zambia" },
+  { english: "we are not in the classroom", bemba: "Ifwe tatuli mu kalasi" },
+
+  // =========================================================
+  // VERB "TO HAVE" [UKUKWATA] - PRESENT / TEMPORARY POSSESSION
+  // =========================================================
+
+  { english: "I have now", bemba: "Nimkwata" },
+  { english: "you have now", bemba: "Namukwata" },
+  { english: "he or she has now", bemba: "Nabakwata" },
+  { english: "they have now", bemba: "Nabakwata" },
+  { english: "we have now", bemba: "Natukwata" },
+
+  // Negative
+
+  { english: "I don't have now", bemba: "Nshikwete" },
+  { english: "you don't have now", bemba: "Tamukwete" },
+  { english: "he or she doesn't have now", bemba: "Tabakwete" },
+  { english: "they don't have now", bemba: "Tabakwete" },
+  { english: "we don't have now", bemba: "Tatukwete" },
   ];
 
