@@ -1,38 +1,176 @@
-export type MapCoordinate = {
-  latitude: number;
-  longitude: number;
+import type {
+  MapData,
+  MapNode,
+  MapEdge,
+} from "./mapTypes";
+
+/*
+ * Offline Zambia navigation foundation.
+ *
+ * This file contains locally packaged map data.
+ * No internet connection is required.
+ *
+ * We are starting with a small demonstration
+ * map structure. More Zambian roads, buildings,
+ * campuses and landmarks can be added later.
+ */
+
+export const zambiaMapNodes: MapNode[] = [
+  {
+    id: "lusaka-center",
+    name: "Lusaka Centre",
+    latitude: -15.4167,
+    longitude: 28.2833,
+    type: "landmark",
+  },
+
+  {
+    id: "cbu",
+    name: "Copperbelt University",
+    latitude: -12.8106,
+    longitude: 28.2132,
+    type: "building",
+  },
+
+  {
+    id: "ndola-center",
+    name: "Ndola Centre",
+    latitude: -12.9680,
+    longitude: 28.6337,
+    type: "landmark",
+  },
+
+  {
+    id: "kitwe-center",
+    name: "Kitwe Centre",
+    latitude: -12.8024,
+    longitude: 28.2132,
+    type: "landmark",
+  },
+];
+
+/*
+ * Connections between offline map points.
+ *
+ * Distance values are approximate metres.
+ * The routing engine can later calculate
+ * these automatically from detailed road data.
+ */
+
+export const zambiaMapEdges: MapEdge[] = [
+  {
+    from: "lusaka-center",
+    to: "cbu",
+    distance: 330000,
+  },
+
+  {
+    from: "cbu",
+    to: "ndola-center",
+    distance: 11000,
+  },
+
+  {
+    from: "ndola-center",
+    to: "kitwe-center",
+    distance: 60000,
+  },
+
+  {
+    from: "cbu",
+    to: "kitwe-center",
+    distance: 1000,
+  },
+];
+
+export const zambiaOfflineMap: MapData = {
+  name: "Zambia Offline Map",
+  nodes: zambiaMapNodes,
+  edges: zambiaMapEdges,
 };
 
-export type MapNode = {
-  id: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-  type?: "building" | "road" | "landmark" | "entrance" | "other";
-};
+export function getMapNode(
+  id: string,
+): MapNode | undefined {
+  return zambiaMapNodes.find(
+    (node) => node.id === id,
+  );
+}
 
-export type MapEdge = {
-  from: string;
-  to: string;
-  distance: number;
-};
+export function getNearestMapNode(
+  latitude: number,
+  longitude: number,
+): MapNode | undefined {
+  if (zambiaMapNodes.length === 0) {
+    return undefined;
+  }
 
-export type MapData = {
-  name: string;
-  nodes: MapNode[];
-  edges: MapEdge[];
-};
+  let nearest =
+    zambiaMapNodes[0];
 
-export type RouteNode = MapNode;
+  let nearestDistance =
+    Number.POSITIVE_INFINITY;
 
-export type RouteResult = {
-  nodes: RouteNode[];
-  distance: number;
-};
+  for (const node of zambiaMapNodes) {
+    const distance =
+      calculateDistance(
+        latitude,
+        longitude,
+        node.latitude,
+        node.longitude,
+      );
 
-export type GPSLocation = MapCoordinate & {
-  accuracy: number;
-  altitude: number | null;
-  speed: number | null;
-  heading: number | null;
-};
+    if (distance < nearestDistance) {
+      nearest = node;
+      nearestDistance = distance;
+    }
+  }
+
+  return nearest;
+}
+
+/*
+ * Haversine distance in metres.
+ */
+
+export function calculateDistance(
+  latitude1: number,
+  longitude1: number,
+  latitude2: number,
+  longitude2: number,
+): number {
+  const earthRadius = 6371000;
+
+  const lat1 =
+    (latitude1 * Math.PI) / 180;
+
+  const lat2 =
+    (latitude2 * Math.PI) / 180;
+
+  const deltaLat =
+    ((latitude2 - latitude1) *
+      Math.PI) /
+    180;
+
+  const deltaLon =
+    ((longitude2 - longitude1) *
+      Math.PI) /
+    180;
+
+  const a =
+    Math.sin(deltaLat / 2) *
+      Math.sin(deltaLat / 2) +
+    Math.cos(lat1) *
+      Math.cos(lat2) *
+      Math.sin(deltaLon / 2) *
+      Math.sin(deltaLon / 2);
+
+  const c =
+    2 *
+    Math.atan2(
+      Math.sqrt(a),
+      Math.sqrt(1 - a),
+    );
+
+  return earthRadius * c;
+}
