@@ -6,6 +6,7 @@ import {
   Heart,
   History as HistoryIcon,
   Languages,
+  Map,
   Search,
   Settings,
   ShieldCheck,
@@ -15,10 +16,12 @@ import {
 
 import { bembaDictionary } from "./data/bembaDictionary";
 import { translateWithFallback } from "./engine/bembaTranslator";
+import Navigation from "./navigation/Navigation";
 import "./styles/global.css";
 
 type Page =
   | "translate"
+  | "navigation"
   | "dictionary"
   | "learn"
   | "history"
@@ -49,6 +52,11 @@ const navigation: {
     id: "translate",
     label: "Translate",
     icon: Languages,
+  },
+  {
+    id: "navigation",
+    label: "Navigate",
+    icon: Map,
   },
   {
     id: "dictionary",
@@ -85,12 +93,9 @@ function App() {
   const [favourite, setFavourite] = useState(false);
   const [speaking, setSpeaking] = useState(false);
 
-  const [history, setHistory] = useState<
-    HistoryItem[]
-  >([]);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
 
-  const [searchText, setSearchText] =
-    useState("");
+  const [searchText, setSearchText] = useState("");
 
   /* --------------------------------------------------
      Launch
@@ -125,9 +130,7 @@ function App() {
   -------------------------------------------------- */
 
   const dictionaryResults = useMemo(() => {
-    const query = searchText
-      .trim()
-      .toLowerCase();
+    const query = searchText.trim().toLowerCase();
 
     if (!query) {
       return bembaDictionary.slice(0, 100);
@@ -136,12 +139,8 @@ function App() {
     return bembaDictionary
       .filter((item) => {
         return (
-          item.english
-            .toLowerCase()
-            .includes(query) ||
-          item.bemba
-            .toLowerCase()
-            .includes(query)
+          item.english.toLowerCase().includes(query) ||
+          item.bemba.toLowerCase().includes(query)
         );
       })
       .slice(0, 200);
@@ -164,8 +163,7 @@ function App() {
     window.setTimeout(() => {
       const match = quickPhrases.find(
         ([source]) =>
-          source.toLowerCase() ===
-          input.toLowerCase()
+          source.toLowerCase() === input.toLowerCase()
       );
 
       const result =
@@ -181,13 +179,10 @@ function App() {
             id: Date.now(),
             english: input,
             bemba: result,
-            time: new Date().toLocaleTimeString(
-              [],
-              {
-                hour: "2-digit",
-                minute: "2-digit",
-              }
-            ),
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
           },
           ...items,
         ]);
@@ -325,24 +320,32 @@ function App() {
         <header className="app-header">
           <div className="header-title">
             <span className="header-icon">
-              <Languages size={17} />
+              {page === "navigation" ? (
+                <Map size={17} />
+              ) : (
+                <Languages size={17} />
+              )}
             </span>
 
             <div>
               <strong>
                 {page === "translate"
                   ? "Translate"
-                  : page === "dictionary"
-                    ? "Dictionary"
-                    : page === "learn"
-                      ? "Learn Bemba"
-                      : page === "history"
-                        ? "History"
-                        : "Settings"}
+                  : page === "navigation"
+                    ? "Navigation"
+                    : page === "dictionary"
+                      ? "Dictionary"
+                      : page === "learn"
+                        ? "Learn Bemba"
+                        : page === "history"
+                          ? "History"
+                          : "Settings"}
               </strong>
 
               <span>
-                English → Bemba
+                {page === "navigation"
+                  ? "Offline Zambia navigation"
+                  : "English → Bemba"}
               </span>
             </div>
           </div>
@@ -593,6 +596,16 @@ function App() {
             </div>
 
           </section>
+        )}
+
+        {/* NAVIGATION */}
+
+        {page === "navigation" && (
+          <Navigation
+            onBack={() => {
+              setPage("translate");
+            }}
+          />
         )}
 
         {/* DICTIONARY */}
@@ -1021,8 +1034,7 @@ function App() {
 
         {navigation.map((item) => {
           const Icon = item.icon;
-          const active =
-            page === item.id;
+          const active = page === item.id;
 
           return (
             <button
@@ -1030,9 +1042,9 @@ function App() {
               className={
                 active ? "active" : ""
               }
-              onClick={() =>
-                setPage(item.id)
-              }
+              onClick={() => {
+                setPage(item.id);
+              }}
               aria-label={item.label}
               aria-current={
                 active
