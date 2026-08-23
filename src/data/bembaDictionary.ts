@@ -8,14 +8,13 @@ export type BembaDictionaryEntry = {
 /**
  * BembaTranslate offline dictionary.
  *
+ * English -> Bemba
+ *
  * IMPORTANT:
  * - No API
  * - No internet
  * - No cloud service
  * - No external model
- * - Safe TypeScript syntax
- *
- * English -> Bemba
  */
 
 export const bembaDictionary: BembaDictionaryEntry[] = [
@@ -44,7 +43,6 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "with", bemba: "na" },
   { english: "like", bemba: "nga" },
   { english: "as", bemba: "nga" },
-
   { english: "good", bemba: "suma" },
   { english: "all", bemba: "onse" },
   { english: "morning", bemba: "uluceelo" },
@@ -152,7 +150,7 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "speak", bemba: "Landa" },
 
   // =========================================================
-  // NUMERALS
+  // NUMBERS
   // =========================================================
 
   { english: "one", bemba: "-mo" },
@@ -169,7 +167,6 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "eleven", bemba: "ikumi na -mo" },
   { english: "twelve", bemba: "ikumi na -bili" },
   { english: "thirteen", bemba: "ikumi na -tatu" },
-
   { english: "twenty", bemba: "ama kumi yabili" },
   { english: "thirty", bemba: "ama kumi yatatu" },
   { english: "one hundred", bemba: "mwanda" },
@@ -231,4 +228,294 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "their father", bemba: "Shibo" },
 
   { english: "mother", bemba: "Mayo" },
-  { english: "mom", bemba: "Mayo
+  { english: "mom", bemba: "Mayo" },
+  { english: "my mother", bemba: "Mayo" },
+  { english: "my mother formal", bemba: "Ba mayo" },
+  { english: "our mother", bemba: "Nyinefwe" },
+  { english: "your mother informal", bemba: "Noko" },
+  { english: "your mother formal", bemba: "Ba Noko" },
+  { english: "his mother", bemba: "Nyina" },
+  { english: "her mother", bemba: "Nyina" },
+  { english: "their mother", bemba: "nyinabo" },
+
+  { english: "grandfather", bemba: "Shikulu" },
+  { english: "grandfather formal", bemba: "Ba shikulu" },
+  { english: "our grandfather", bemba: "Shikulwifwe" },
+  { english: "your grandfather", bemba: "Sokulu" },
+  { english: "your grandfather formal", bemba: "Ba sokulu" },
+  { english: "his grandfather", bemba: "Shiikulu" },
+  { english: "their grandfather", bemba: "Shikulwibo" },
+
+  { english: "son", bemba: "Mwana mwaume" },
+  { english: "daughter", bemba: "Mwana mukashana" },
+  { english: "son or daughter", bemba: "Mwana" },
+  { english: "my son", bemba: "Mwana wandi" },
+  { english: "my daughter", bemba: "Mwana wandi" },
+  { english: "your son", bemba: "Mwana obe" },
+  { english: "your daughter", bemba: "Mwana obe" },
+  { english: "his son", bemba: "Mwana wakwe" },
+  { english: "her son", bemba: "Mwana wakwe" },
+  { english: "our son", bemba: "Mwana wesu" },
+  { english: "our daughter", bemba: "Mwana wesu" },
+  { english: "their son", bemba: "Mwana wabo" },
+  { english: "their daughter", bemba: "Mwana wabo" },
+
+  { english: "brother", bemba: "Ndume nandi" },
+  { english: "your brother", bemba: "Ndume nobe" },
+  { english: "his brother", bemba: "Ndume nankwe" },
+  { english: "our brother", bemba: "Ndume nensu" },
+
+  { english: "sister", bemba: "Nkashi" },
+  { english: "my sister", bemba: "Nkashi nandi" },
+  { english: "our sister", bemba: "Nkashi nensu" },
+  { english: "your sister", bemba: "Nkashi yobe" },
+  { english: "his sister", bemba: "Nkashi yakhe" },
+
+  { english: "husband", bemba: "Mulume" },
+  { english: "my husband", bemba: "Mulume wandi" },
+  { english: "your husband", bemba: "Mulume obe" },
+  { english: "her husband", bemba: "Mwina mwakwe" },
+
+  { english: "wife", bemba: "Mukashi" },
+  { english: "wife formal", bemba: "Bakashi" },
+  { english: "my wife", bemba: "Mukashi wandi" },
+  { english: "your wife", bemba: "Mukashi obe" },
+  { english: "his wife", bemba: "Mukashi wakwe" },
+
+  // =========================================================
+  // IN-LAWS
+  // =========================================================
+
+  { english: "father in law", bemba: "tatafyala" },
+  { english: "father in law formal", bemba: "Ba tata fyala" },
+  { english: "your father in law", bemba: "Sofyala" },
+  { english: "your father in law formal", bemba: "Ba sofyala" },
+  { english: "his father in law", bemba: "shifyala" },
+  { english: "our father in law", bemba: "Shifyalefwe" },
+
+  { english: "mother in law", bemba: "Mayofyala" },
+  { english: "mother in law alternative", bemba: "Mamafyala" },
+  { english: "our mother in law", bemba: "Nafyalefwe" },
+  { english: "your mother in law", bemba: "Nokofyala" },
+  { english: "his mother in law", bemba: "nyinafyala" },
+
+  // =========================================================
+  // FRIENDS
+  // =========================================================
+
+  { english: "friend", bemba: "Cibusa" },
+  { english: "friend alternative", bemba: "Chibusa" },
+  { english: "friend alternative 2", bemba: "Icibusa" },
+  { english: "friends", bemba: "Ifibusa" },
+  { english: "your friend", bemba: "Cibusa obe" },
+  { english: "your friend alternative", bemba: "Umubiyo" },
+  { english: "your friend alternative 2", bemba: "Umunobe" },
+  { english: "your friends", bemba: "Ifibusa fyobe" },
+  { english: "my friend", bemba: "Chibusa wandi" },
+  { english: "my friend alternative", bemba: "Umunandi" },
+  { english: "our friend", bemba: "Chibusa wesu" },
+  { english: "our friend alternative", bemba: "Umunensu" },
+  { english: "his friend", bemba: "Umubiye" },
+  { english: "his friend alternative", bemba: "Umunankwe" },
+  { english: "their friends", bemba: "Abanabo" },
+
+  // =========================================================
+  // ADJECTIVES
+  // =========================================================
+
+  { english: "new", bemba: "nomba" },
+  { english: "good", bemba: "suma" },
+  { english: "all", bemba: "onse" },
+  { english: "big", bemba: "kikalamba" },
+  { english: "small", bemba: "kanono" },
+  { english: "many", bemba: "ingi" },
+  { english: "few", bemba: "fiinini" },
+  { english: "bad", bemba: "biipi" },
+  { english: "beautiful", bemba: "wasekesha" },
+
+  // =========================================================
+  // CONJUNCTIONS
+  // =========================================================
+
+  { english: "and", bemba: "na" },
+  { english: "with", bemba: "na" },
+  { english: "like", bemba: "nga" },
+  { english: "as", bemba: "nga" },
+  { english: "because", bemba: "pantu" },
+  { english: "but", bemba: "lelo" },
+  { english: "or", bemba: "nangu" },
+  { english: "if", bemba: "nga" },
+  { english: "when", bemba: "apo" },
+
+  // =========================================================
+  // COMMON VERBS
+  // =========================================================
+
+  { english: "eat", bemba: "lya" },
+  { english: "drink", bemba: "mwa" },
+  { english: "sleep", bemba: "lala" },
+  { english: "sit", bemba: "ikala" },
+  { english: "stand", bemba: "imina" },
+  { english: "walk", bemba: "enda" },
+  { english: "run", bemba: "tuka" },
+  { english: "come", bemba: "isa" },
+  { english: "go", bemba: "ya" },
+  { english: "see", bemba: "mona" },
+  { english: "look", bemba: "mona" },
+  { english: "hear", bemba: "umfwa" },
+  { english: "listen", bemba: "umfwa" },
+  { english: "speak", bemba: "landa" },
+  { english: "say", bemba: "landa" },
+  { english: "know", bemba: "ishiba" },
+  { english: "understand", bemba: "umfwa" },
+  { english: "want", bemba: "fwaya" },
+  { english: "love", bemba: "temwa" },
+  { english: "give", bemba: "pa" },
+  { english: "take", bemba: "tola" },
+  { english: "make", bemba: "cita" },
+  { english: "do", bemba: "cita" },
+  { english: "work", bemba: "bomba" },
+  { english: "help", bemba: "fwafwilisha" },
+  { english: "wait", bemba: "lindila" },
+  { english: "open", bemba: "sula" },
+  { english: "close", bemba: "shala" },
+  { english: "buy", bemba: "ula" },
+  { english: "sell", bemba: "sambisha" },
+  { english: "read", bemba: "belenga" },
+  { english: "write", bemba: "lemba" },
+  { english: "learn", bemba: "sambilila" },
+  { english: "teach", bemba: "sambilisha" },
+  { english: "remember", bemba: "ibukisha" },
+  { english: "forget", bemba: "laba" },
+
+  // =========================================================
+  // PRONOUNS
+  // =========================================================
+
+  { english: "I", bemba: "ine" },
+  { english: "me", bemba: "ine" },
+  { english: "you", bemba: "iwe" },
+  { english: "you formal", bemba: "imwe" },
+  { english: "he", bemba: "ena" },
+  { english: "she", bemba: "ena" },
+  { english: "him", bemba: "ena" },
+  { english: "her", bemba: "ena" },
+  { english: "we", bemba: "ifwe" },
+  { english: "us", bemba: "ifwe" },
+  { english: "they", bemba: "bena" },
+  { english: "them", bemba: "bena" },
+
+  // =========================================================
+  // NEGATION
+  // =========================================================
+
+  { english: "not", bemba: "ta-" },
+  { english: "I do not", bemba: "nshi-" },
+  { english: "I don't", bemba: "nshi-" },
+  { english: "you do not", bemba: "tau-" },
+  { english: "you don't", bemba: "tau-" },
+  { english: "he does not", bemba: "taa-" },
+  { english: "she does not", bemba: "taa-" },
+  { english: "we do not", bemba: "tatu-" },
+
+  // =========================================================
+  // GRAMMAR
+  // =========================================================
+
+  { english: "passive", bemba: "-w-" },
+  { english: "neutral voice", bemba: "-ik-" },
+  { english: "neutral voice e o", bemba: "-ek-" },
+
+  // =========================================================
+  // TIME
+  // =========================================================
+
+  { english: "today", bemba: "lelo" },
+  { english: "tomorrow", bemba: "mailo" },
+  { english: "yesterday", bemba: "mailo yapita" },
+  { english: "now", bemba: "nomba" },
+  { english: "morning", bemba: "uluceelo" },
+  { english: "afternoon", bemba: "kasuba" },
+  { english: "evening", bemba: "chungulo" },
+  { english: "night", bemba: "ubushiku" },
+  { english: "day", bemba: "ubushiku" },
+
+  // =========================================================
+  // PLACES / EVERYDAY WORDS
+  // =========================================================
+
+  { english: "home", bemba: "ng'anda" },
+  { english: "house", bemba: "ng'anda" },
+  { english: "school", bemba: "sukulu" },
+  { english: "church", bemba: "cengelo" },
+  { english: "market", bemba: "mu marketi" },
+  { english: "shop", bemba: "duka" },
+  { english: "road", bemba: "ndila" },
+  { english: "water", bemba: "amenshi" },
+  { english: "food", bemba: "ifyakulya" },
+  { english: "money", bemba: "indalama" },
+  { english: "work", bemba: "incito" },
+  { english: "job", bemba: "incito" },
+  { english: "car", bemba: "imotoka" },
+  { english: "phone", bemba: "simu" },
+  { english: "book", bemba: "ifyebo" },
+
+  // =========================================================
+  // PEOPLE
+  // =========================================================
+
+  { english: "man", bemba: "umwaume" },
+  { english: "woman", bemba: "umukashi" },
+  { english: "boy", bemba: "umwana mwaume" },
+  { english: "girl", bemba: "umwana mukashana" },
+  { english: "baby", bemba: "kafwafwa" },
+  { english: "people", bemba: "abantu" },
+  { english: "child", bemba: "umwana" },
+  { english: "children", bemba: "abana" },
+
+  // =========================================================
+  // SIMPLE RESPONSES
+  // =========================================================
+
+  { english: "yes please", bemba: "ee mukwai" },
+  { english: "no thank you", bemba: "awe natotela" },
+  { english: "please", bemba: "mukwai" },
+  { english: "sorry", bemba: "ndoloka" },
+  { english: "excuse me", bemba: "mukwai" },
+  { english: "welcome", bemba: "Mwaiseni" },
+  { english: "congratulations", bemba: "Mwapokolola" },
+
+  // =========================================================
+  // QUESTIONS
+  // =========================================================
+
+  { english: "what", bemba: "ci" },
+  { english: "who", bemba: "nani" },
+  { english: "where", bemba: "kwisa" },
+  { english: "when", bemba: "lilali" },
+  { english: "why", bemba: "pali shani" },
+  { english: "how", bemba: "shani" },
+  { english: "which", bemba: "cili citi" },
+  { english: "how much", bemba: "ngafika shani" },
+  { english: "how many", bemba: "wingi shani" },
+
+  // =========================================================
+  // ANIMALS
+  // =========================================================
+
+  { english: "dog", bemba: "imbwa" },
+  { english: "cat", bemba: "inkalamo" },
+  { english: "cow", bemba: "inkombe" },
+  { english: "goat", bemba: "mbushi" },
+  { english: "sheep", bemba: "mpanga" },
+  { english: "pig", bemba: "imbushi" },
+  { english: "chicken", bemba: "inkoko" },
+  { english: "bird", bemba: "inoni" },
+  { english: "fish", bemba: "isabi" },
+  { english: "snake", bemba: "inkoka" },
+  { english: "elephant", bemba: "nsofu" },
+  { english: "rhinoceros", bemba: "chipembere" },
+  { english: "hippopotamus", bemba: "mfubu" },
+  { english: "buffalo", bemba: "mboo" },
+  { english: "sable", bemba: "nkanshilie" },
+  { english: "roan", bemba: "mper
