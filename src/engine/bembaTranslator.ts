@@ -8,53 +8,47 @@ export type BembaEntry = {
 /*
  * ============================================================
  * BEMBATRANSLATE
- * DICTIONARY-FIRST OFFLINE ENGLISH → BEMBA ENGINE
+ * OFFLINE ENGLISH → BEMBA TRANSLATION ENGINE
  * ============================================================
  *
  * IMPORTANT:
  *
- * The local dictionary is the SOURCE OF TRUTH.
+ * bembaDictionary.ts is the main source of vocabulary.
  *
- * The engine does NOT replace the dictionary with a small
- * collection of hard-coded words.
+ * This engine:
  *
- * It supports:
+ * 1. Loads ALL dictionary entries
+ * 2. Normalizes English safely
+ * 3. Supports exact phrases
+ * 4. Supports exact individual words
+ * 5. Supports multiple translations
+ * 6. Supports common English variations
+ * 7. Supports common sentence patterns
+ * 8. Supports Bemba verb roots when the dictionary provides them
+ * 9. Uses fuzzy matching only as a LAST RESORT
  *
- * 1. Exact dictionary phrases
- * 2. Normalized dictionary phrases
- * 3. All dictionary words
- * 4. Longest phrase matching
- * 5. Common English variations
- * 6. Controlled sentence patterns
- * 7. Controlled Bemba verb-root conjugation
- * 8. Very conservative fuzzy matching
+ * Exact dictionary data ALWAYS has priority over fuzzy matching.
  *
- * Fuzzy matching NEVER gets priority over the dictionary.
- *
- * This is completely offline.
+ * Completely offline.
+ * No API.
+ * No cloud.
+ * No internet.
  * ============================================================
  */
-
 
 /* ============================================================
    DICTIONARY
 ============================================================ */
 
-const dictionary =
-  Array.isArray(bembaDictionary)
-    ? (bembaDictionary as BembaEntry[])
-    : [];
-
+const dictionary: BembaEntry[] = Array.isArray(
+  bembaDictionary
+)
+  ? (bembaDictionary as BembaEntry[])
+  : [];
 
 /* ============================================================
    NORMALIZATION
 ============================================================ */
-
-/*
- * Removes accents/diacritics only for LOOKUP purposes.
- *
- * The original Bemba spelling remains untouched in output.
- */
 
 function normalize(text: string): string {
   return String(text ?? "")
@@ -66,131 +60,100 @@ function normalize(text: string): string {
     .replace(/\s+/g, " ");
 }
 
-
-function cleanTranslation(text: string): string {
+function cleanBemba(text: string): string {
   return String(text ?? "")
     .replace(/\s+/g, " ")
     .trim();
 }
 
-
 /* ============================================================
-   DICTIONARY INDEXES
+   DICTIONARY INDEX
 ============================================================ */
 
 /*
- * Primary dictionary lookup.
- *
- * Example:
- *
- * "money" -> "indalama"
- *
- * The FIRST valid dictionary translation is retained.
- *
- * This prevents later unrelated entries from overwriting it.
+ * First translation for each English expression.
  */
-
-const dictionaryLookup =
-  new Map<string, string>();
-
+const dictionaryLookup = new Map<string, string>();
 
 /*
- * Keep every translation for an English entry.
- *
- * Example:
- *
- * "bank" ->
- * [
- *   "bank",
- *   "..."
- * ]
+ * ALL translations for each English expression.
  */
-
 const dictionaryAlternatives =
   new Map<string, string[]>();
 
+/*
+ * English words only.
+ *
+ * This is separate from the phrase index so that
+ * sentence processing can work efficiently.
+ */
+const dictionaryWords =
+  new Map<string, string>();
 
 /*
- * Store original dictionary entries as well.
- *
- * This makes dictionary searching use the FULL dataset.
+ * Phrase index.
  */
+const dictionaryPhrases =
+  new Map<string, string>();
 
-const indexedDictionary: BembaEntry[] = [];
-
-
-/* ============================================================
-   BUILD DICTIONARY INDEX
-============================================================ */
-
+/*
+ * Build indexes from EVERY dictionary entry.
+ */
 for (const entry of dictionary) {
   if (!entry) continue;
 
-  const english =
-    normalize(entry.english);
+  const english = normalize(entry.english);
+  const bemba = cleanBemba(entry.bemba);
 
-  const bemba =
-    cleanTranslation(entry.bemba);
-
-  if (!english || !bemba) {
-    continue;
-  }
-
+  if (!english || !bemba) continue;
 
   /*
-   * Keep original entry for dictionary search.
+   * First translation wins for normal translation.
    */
-
-  indexedDictionary.push({
-    english: entry.english,
-    bemba: entry.bemba,
-  });
-
-
-  /*
-   * IMPORTANT:
-   *
-   * Never overwrite an existing exact dictionary entry.
-   */
-
   if (!dictionaryLookup.has(english)) {
-    dictionaryLookup.set(
-      english,
-      bemba
-    );
+    dictionaryLookup.set(english, bemba);
   }
-
 
   /*
-   * Store alternatives.
+   * Preserve all alternatives.
    */
+  const alternatives =
+    dictionaryAlternatives.get(english) ?? [];
 
-  const existing =
-    dictionaryAlternatives.get(
-      english
-    ) ?? [];
-
-
-  if (!existing.includes(bemba)) {
-    existing.push(bemba);
+  if (!alternatives.includes(bemba)) {
+    alternatives.push(bemba);
   }
-
 
   dictionaryAlternatives.set(
     english,
-    existing
+    alternatives
   );
-}
 
+  /*
+   * Separate word and phrase indexes.
+   */
+  if (english.includes(" ")) {
+    if (!dictionaryPhrases.has(english)) {
+      dictionaryPhrases.set(
+        english,
+        bemba
+      );
+    }
+  } else {
+    if (!dictionaryWords.has(english)) {
+      dictionaryWords.set(
+        english,
+        bemba
+      );
+    }
+  }
+}
 
 /* ============================================================
    CONTRACTIONS
 ============================================================ */
 
-const contractionMap: Record<
-  string,
-  string
-> = {
+const contractionMap: Record<string, string> = {
   "i'm": "i am",
   "im": "i am",
 
@@ -260,51 +223,39 @@ const contractionMap: Record<
   "shouldnt": "should not",
 };
 
-
-/* ============================================================
-   EXPAND CONTRACTIONS
-============================================================ */
-
 function expandContractions(
   text: string
 ): string {
   let result = String(text ?? "");
 
-  for (
-    const [from, to]
-    of Object.entries(contractionMap)
-  ) {
-    const escaped =
-      from.replace(
-        /[.*+?^${}()|[\]\\]/g,
-        "\\$&"
-      );
+  for (const [from, to] of Object.entries(
+    contractionMap
+  )) {
+    const escaped = from.replace(
+      /[.*+?^${}()|[\]\\]/g,
+      "\\$&"
+    );
 
-    result =
-      result.replace(
-        new RegExp(
-          `\\b${escaped}\\b`,
-          "gi"
-        ),
-        to
-      );
+    result = result.replace(
+      new RegExp(
+        `\\b${escaped}\\b`,
+        "gi"
+      ),
+      to
+    );
   }
 
   return result;
 }
 
-
 /* ============================================================
    TOKENIZATION
 ============================================================ */
 
-function tokenize(
-  text: string
-): string[] {
-  const normalized =
-    normalize(
-      expandContractions(text)
-    );
+function tokenize(text: string): string[] {
+  const normalized = normalize(
+    expandContractions(text)
+  );
 
   if (!normalized) {
     return [];
@@ -315,23 +266,11 @@ function tokenize(
     .filter(Boolean);
 }
 
-
 /* ============================================================
-   ENGLISH ALIASES
+   COMMON ENGLISH VARIATIONS
 ============================================================ */
 
-/*
- * These are ONLY used when the requested word itself is not
- * already present in the dictionary.
- *
- * Exact dictionary data always wins.
- */
-
-const englishAliases: Record<
-  string,
-  string
-> = {
-
+const englishAliases: Record<string, string> = {
   ill: "sick",
   unwell: "sick",
 
@@ -390,10 +329,6 @@ const englishAliases: Record<
   washing: "wash",
   washes: "wash",
 
-  cooked: "cook",
-  cooking: "cook",
-  cooks: "cook",
-
   looked: "look",
   looking: "look",
   looks: "look",
@@ -442,176 +377,85 @@ const englishAliases: Record<
   drinking: "drink",
   drinks: "drink",
 
-  angry: "angry",
   anger: "angry",
 };
-
 
 /* ============================================================
    IMPORTANT EVERYDAY PHRASES
 ============================================================ */
 
-/*
- * These are ONLY high-confidence phrases.
- *
- * Dictionary entries still have priority over these when the
- * exact phrase exists in the dictionary.
- */
-
 const importantPhrases =
   new Map<string, string>([
-    [
-      "how are you",
-      "Mulishani?"
-    ],
+    ["how are you", "Mulishani?"],
 
-    [
-      "good morning",
-      "Mwashibukeni!"
-    ],
+    ["good morning", "Mwashibukeni!"],
 
-    [
-      "good afternoon",
-      "Kasuba mukwai"
-    ],
+    ["good afternoon", "Kasuba mukwai"],
 
-    [
-      "good evening",
-      "Chungulo mukwai"
-    ],
+    ["good evening", "Chungulo mukwai"],
 
-    [
-      "good night",
-      "Sendameenipo"
-    ],
+    ["good night", "Sendameenipo"],
 
-    [
-      "goodbye",
-      "Shalenipo"
-    ],
+    ["goodbye", "Shalenipo"],
 
-    [
-      "thank you",
-      "Natotela"
-    ],
+    ["thank you", "Natotela"],
 
-    [
-      "thanks",
-      "Natotela"
-    ],
+    ["thanks", "Natotela"],
 
-    [
-      "thanks a lot",
-      "Natotela saana"
-    ],
+    ["thanks a lot", "Natotela saana"],
 
-    [
-      "a lot",
-      "Saana"
-    ],
+    ["a lot", "Saana"],
 
-    [
-      "yes",
-      "Ee"
-    ],
+    ["yes", "Ee"],
 
-    [
-      "no",
-      "Awe"
-    ],
+    ["no", "Awe"],
 
-    [
-      "where are you",
-      "Ulikwisa?"
-    ],
+    ["where are you", "Ulikwisa?"],
 
-    [
-      "where are they",
-      "Balikwisa?"
-    ],
+    ["where are they", "Balikwisa?"],
 
-    [
-      "i want money",
-      "Ndefwaya indalama"
-    ],
+    ["i want money", "Ndefwaya indalama"],
 
-    [
-      "i am angry",
-      "Nimfulwa"
-    ],
+    ["i am angry", "Nimfulwa"],
 
-    [
-      "i'm angry",
-      "Nimfulwa"
-    ],
+    ["i'm angry", "Nimfulwa"],
 
-    [
-      "i am sick",
-      "Ndelwala"
-    ],
+    ["i am sick", "Ndelwala"],
 
-    [
-      "i'm sick",
-      "Ndelwala"
-    ],
+    ["i'm sick", "Ndelwala"],
   ]);
 
-
 /* ============================================================
-   EXACT DICTIONARY LOOKUP
+   DIRECT WORD LOOKUP
 ============================================================ */
 
-/*
- * THIS IS THE MOST IMPORTANT FUNCTION.
- *
- * It checks the complete indexed dictionary first.
- *
- * Therefore:
- *
- * money
- *
- * will use the dictionary entry for "money" if it exists.
- *
- * It will NOT fuzzy-match money to kolwe.
- */
-
 function lookupEnglish(
-  word: string
+  text: string
 ): string | undefined {
-
-  const normalized =
-    normalize(word);
+  const normalized = normalize(text);
 
   if (!normalized) {
     return undefined;
   }
 
-
   /*
-   * STEP 1:
-   * Exact normalized dictionary match.
+   * MOST IMPORTANT:
+   *
+   * Exact dictionary match ALWAYS comes first.
    */
-
   const exact =
-    dictionaryLookup.get(
-      normalized
-    );
+    dictionaryLookup.get(normalized);
 
   if (exact) {
     return exact;
   }
 
-
   /*
-   * STEP 2:
-   * Alias only if the original word is NOT
-   * present in the dictionary.
+   * Alias is only used when the exact word
+   * does not exist.
    */
-
   const alias =
-    englishAliases[
-      normalized
-    ];
+    englishAliases[normalized];
 
   if (alias) {
     const aliasTranslation =
@@ -624,80 +468,60 @@ function lookupEnglish(
     }
   }
 
-
   return undefined;
 }
 
-
 /* ============================================================
-   CHECK WHETHER DICTIONARY CONTAINS WORD
+   GET ALL EXACT TRANSLATIONS
 ============================================================ */
 
-function hasExactDictionaryEntry(
-  word: string
-): boolean {
-  const normalized =
-    normalize(word);
+function lookupAllEnglish(
+  text: string
+): string[] {
+  const normalized = normalize(text);
 
-  return dictionaryLookup.has(
-    normalized
+  if (!normalized) {
+    return [];
+  }
+
+  return (
+    dictionaryAlternatives.get(
+      normalized
+    ) ?? []
   );
 }
 
-
 /* ============================================================
-   ROOT CLEANING
+   VERB ROOT
 ============================================================ */
 
 function cleanRoot(
   root: string
 ): string {
   return root
-    .replace(
-      /^[-–—]/,
-      ""
-    )
+    .replace(/^[-–—]/, "")
     .trim();
 }
-
-
-/* ============================================================
-   VERB ROOT
-============================================================ */
 
 function getVerbRoot(
   englishWord: string
 ): string | undefined {
-
   const translation =
-    lookupEnglish(
-      englishWord
-    );
+    lookupEnglish(englishWord);
 
   if (!translation) {
     return undefined;
   }
 
-
-  /*
-   * Support dictionary entries such as:
-   *
-   * -landa/-sosa
-   */
-
   const first =
     translation
       .split("/")
-      .map(
-        item => item.trim()
-      )
+      .map((item) => item.trim())
       .find(Boolean);
-
 
   if (!first) {
     return undefined;
   }
-
 
   if (
     first.startsWith("-") ||
@@ -707,32 +531,25 @@ function getVerbRoot(
     return cleanRoot(first);
   }
 
-
   return undefined;
 }
 
-
 /* ============================================================
-   PRESENT CONJUGATION
+   VERB CONJUGATION
 ============================================================ */
 
 function conjugatePresent(
   subject: string,
   verb: string
 ): string | undefined {
-
   const root =
-    getVerbRoot(
-      verb
-    );
+    getVerbRoot(verb);
 
   if (!root) {
     return undefined;
   }
 
-
   switch (subject) {
-
     case "i":
       return `Nde${root}`;
 
@@ -757,7 +574,6 @@ function conjugatePresent(
   }
 }
 
-
 /* ============================================================
    OBJECT TRANSLATION
 ============================================================ */
@@ -765,69 +581,47 @@ function conjugatePresent(
 function translateObject(
   text: string
 ): string | undefined {
-
-  const normalized =
-    normalize(text);
+  const normalized = normalize(text);
 
   if (!normalized) {
     return undefined;
   }
 
-
   /*
-   * Exact complete phrase.
+   * Exact phrase first.
    */
-
   const direct =
-    lookupEnglish(
-      normalized
-    );
+    lookupEnglish(normalized);
 
   if (direct) {
     return direct;
   }
 
-
   /*
-   * Translate every word using the FULL dictionary.
+   * Then translate every word exactly.
    */
-
   const words =
-    tokenize(
-      normalized
-    );
+    tokenize(normalized);
 
   if (!words.length) {
     return undefined;
   }
 
+  const output: string[] = [];
 
-  const translated: string[] =
-    [];
-
-
-  for (
-    const word of words
-  ) {
-
+  for (const word of words) {
     const translation =
-      lookupEnglish(
-        word
-      );
+      lookupEnglish(word);
 
     if (!translation) {
       return undefined;
     }
 
-    translated.push(
-      translation
-    );
+    output.push(translation);
   }
 
-
-  return translated.join(" ");
+  return output.join(" ");
 }
-
 
 /* ============================================================
    POSSESSIVES
@@ -845,48 +639,35 @@ const possessiveMap: Record<
   their: "babo",
 };
 
-
 function translatePossessive(
   text: string
 ): string | undefined {
-
   const normalized =
     normalize(
       expandContractions(text)
     );
-
 
   const match =
     normalized.match(
       /^(my|your|his|her|our|their)\s+(.+)$/
     );
 
-
   if (!match) {
     return undefined;
   }
 
-
   const owner =
-    possessiveMap[
-      match[1]
-    ];
-
+    possessiveMap[match[1]];
 
   const noun =
-    translateObject(
-      match[2]
-    );
-
+    translateObject(match[2]);
 
   if (!owner || !noun) {
     return undefined;
   }
 
-
   return `${noun} ${owner}`;
 }
-
 
 /* ============================================================
    DIRECT SENTENCE PATTERNS
@@ -896,278 +677,193 @@ const directPatterns: Array<{
   pattern: RegExp;
   result:
     | string
-    | ((
-        match: RegExpMatchArray
-      ) => string);
+    | ((match: RegExpMatchArray) => string);
 }> = [
-
   {
-    pattern:
-      /^i am sick$/,
-    result:
-      "Ndelwala",
+    pattern: /^i am sick$/,
+    result: "Ndelwala",
   },
 
   {
-    pattern:
-      /^i am angry$/,
-    result:
-      "Nimfulwa",
+    pattern: /^i am angry$/,
+    result: "Nimfulwa",
   },
 
   {
-    pattern:
-      /^i am working$/,
-    result:
-      "Ndebomba",
+    pattern: /^i am working$/,
+    result: "Ndebomba",
   },
 
   {
-    pattern:
-      /^i work$/,
-    result:
-      "Ndebomba",
+    pattern: /^i work$/,
+    result: "Ndebomba",
   },
 
   {
-    pattern:
-      /^i am suffering$/,
-    result:
-      "Ndecula",
+    pattern: /^i am suffering$/,
+    result: "Ndecula",
   },
 
   {
-    pattern:
-      /^i suffer$/,
-    result:
-      "Ndecula",
+    pattern: /^i suffer$/,
+    result: "Ndecula",
   },
 
   {
-    pattern:
-      /^i am writing$/,
-    result:
-      "Ndelemba",
+    pattern: /^i am writing$/,
+    result: "Ndelemba",
   },
 
   {
-    pattern:
-      /^i write$/,
-    result:
-      "Ndelemba",
+    pattern: /^i write$/,
+    result: "Ndelemba",
   },
 
   {
-    pattern:
-      /^i am walking$/,
-    result:
-      "Ndeenda",
+    pattern: /^i am walking$/,
+    result: "Ndeenda",
   },
 
   {
-    pattern:
-      /^i walk$/,
-    result:
-      "Ndeenda",
+    pattern: /^i walk$/,
+    result: "Ndeenda",
   },
 
   {
-    pattern:
-      /^i am waiting$/,
-    result:
-      "Ndelolela",
+    pattern: /^i am waiting$/,
+    result: "Ndelolela",
   },
 
   {
-    pattern:
-      /^i wait$/,
-    result:
-      "Ndelolela",
+    pattern: /^i wait$/,
+    result: "Ndelolela",
   },
 
   {
-    pattern:
-      /^i am visiting$/,
-    result:
-      "Ndetandala",
+    pattern: /^i am visiting$/,
+    result: "Ndetandala",
   },
 
   {
-    pattern:
-      /^i visit$/,
-    result:
-      "Ndetandala",
+    pattern: /^i visit$/,
+    result: "Ndetandala",
   },
 
   {
-    pattern:
-      /^i am talking$/,
-    result:
-      "Ndelanda",
+    pattern: /^i am talking$/,
+    result: "Ndelanda",
   },
 
   {
-    pattern:
-      /^i talk$/,
-    result:
-      "Ndelanda",
+    pattern: /^i talk$/,
+    result: "Ndelanda",
   },
 
   {
-    pattern:
-      /^i am speaking$/,
-    result:
-      "Ndelanda",
+    pattern: /^i am speaking$/,
+    result: "Ndelanda",
   },
 
   {
-    pattern:
-      /^i speak$/,
-    result:
-      "Ndelanda",
+    pattern: /^i speak$/,
+    result: "Ndelanda",
   },
 
   {
-    pattern:
-      /^i am buying$/,
-    result:
-      "Ndeshita",
+    pattern: /^i am buying$/,
+    result: "Ndeshita",
   },
 
   {
-    pattern:
-      /^i buy$/,
-    result:
-      "Ndeshita",
+    pattern: /^i buy$/,
+    result: "Ndeshita",
   },
 
   {
-    pattern:
-      /^i am selling$/,
-    result:
-      "Ndeshitisha",
+    pattern: /^i am selling$/,
+    result: "Ndeshitisha",
   },
 
   {
-    pattern:
-      /^i sell$/,
-    result:
-      "Ndeshitisha",
+    pattern: /^i sell$/,
+    result: "Ndeshitisha",
   },
 
   {
-    pattern:
-      /^i am washing$/,
-    result:
-      "Ndesamba",
+    pattern: /^i am washing$/,
+    result: "Ndesamba",
   },
 
   {
-    pattern:
-      /^i wash$/,
-    result:
-      "Ndesamba",
+    pattern: /^i wash$/,
+    result: "Ndesamba",
   },
 
   {
-    pattern:
-      /^i am learning$/,
-    result:
-      "Ndefunda",
+    pattern: /^i am learning$/,
+    result: "Ndefunda",
   },
 
   {
-    pattern:
-      /^i learn$/,
-    result:
-      "Ndefunda",
+    pattern: /^i learn$/,
+    result: "Ndefunda",
   },
 
   {
-    pattern:
-      /^i am teaching$/,
-    result:
-      "Ndefunda",
+    pattern: /^i am teaching$/,
+    result: "Ndefunda",
   },
 
   {
-    pattern:
-      /^i teach$/,
-    result:
-      "Ndefunda",
+    pattern: /^i teach$/,
+    result: "Ndefunda",
   },
 
   {
-    pattern:
-      /^i am sitting$/,
-    result:
-      "Ndeikala",
+    pattern: /^i am sitting$/,
+    result: "Ndeikala",
   },
 
   {
-    pattern:
-      /^i sit$/,
-    result:
-      "Ndeikala",
+    pattern: /^i sit$/,
+    result: "Ndeikala",
   },
 
   {
-    pattern:
-      /^i am staying$/,
-    result:
-      "Ndeikala",
+    pattern: /^i am staying$/,
+    result: "Ndeikala",
   },
 
   {
-    pattern:
-      /^i stay$/,
-    result:
-      "Ndeikala",
+    pattern: /^i stay$/,
+    result: "Ndeikala",
   },
 
   {
-    pattern:
-      /^i am going$/,
-    result:
-      "Ndeenda",
+    pattern: /^i am going$/,
+    result: "Ndeenda",
   },
 
   {
-    pattern:
-      /^i go$/,
-    result:
-      "Ndeenda",
+    pattern: /^i go$/,
+    result: "Ndeenda",
   },
 
   {
-    pattern:
-      /^i am coming$/,
-    result:
-      "Ndesa",
+    pattern: /^i am coming$/,
+    result: "Ndesa",
   },
 
   {
-    pattern:
-      /^i come$/,
-    result:
-      "Ndesa",
+    pattern: /^i come$/,
+    result: "Ndesa",
   },
 
-  /*
-   * I WANT OBJECT
-   */
-
   {
-    pattern:
-      /^i want (.+)$/,
-    result: (
-      match
-    ) => {
-
+    pattern: /^i want (.+)$/,
+    result: (match) => {
       const object =
-        translateObject(
-          match[1]
-        );
+        translateObject(match[1]);
 
       return object
         ? `Ndefwaya ${object}`
@@ -1175,21 +871,11 @@ const directPatterns: Array<{
     },
   },
 
-  /*
-   * I NEED OBJECT
-   */
-
   {
-    pattern:
-      /^i need (.+)$/,
-    result: (
-      match
-    ) => {
-
+    pattern: /^i need (.+)$/,
+    result: (match) => {
       const object =
-        translateObject(
-          match[1]
-        );
+        translateObject(match[1]);
 
       return object
         ? `Ndefwaya ${object}`
@@ -1198,7 +884,6 @@ const directPatterns: Array<{
   },
 ];
 
-
 /* ============================================================
    SENTENCE ENGINE
 ============================================================ */
@@ -1206,348 +891,161 @@ const directPatterns: Array<{
 function translateSentencePattern(
   text: string
 ): string | undefined {
-
   const normalized =
     normalize(
-      expandContractions(
-        text
-      )
+      expandContractions(text)
     );
-
 
   /*
    * Important phrase.
    */
-
   const important =
-    importantPhrases.get(
-      normalized
-    );
+    importantPhrases.get(normalized);
 
   if (important) {
     return important;
   }
 
-
   /*
-   * Explicit patterns.
+   * Direct sentence patterns.
    */
-
-  for (
-    const item of directPatterns
-  ) {
-
+  for (const item of directPatterns) {
     const match =
-      normalized.match(
-        item.pattern
-      );
+      normalized.match(item.pattern);
 
     if (!match) {
       continue;
     }
 
-
     if (
-      typeof item.result ===
-      "string"
+      typeof item.result === "string"
     ) {
       return item.result;
     }
 
-
     const result =
-      item.result(
-        match
-      );
-
+      item.result(match);
 
     if (result) {
       return result;
     }
   }
 
-
   /*
-   * ==========================================================
-   * GENERIC SUBJECT + VERB
-   * ==========================================================
+   * I am + adjective / condition.
    */
-
-  const subjectVerb =
-    normalized.match(
-      /^(i|you|he|she|we|they)\s+(.+)$/
-    );
-
-
-  if (subjectVerb) {
-
-    const subject =
-      subjectVerb[1];
-
-    let rest =
-      subjectVerb[2];
-
-
-    rest =
-      rest
-        .replace(
-          /^(am|are|is|do|does|will|can|must)\s+/,
-          ""
-        )
-        .trim();
-
-
-    const verbWords =
-      rest.split(" ");
-
-
-    const verb =
-      verbWords[0];
-
-
-    const conjugated =
-      conjugatePresent(
-        subject,
-        verb
-      );
-
-
-    if (conjugated) {
-
-      const objectWords =
-        verbWords.slice(1);
-
-
-      if (
-        objectWords.length
-      ) {
-
-        const object =
-          translateObject(
-            objectWords.join(" ")
-          );
-
-
-        if (object) {
-          return `${conjugated} ${object}`;
-        }
-      }
-
-
-      return conjugated;
-    }
-  }
-
-
-  /*
-   * I AM + VALUE
-   */
-
   const iAm =
-    normalized.match(
-      /^i am (.+)$/
-    );
-
+    normalized.match(/^i am (.+)$/);
 
   if (iAm) {
-
-    const value =
-      iAm[1];
-
+    const value = iAm[1];
 
     const root =
-      getVerbRoot(
-        value
-      );
-
+      getVerbRoot(value);
 
     if (root) {
       return `Nde${root}`;
     }
 
-
     const translation =
-      lookupEnglish(
-        value
-      );
-
+      lookupEnglish(value);
 
     if (translation) {
       return `Ndi ${translation}`;
     }
   }
 
-
   /*
-   * YOU ARE + VALUE
+   * YOU ARE + adjective.
    */
-
   const youAre =
-    normalized.match(
-      /^you are (.+)$/
-    );
-
+    normalized.match(/^you are (.+)$/);
 
   if (youAre) {
-
-    const value =
-      youAre[1];
-
+    const value = youAre[1];
 
     const root =
-      getVerbRoot(
-        value
-      );
-
+      getVerbRoot(value);
 
     if (root) {
       return `Ule${root}`;
     }
 
-
     const translation =
-      lookupEnglish(
-        value
-      );
-
+      lookupEnglish(value);
 
     if (translation) {
       return `Uli ${translation}`;
     }
   }
 
-
   /*
-   * HE / SHE IS + VALUE
+   * HE / SHE IS + adjective.
    */
-
   const heSheIs =
     normalized.match(
       /^(he|she) is (.+)$/
     );
 
-
   if (heSheIs) {
-
-    const value =
-      heSheIs[2];
-
+    const value = heSheIs[2];
 
     const root =
-      getVerbRoot(
-        value
-      );
-
+      getVerbRoot(value);
 
     if (root) {
       return `Ale${root}`;
     }
 
-
     const translation =
-      lookupEnglish(
-        value
-      );
-
+      lookupEnglish(value);
 
     if (translation) {
       return `Ali ${translation}`;
     }
   }
 
-
-  return undefined;
-}
-
-
-/* ============================================================
-   LONGEST DICTIONARY PHRASE
-============================================================ */
-
-/*
- * This searches the FULL dictionary index.
- *
- * Example:
- *
- * "good morning everyone"
- *
- * will first attempt:
- *
- * "good morning everyone"
- * "good morning"
- * "good"
- *
- * before moving to the next word.
- */
-
-function findLongestMatch(
-  words: string[],
-  startIndex: number
-):
-  | {
-      translation: string;
-      length: number;
-    }
-  | undefined {
-
-  const remaining =
-    words.length -
-    startIndex;
-
-
   /*
-   * Allow reasonably long dictionary phrases.
+   * Generic subject + verb.
    */
-
-  const maxLength =
-    Math.min(
-      remaining,
-      20
+  const subjectMatch =
+    normalized.match(
+      /^(i|you|he|she|we|they)\s+(.+)$/
     );
 
-
-  for (
-    let length = maxLength;
-    length >= 1;
-    length--
-  ) {
-
-    const phrase =
-      words
-        .slice(
-          startIndex,
-          startIndex + length
-        )
-        .join(" ");
-
-
-    /*
-     * IMPORTANT:
-     *
-     * Direct dictionary lookup only.
-     *
-     * No fuzzy matching here.
-     */
-
-    const translation =
-      dictionaryLookup.get(
-        phrase
-      );
-
-
-    if (translation) {
-
-      return {
-        translation,
-        length,
-      };
-    }
+  if (!subjectMatch) {
+    return undefined;
   }
 
+  const subject =
+    subjectMatch[1];
 
-  return undefined;
-}
+  let rest =
+    subjectMatch[2];
 
+  /*
+   * Remove auxiliaries.
+   */
+  rest =
+    rest
+      .replace(
+        /^(am|are|is|do|does|did|will|can|must|should|could|would)\s+/,
+        ""
+      )
+      .trim();
 
-/* ============================================================
-   LEVENS
+  if (!rest) {
+    return undefined;
+  }
+
+  const words =
+    rest.split(" ");
+
+  const verb =
+    words[0];
+
+  /*
+   * Check aliases before conjugation.
+   */
+  const canonicalVerb =
+    englishAliases[verb]
