@@ -1,139 +1,215 @@
+/* =========================================================
+   BEMBATRANSLATE
+   OFFLINE ROUTE ENGINE
+   Dijkstra shortest-path routing
+   ========================================================= */
+
 import type {
+  Coordinate,
+  MapData,
+  MapEdge,
   MapNode,
   RouteResult,
   RouteStep,
-  Coordinate,
 } from "./mapTypes";
 
-function distanceBetween(
+/* =========================================================
+   DISTANCE
+   ========================================================= */
+
+function coordinateDistance(
   a: Coordinate,
-  b: Coordinate
+  b: Coordinate,
 ): number {
   const earthRadius = 6371000;
 
-  const lat1 = (a.latitude * Math.PI) / 180;
-  const lat2 = (b.latitude * Math.PI) / 180;
+  const lat1 =
+    (a.latitude * Math.PI) / 180;
+
+  const lat2 =
+    (b.latitude * Math.PI) / 180;
 
   const deltaLat =
-    ((b.latitude - a.latitude) * Math.PI) / 180;
+    ((b.latitude - a.latitude) *
+      Math.PI) /
+    180;
 
   const deltaLon =
-    ((b.longitude - a.longitude) * Math.PI) / 180;
+    ((b.longitude - a.longitude) *
+      Math.PI) /
+    180;
 
   const value =
-    Math.sin(deltaLat / 2) ** 2 +
+    Math.sin(deltaLat / 2) *
+      Math.sin(deltaLat / 2) +
     Math.cos(lat1) *
       Math.cos(lat2) *
-      Math.sin(deltaLon / 2) ** 2;
+      Math.sin(deltaLon / 2) *
+      Math.sin(deltaLon / 2);
 
-  const arc =
+  const safeValue = Math.min(
+    1,
+    Math.max(0, value),
+  );
+
+  const c =
     2 *
     Math.atan2(
-      Math.sqrt(value),
-      Math.sqrt(1 - value)
+      Math.sqrt(safeValue),
+      Math.sqrt(1 - safeValue),
     );
 
-  return earthRadius * arc;
+  return earthRadius * c;
 }
 
-function findNearestNode(
-  position: Coordinate,
-  nodes: MapNode[]
-): MapNode | null {
-  if (nodes.length === 0) {
-    return null;
-  }
+/* =========================================================
+   CONNECTED EDGES
+   ========================================================= */
 
-  let nearest = nodes[0];
-  let nearestDistance = distanceBetween(
-    position,
-    nearest.coordinate
+function getConnectedEdges(
+  nodeId: string,
+  edges: MapEdge[],
+): MapEdge[] {
+  return edges.filter(
+    (edge) =>
+      edge.from === nodeId ||
+      edge.to === nodeId,
   );
-
-  for (let index = 1; index < nodes.length; index += 1) {
-    const node = nodes[index];
-
-    const distance = distanceBetween(
-      position,
-      node.coordinate
-    );
-
-    if (distance < nearestDistance) {
-      nearest = node;
-      nearestDistance = distance;
-    }
-  }
-
-  return nearest;
 }
 
-function calculateTotalDistance(
-  nodes: MapNode[]
+/* =========================================================
+   OPPOSITE NODE
+   ========================================================= */
+
+function getOtherNode(
+  edge: MapEdge,
+  nodeId: string,
+): string {
+  return edge.from === nodeId
+    ? edge.to
+    : edge.from;
+}
+
+/* =========================================================
+   BEARING
+   ========================================================= */
+
+export function calculateBearing(
+  latitude1: number,
+  longitude1: number,
+  latitude2: number,
+  longitude2: number,
 ): number {
-  let total = 0;
+  const lat1 =
+    (latitude1 * Math.PI) / 180;
 
-  for (let index = 1; index < nodes.length; index += 1) {
-    total += distanceBetween(
-      nodes[index - 1].coordinate,
-      nodes[index].coordinate
-    );
+  const lat2 =
+    (latitude2 * Math.PI) / 180;
+
+  const deltaLongitude =
+    ((longitude2 - longitude1) *
+      Math.PI) /
+    180;
+
+  const y =
+    Math.sin(deltaLongitude) *
+    Math.cos(lat2);
+
+  const x =
+    Math.cos(lat1) *
+      Math.sin(lat2) -
+    Math.sin(lat1) *
+      Math.cos(lat2) *
+      Math.cos(deltaLongitude);
+
+  const bearing =
+    (Math.atan2(y, x) * 180) /
+    Math.PI;
+
+  return (
+    (bearing + 360) % 360
+  );
+}
+
+/* =========================================================
+   DIRECTION
+   ========================================================= */
+
+export function bearingToDirection(
+  bearing: number,
+): string {
+  const directions = [
+    "north",
+    "north-east",
+    "east",
+    "south-east",
+    "south",
+    "south-west",
+    "west",
+    "north-west",
+  ];
+
+  const index =
+    Math.round(bearing / 45) %
+    directions.length;
+
+  return directions[index];
+}
+
+/* =========================================================
+   FORMAT DISTANCE
+   ========================================================= */
+
+export function formatDistance(
+  distance: number,
+): string {
+  if (distance < 1000) {
+    return `${Math.round(
+      distance,
+    )} m`;
   }
 
-  return total;
+  return `${(
+    distance / 1000
+  ).toFixed(1)} km`;
 }
 
-function createStep(
-  from: MapNode,
-  to: MapNode
-): RouteStep {
-  const distance = distanceBetween(
-    from.coordinate,
-    to.coordinate
-  );
+/* =========================================================
+   FIND SHORTEST ROUTE
+   ========================================================= */
 
-  return {
-    from: from.name,
-    to: to.name,
-    distance,
-  };
-}
-
-/*
- * Simple offline route calculation.
- *
- * This first version uses the locally packaged map nodes.
- * It does not require internet access.
- *
- * The map can later be expanded with:
- * - roads
- * - paths
- * - buildings
- * - campuses
- * - towns
- * - provinces
- * - Zambia-wide road data
- */
-
-export function calculateRoute(
-  start: Coordinate,
-  destination: Coordinate,
-  nodes: MapNode[]
+export function findRoute(
+  map: MapData,
+  startId: string,
+  destinationId: string,
 ): RouteResult | null {
-  if (nodes.length === 0) {
+  const startNode =
+    map.nodes.find(
+      (node) =>
+        node.id === startId,
+    );
+
+  const destinationNode =
+    map.nodes.find(
+      (node) =>
+        node.id ===
+        destinationId,
+    );
+
+  if (
+    !startNode ||
+    !destinationNode
+  ) {
     return null;
   }
 
-  const startNode = findNearestNode(start, nodes);
-  const destinationNode = findNearestNode(
-    destination,
-    nodes
-  );
+  /* -------------------------------------------------------
+     Same destination
+  ------------------------------------------------------- */
 
-  if (!startNode || !destinationNode) {
-    return null;
-  }
-
-  if (startNode.id === destinationNode.id) {
+  if (
+    startId === destinationId
+  ) {
     return {
       nodes: [startNode],
       steps: [],
@@ -141,129 +217,342 @@ export function calculateRoute(
     };
   }
 
-  /*
-   * For the first offline navigation layer,
-   * connect the nearest known points directly.
-   *
-   * A full road-network A* engine can replace this
-   * later without changing the GPS/user interface.
-   */
+  /* -------------------------------------------------------
+     Dijkstra state
+  ------------------------------------------------------- */
 
-  const routeNodes: MapNode[] = [
-    startNode,
-    destinationNode,
-  ];
+  const distances =
+    new Map<
+      string,
+      number
+    >();
 
-  const steps: RouteStep[] = [
-    createStep(
-      startNode,
-      destinationNode
-    ),
-  ];
+  const previous =
+    new Map<
+      string,
+      string | null
+    >();
+
+  const unvisited =
+    new Set<string>();
+
+  for (const node of map.nodes) {
+    distances.set(
+      node.id,
+      Number.POSITIVE_INFINITY,
+    );
+
+    previous.set(
+      node.id,
+      null,
+    );
+
+    unvisited.add(
+      node.id,
+    );
+  }
+
+  distances.set(
+    startId,
+    0,
+  );
+
+  /* -------------------------------------------------------
+     Main Dijkstra loop
+  ------------------------------------------------------- */
+
+  while (
+    unvisited.size > 0
+  ) {
+    let currentId:
+      | string
+      | null = null;
+
+    let currentDistance =
+      Number.POSITIVE_INFINITY;
+
+    for (
+      const nodeId of unvisited
+    ) {
+      const distance =
+        distances.get(
+          nodeId,
+        ) ??
+        Number.POSITIVE_INFINITY;
+
+      if (
+        distance <
+        currentDistance
+      ) {
+        currentDistance =
+          distance;
+
+        currentId =
+          nodeId;
+      }
+    }
+
+    if (
+      currentId === null
+    ) {
+      break;
+    }
+
+    unvisited.delete(
+      currentId,
+    );
+
+    if (
+      currentId ===
+      destinationId
+    ) {
+      break;
+    }
+
+    const connectedEdges =
+      getConnectedEdges(
+        currentId,
+        map.edges,
+      );
+
+    for (
+      const edge of connectedEdges
+    ) {
+      const neighbourId =
+        getOtherNode(
+          edge,
+          currentId,
+        );
+
+      if (
+        !unvisited.has(
+          neighbourId,
+        )
+      ) {
+        continue;
+      }
+
+      const newDistance =
+        currentDistance +
+        edge.distance;
+
+      const oldDistance =
+        distances.get(
+          neighbourId,
+        ) ??
+        Number.POSITIVE_INFINITY;
+
+      if (
+        newDistance <
+        oldDistance
+      ) {
+        distances.set(
+          neighbourId,
+          newDistance,
+        );
+
+        previous.set(
+          neighbourId,
+          currentId,
+        );
+      }
+    }
+  }
+
+  /* -------------------------------------------------------
+     Check destination
+  ------------------------------------------------------- */
+
+  const destinationDistance =
+    distances.get(
+      destinationId,
+    );
+
+  if (
+    destinationDistance ===
+      undefined ||
+    !Number.isFinite(
+      destinationDistance,
+    )
+  ) {
+    return null;
+  }
+
+  /* -------------------------------------------------------
+     Rebuild route IDs
+  ------------------------------------------------------- */
+
+  const routeIds: string[] =
+    [];
+
+  let current:
+    | string
+    | null =
+    destinationId;
+
+  while (
+    current !== null
+  ) {
+    routeIds.unshift(
+      current,
+    );
+
+    current =
+      previous.get(
+        current,
+      ) ?? null;
+  }
+
+  if (
+    routeIds.length === 0 ||
+    routeIds[0] !== startId
+  ) {
+    return null;
+  }
+
+  /* -------------------------------------------------------
+     Convert IDs to nodes
+  ------------------------------------------------------- */
+
+  const routeNodes: MapNode[] =
+    routeIds
+      .map(
+        (id) =>
+          map.nodes.find(
+            (node) =>
+              node.id === id,
+          ),
+      )
+      .filter(
+        (
+          node,
+        ): node is MapNode =>
+          node !== undefined,
+      );
+
+  if (
+    routeNodes.length === 0
+  ) {
+    return null;
+  }
+
+  /* -------------------------------------------------------
+     Build route steps
+  ------------------------------------------------------- */
+
+  const steps: RouteStep[] =
+    [];
+
+  for (
+    let index = 0;
+    index <
+    routeNodes.length - 1;
+    index += 1
+  ) {
+    const from =
+      routeNodes[index];
+
+    const to =
+      routeNodes[index + 1];
+
+    const edge =
+      map.edges.find(
+        (item) =>
+          (
+            item.from ===
+              from.id &&
+            item.to === to.id
+          ) ||
+          (
+            item.from ===
+              to.id &&
+            item.to === from.id
+          ),
+      );
+
+    const stepDistance =
+      edge?.distance ??
+      coordinateDistance(
+        from.coordinate,
+        to.coordinate,
+      );
+
+    const bearing =
+      calculateBearing(
+        from.latitude,
+        from.longitude,
+        to.latitude,
+        to.longitude,
+      );
+
+    steps.push({
+      from,
+      to,
+      distance:
+        stepDistance,
+      bearing,
+      direction:
+        bearingToDirection(
+          bearing,
+        ),
+    });
+  }
 
   return {
     nodes: routeNodes,
     steps,
-    distance: calculateTotalDistance(
-      routeNodes
-    ),
+    distance:
+      destinationDistance,
   };
 }
 
-export function formatDistance(
-  distance: number
-): string {
-  if (distance < 1000) {
-    return `${Math.round(distance)} m`;
-  }
+/* =========================================================
+   FIND NEAREST NODE
+   ========================================================= */
 
-  return `${(distance / 1000).toFixed(1)} km`;
-}
-
-export function estimateWalkingTime(
-  distance: number
-): number {
-  /*
-   * Average walking speed:
-   * approximately 1.4 metres per second.
-   */
-  const walkingSpeed = 1.4;
-
-  return Math.max(
-    1,
-    Math.ceil(distance / walkingSpeed / 60)
-  );
-}
-
-export function getDirectionText(
-  from: Coordinate,
-  to: Coordinate
-): string {
-  const deltaLatitude =
-    to.latitude - from.latitude;
-
-  const deltaLongitude =
-    to.longitude - from.longitude;
-
-  const angle =
-    (Math.atan2(
-      deltaLongitude,
-      deltaLatitude
-    ) *
-      180) /
-    Math.PI;
-
-  const normalized =
-    (angle + 360) % 360;
-
+export function findNearestNode(
+  map: MapData,
+  latitude: number,
+  longitude: number,
+): MapNode | null {
   if (
-    normalized >= 337.5 ||
-    normalized < 22.5
+    map.nodes.length === 0
   ) {
-    return "Head north";
+    return null;
   }
 
-  if (
-    normalized >= 22.5 &&
-    normalized < 67.5
+  const current: Coordinate =
+    {
+      latitude,
+      longitude,
+    };
+
+  let nearest =
+    map.nodes[0];
+
+  let nearestDistance =
+    Number.POSITIVE_INFINITY;
+
+  for (
+    const node of map.nodes
   ) {
-    return "Head north-east";
+    const distance =
+      coordinateDistance(
+        current,
+        node.coordinate,
+      );
+
+    if (
+      distance <
+      nearestDistance
+    ) {
+      nearest =
+        node;
+
+      nearestDistance =
+        distance;
+    }
   }
 
-  if (
-    normalized >= 67.5 &&
-    normalized < 112.5
-  ) {
-    return "Head east";
-  }
-
-  if (
-    normalized >= 112.5 &&
-    normalized < 157.5
-  ) {
-    return "Head south-east";
-  }
-
-  if (
-    normalized >= 157.5 &&
-    normalized < 202.5
-  ) {
-    return "Head south";
-  }
-
-  if (
-    normalized >= 202.5 &&
-    normalized < 247.5
-  ) {
-    return "Head south-west";
-  }
-
-  if (
-    normalized >= 247.5 &&
-    normalized < 292.5
-  ) {
-    return "Head west";
-  }
-
-  return "Head north-west";
+  return nearest;
 }
