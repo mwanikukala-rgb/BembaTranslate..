@@ -1852,6 +1852,38 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   // USEFUL EXPRESSIONS AND WORDS TO NOTE
   { english: "my / your / his / her / their / our family", bemba: "ulupwa lwandi, lwenu, lwabo, lwesu" },
   { english: "in my / your / his / her / their / our home house", bemba: "mu mwandi, mu mwenu" },
+  
+  // STRONG COMMANDS — 2ND PERSON PLURAL / RESPECT
+  { english: "Enter", bemba: "Ingileeni" },
+  { english: "Put", bemba: "Bikeeni" },
+  { english: "Close", bemba: "Isaleeni" },
+  { english: "Open", bemba: "Isuleeni" },
+  { english: "Sweep", bemba: "Pyangeeni" },
+  { english: "Stop", bemba: "Lekeeni" },
+
+  // POLITE COMMANDS
+  { english: "Please enter", bemba: "Ingileeniko" },
+  { english: "Please put", bemba: "Bikeeniko" },
+  { english: "Please close", bemba: "Isaleeniko" },
+  { english: "Please open", bemba: "Isuleeniko" },
+  { english: "Please sweep", bemba: "Pyangeeniko" },
+  { english: "Please stop", bemba: "Lekeeniko" },
+
+  // FIRST PERSON PLURAL COMMANDS
+
+  { english: "Let me eat nshima", bemba: "Ndye ubwali" },
+  { english: "You eat bananas", bemba: "Mulye inkonde" },
+  { english: "Let them eat rice", bemba: "Balye mupunga" },
+  { english: "Let us eat chicken", bemba: "Tulye inkoko" },
+
+  // POLITE COMMAND EXAMPLES
+  { english: "Please enter the hut", bemba: "Ingileeniko mu nsaka" },
+  { english: "Please dance to the rhumba", bemba: "Shaneeniko rhumba" },
+  { english: "Please open the door", bemba: "Isuleeniko icibi" },
+  { english: "Please close the door", bemba: "Isaleeniko icibi" },
+  { english: "Please sweep the house", bemba: "Pyangeeniko mu ng'anda" },
+  { english: "Please clean the plates", bemba: "Wamyeeniko imbale" },
+  { english: "Please stop drinking beer", bemba: "Lekeeniko ukumwa ubwalwa" },
 ];
 
 
