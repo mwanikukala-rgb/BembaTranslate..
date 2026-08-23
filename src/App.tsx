@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
 import {
   BookOpen,
   Check,
+  ChevronRight,
   Clock3,
   Copy,
   Heart,
@@ -19,6 +19,8 @@ import {
   Sparkles,
   Volume2,
   WifiOff,
+  X,
+} from "lucide-react";
 } from "lucide-react";
 
 import "./index.css";
