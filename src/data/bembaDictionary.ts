@@ -379,5 +379,416 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "love", bemba: "temwa" },
   { english: "give", bemba: "pa" },
   { english: "take", bemba: "tola" },
+    // =========================================================
+  // INSULTS & OFFENSIVE EXPRESSIONS
+  // =========================================================
+
+  { english: "you dog", bemba: "We mbwawe" },
+  { english: "you are a dog", bemba: "Uli mbwa" },
+  { english: "you are dogs", bemba: "Muli mbwa" },
+  { english: "you son or daughter of a dog", bemba: "We mwana wa mbwawe" },
+  { english: "he or she is a dog", bemba: "Ni mbwa" },
+  { english: "you big dog", bemba: "We chibwawe" },
+  { english: "you dogs", bemba: "Mwe mbwamwe" },
+  { english: "you big dogs", bemba: "Mwe fibwamwe" },
+
+  { english: "you fool", bemba: "We chipubawe" },
+  { english: "you fool alternative", bemba: "We chipumbuwe" },
+  { english: "you are a fool", bemba: "Uli chipuba" },
+  { english: "you are insane", bemba: "Walipukuta" },
+  { english: "foolishness", bemba: "Ubupuba" },
+  { english: "take your foolishness far from here", bemba: "Twala ubupuba ukutali" },
+
+  { english: "you are a mad person", bemba: "Uli shilu" },
+  { english: "mad person", bemba: "Ishilu" },
+  { english: "he or she is a mad person", bemba: "Lishilu" },
+  { english: "they are mad people", bemba: "Mashilu" },
+  { english: "he or she is mad", bemba: "Alipena" },
+  { english: "they are mad formal", bemba: "Balipena" },
+  { english: "they went mad", bemba: "Baâlipena" },
+  { english: "he or she went mad", bemba: "Âalipena" },
+  { english: "he or she is mad informal", bemba: "Chalipena" },
+  { english: "they are mad", bemba: "balipena" },
+  { english: "they are mad informal", bemba: "Fyalipena" },
+  { english: "he or she is mad informal alternative", bemba: "Kalipen" },
+  { english: "he or she has gone mad", bemba: "Napena" },
+
+  { english: "dick", bemba: "Chikala" },
+  { english: "you dick", bemba: "Chikala chobe" },
+  { english: "your father's dick", bemba: "Chikala cha wiso" },
+
+  { english: "pussy", bemba: "Ichinyo" },
+  { english: "your pussy", bemba: "Chinyo chobe" },
+  { english: "your mother's pussy", bemba: "Noko ichinyo" },
+  { english: "your mother's pussy alternative", bemba: "Chinyo cha noko" },
+
+  { english: "fuck", bemba: "Tomba" },
+  { english: "fuck your mother", bemba: "Tomba noko" },
+
+  { english: "testicle", bemba: "Itole" },
+  { english: "your testicle", bemba: "Wabe tole" },
+
+  { english: "very offensive insult for someone's mother", bemba: "Stanyoko" },
+  { english: "very offensive insult for someone's mother alternative", bemba: "Satanyono" },
+  { english: "very offensive insult for someone's mother alternative 2", bemba: "Sulunyoko" },
+  { english: "very offensive insult for someone's mother alternative 3", bemba: "Gungunyoko" },
+
+  { english: "anus", bemba: "Mukongo" },
+  { english: "your mother's anus", bemba: "Mukongo wa noko" },
+  { english: "your father's anus", bemba: "Mukongo wa wiso" },
+
+  { english: "your anus", bemba: "Munyelo obe" },
+
+  { english: "pussy lips", bemba: "Malepe" },
+  { english: "your mother's pussy lips", bemba: "malepe ya noko" },
+  { english: "your mother's pussy lips alternative", bemba: "noko amalepe" },
+
+  { english: "shit", bemba: "Mafi" },
+  { english: "your shit", bemba: "Mafi yobe" },
+  { english: "his or her shit", bemba: "Mafi yakhe" },
+  { english: "their shit", bemba: "Mafi yabo" },
+
+  { english: "rubbish", bemba: "Ata!" },
+  { english: "rubbish alternative", bemba: "Atase!" },
+
+  { english: "clitoris", bemba: "Nini" },
+  { english: "your mother's clitoris", bemba: "Nini ya noko" },
+  { english: "your clitoris", bemba: "Nini yobe" },
+  { english: "their clitoris", bemba: "Nini yabo" },
+  { english: "their clitoris alternative", bemba: "Nini shabo" },
+
+  { english: "pubic hair", bemba: "Amaso" },
+  { english: "your pubic hair", bemba: "Maso yobe" },
+  { english: "your pubic hair alternative", bemba: "Waba amaso" },
+  { english: "your mother's pubic hair", bemba: "Maso ya noko" },
+  { english: "your mother's pubic hair alternative", bemba: "Noko amaso" },
+    // =========================================================
+  // PREFIXES & PREPOSITIONS
+  // =========================================================
+
+  { english: "single noun class Mu prefix", bemba: "U-" },
+  { english: "plural noun class Ba prefix", bemba: "A-" },
+  { english: "Mu class preposition", bemba: "Wa" },
+  { english: "Ba class preposition", bemba: "Ba" },
+
+  { english: "single noun class U prefix", bemba: "U-" },
+  { english: "plural noun class Mi prefix", bemba: "I-" },
+  { english: "Mi class preposition", bemba: "Ya" },
+
+  { english: "single noun class N or M prefix", bemba: "I-" },
+  { english: "N or M class plural verbal prefix", bemba: "Shi-" },
+  { english: "N or M class preposition", bemba: "Ya" },
+  { english: "N or M plural preposition", bemba: "Sha" },
+
+  { english: "single noun class Lu prefix", bemba: "U-" },
+  { english: "Lu class verbal prefix", bemba: "Lu-" },
+  { english: "Lu class preposition", bemba: "Lwa" },
+
+  { english: "single noun class Ci prefix", bemba: "I-" },
+  { english: "Ci class verbal prefix", bemba: "Ci-" },
+  { english: "Ci class preposition", bemba: "Ca" },
+  { english: "plural noun class Fi prefix", bemba: "I-" },
+  { english: "Fi class verbal prefix", bemba: "Fi-" },
+  { english: "Fi class preposition", bemba: "Fya" },
+
+  { english: "single noun class I prefix", bemba: "I-" },
+  { english: "I class verbal prefix", bemba: "Li-" },
+  { english: "I class preposition", bemba: "Lya" },
+  { english: "plural noun class Ma prefix", bemba: "A-" },
+  { english: "Ma class verbal prefix", bemba: "Ya-" },
+  { english: "Ma class preposition", bemba: "Ya" },
+
+  { english: "single noun class Ku prefix", bemba: "U-" },
+  { english: "Ku class verbal prefix", bemba: "Ku-" },
+  { english: "Ku class preposition", bemba: "Kwa" },
+
+  { english: "single noun class Bu prefix", bemba: "U-" },
+  { english: "Bu class verbal prefix", bemba: "Bu-" },
+  { english: "Bu class preposition", bemba: "Bwa" },
+
+  { english: "single noun class Ka prefix", bemba: "A-" },
+  { english: "Ka class verbal prefix", bemba: "Ka-" },
+  { english: "Ka class preposition", bemba: "Ka" },
+  { english: "plural noun class Tu prefix", bemba: "U-" },
+  { english: "Tu class verbal prefix", bemba: "Tu-" },
+  { english: "Tu class preposition", bemba: "Twa" },
+
+  { english: "single noun class Mu verbal prefix", bemba: "Mu-" },
+  { english: "Mu class preposition", bemba: "Mwa" },
+
+  { english: "single noun class Pa prefix", bemba: "Pa-" },
+  { english: "Pa class verbal prefix", bemba: "Pa-" },
+  { english: "Pa class preposition", bemba: "Pa" },
+
+  // =========================================================
+  // BEMBA GRAMMAR TERMS
+  // =========================================================
+
+  { english: "nominal prefix", bemba: "prefix of the noun" },
+  { english: "verbal prefix", bemba: "prefix of the verb" },
+  { english: "concord", bemba: "harmony between prefixes in a sentence" },
+  { english: "concord prefixes", bemba: "prefixes of words requiring concord with the noun" },
+  { english: "class concord", bemba: "concord between noun and other words in a sentence" },
+  { english: "the L is dropped in most words of this class", bemba: "the concord remains li" },
+    // =========================================================
+  // BEMBA VOWELS & PRONUNCIATION
+  // =========================================================
+
+  { english: "Bemba vowels", bemba: "Aa, Ee, Ii, Oo, Uu" },
+
+  { english: "Bemba vowel A pronunciation", bemba: "A as in father" },
+  { english: "Bemba vowel E pronunciation", bemba: "E as in egg or elephant" },
+  { english: "Bemba vowel I pronunciation", bemba: "I as the E sound in English, eat, or east" },
+  { english: "Bemba vowel O pronunciation", bemba: "O as in orange" },
+  { english: "Bemba vowel U pronunciation", bemba: "U as the double OO sound in fool, foot, boot, or food" },
+
+  { english: "A vowel sound", bemba: "A as in father" },
+  { english: "E vowel sound", bemba: "E as in egg" },
+  { english: "I vowel sound", bemba: "E sound as in English" },
+  { english: "O vowel sound", bemba: "O as in orange" },
+  { english: "U vowel sound", bemba: "OO sound as in food" },
+    // =========================================================
+  // PARTS OF THE BODY
+  // =========================================================
+
+  { english: "head", bemba: "Umutwe" },
+  { english: "heads", bemba: "Imitwe" },
+
+  { english: "eye", bemba: "Ilinso" },
+  { english: "eyes", bemba: "Amenso" },
+
+  { english: "nose", bemba: "Umoona" },
+  { english: "noses", bemba: "Imyoona" },
+
+  { english: "nostril", bemba: "Umoona" },
+  { english: "nostrils", bemba: "Imyoona" },
+
+  { english: "mouth", bemba: "Akanwa" },
+  { english: "mouths", bemba: "Utunwa" },
+
+  { english: "lip", bemba: "Umulomo" },
+  { english: "lips", bemba: "Imilomo" },
+
+  { english: "eyebrow", bemba: "Inkopyo" },
+
+  { english: "eyelid", bemba: "Icikapa ce linso" },
+  { english: "eyelids", bemba: "Ifikapa ya menso" },
+
+  { english: "chin", bemba: "Icilefulefu" },
+  { english: "chins", bemba: "Ifilefulefu" },
+
+  { english: "cheek", bemba: "Itobo" },
+  { english: "cheeks", bemba: "Amatobo" },
+
+  { english: "beard", bemba: "Umwefu" },
+  { english: "beards", bemba: "Imyefu" },
+
+  { english: "hair", bemba: "Umushishi" },
+
+  { english: "tooth", bemba: "Ilino" },
+  { english: "teeth", bemba: "Ameno" },
+
+  { english: "tongue", bemba: "Ululimi" },
+  { english: "tongues", bemba: "Indimi" },
+
+  { english: "saliva", bemba: "Amate" },
+
+  { english: "esophagus", bemba: "Ichikolomino" },
+  { english: "esophaguses", bemba: "Ifikolomino" },
+
+  { english: "breast", bemba: "Ibeele" },
+  { english: "breasts", bemba: "Amabeele" },
+
+  { english: "chest", bemba: "Ichifuba" },
+  { english: "chests", bemba: "Ififuba" },
+
+  { english: "shoulder", bemba: "Ichipeeya" },
+  { english: "shoulders", bemba: "Ifipeeya" },
+  { english: "shoulder alternative", bemba: "Ukubeya" },
+  { english: "shoulders alternative", bemba: "Amabeya" },
+
+  { english: "elbow", bemba: "Inkonkoni" },
+  { english: "elbows", bemba: "Inkonkoni" },
+
+  { english: "arm", bemba: "Ukuboko" },
+  { english: "arms", bemba: "Amaboko" },
+
+  { english: "finger", bemba: "Umunwe" },
+  { english: "fingers", bemba: "Iminwe" },
+
+  { english: "thumb", bemba: "Ichikumo" },
+  { english: "thumbs", bemba: "Ifikumo" },
+
+  { english: "small short finger", bemba: "Akantengelesha" },
+
+  { english: "hand", bemba: "Ukuboko" },
+  { english: "hands", bemba: "Amaboko" },
+
+  { english: "palm", bemba: "Ichisansa" },
+  { english: "palms", bemba: "Ifisansa" },
+
+  { english: "fist", bemba: "Ikofi" },
+  { english: "fists", bemba: "Amakofi" },
+  { english: "fist alternative", bemba: "ulukonya" },
+  { english: "fists alternative", bemba: "Inkonya" },
+
+  { english: "skin", bemba: "Inkanda" },
+
+  { english: "belly", bemba: "Ifumo" },
+  { english: "bellies", bemba: "Amafumo" },
+
+  { english: "navel", bemba: "Umutoto" },
+  { english: "navels", bemba: "Imitoto" },
+
+  { english: "neck", bemba: "Umukoshi" },
+  { english: "necks", bemba: "Imikoshi" },
+
+  { english: "stomach", bemba: "Ichifu" },
+  { english: "stomachs", bemba: "Ififu" },
+
+  { english: "intestine", bemba: "Ubula" },
+  { english: "intestines", bemba: "Amala" },
+
+  { english: "pancreas", bemba: "Indusha" },
+
+  { english: "bile", bemba: "Indusha" },
+
+  { english: "liver", bemba: "Pwapwa" },
+  { english: "livers", bemba: "Ba pwapa" },
+
+  { english: "blood", bemba: "Umulopa" },
+
+  { english: "hormone", bemba: "Insandesande" },
+  { english: "hormones", bemba: "Insandesande" },
+
+  { english: "brain", bemba: "Bongobongo" },
+  { english: "brains", bemba: "Ba bongobongo" },
+
+  { english: "bald", bemba: "Ipala" },
+  { english: "bald heads", bemba: "Amapala" },
+
+  { english: "artery", bemba: "Umushipa" },
+  { english: "arteries", bemba: "Imishipa" },
+
+  { english: "vein", bemba: "Umushipa" },
+  { english: "veins", bemba: "Imishipa" },
+
+  { english: "heart", bemba: "Umutima" },
+  { english: "hearts", bemba: "Imitima" },
+
+  { english: "bladder", bemba: "Ichisu" },
+  { english: "bladders", bemba: "Ifisu" },
+
+  { english: "urine", bemba: "Imisu" },
+
+  { english: "rib", bemba: "Ulubafu" },
+  { english: "ribs", bemba: "Imbafu" },
+
+  { english: "spine", bemba: "Umungoloolo" },
+  { english: "spines", bemba: "Imingoloolo" },
+
+  { english: "hip", bemba: "Intungu" },
+  { english: "hips", bemba: "Intungu" },
+
+  { english: "gum", bemba: "Ichiponshi" },
+  { english: "gums", bemba: "Ifiponshi" },
+
+  { english: "heel", bemba: "Ichitende" },
+  { english: "heels", bemba: "Ifitende" },
+
+  { english: "bone", bemba: "Ifupa" },
+  { english: "bones", bemba: "Amafupa" },
+
+  { english: "bowel", bemba: "Ubula" },
+  { english: "bowels", bemba: "Amala" },
+
+  { english: "leg", bemba: "Ukuulu" },
+  { english: "legs", bemba: "Amaoolu" },
+
+  { english: "toe", bemba: "Ichikondo" },
+  { english: "toes", bemba: "Ifikondo" },
+
+  { english: "nail", bemba: "Ulwaala" },
+  { english: "nails", bemba: "Amaala" },
+
+  { english: "butt", bemba: "Itako" },
+  { english: "buttocks", bemba: "Amatako" },
+
+  { english: "anus", bemba: "Imputi" },
+  { english: "anus alternative", bemba: "Umusula" },
+  { english: "anuses", bemba: "Imisula" },
+
+  { english: "pubic hair", bemba: "Amaso" },
+
+  { english: "vagina formal", bemba: "Ubwanakashi" },
+  { english: "vagina informal", bemba: "Ichinyo" },
+
+  { english: "penis formal", bemba: "Ubwaume" },
+  { english: "penis informal", bemba: "Ubwamba" },
+  { english: "penis informal alternative", bemba: "Icikala" },
+  { english: "penises informal", bemba: "Ifikala" },
+
+  { english: "crotch", bemba: "Ichinena" },
+  { english: "crotches", bemba: "Ifinena" },
+
+  { english: "knee", bemba: "Ikufi" },
+  { english: "knees", bemba: "Amakufi" },
+
+  { english: "waist", bemba: "Umusana" },
+  { english: "waists", bemba: "Imisana" },
+
+  { english: "wrist", bemba: "Inkolokoso" },
+
+  { english: "forehead", bemba: "Impumi" },
+    // =========================================================
+  // ADJECTIVES
+  // =========================================================
+
+  // Adjective examples
+
+  { english: "a green house", bemba: "Inganda ya katapakatapa" },
+  { english: "a tall building", bemba: "Ichikuulwa ichitali" },
+  { english: "a very old man", bemba: "Umwaume umukote saana" },
+  { english: "the old red house", bemba: "Inganda ya kale iyakashika" },
+  { english: "a very nice friend", bemba: "Chibusa umusuma saana" },
+
+  // =========================================================
+  // COLORS
+  // =========================================================
+
+  { english: "colors", bemba: "Amalangi" },
+  { english: "black", bemba: "-fiita" },
+  { english: "brown", bemba: "-kashikila" },
+  { english: "red", bemba: "-kashika" },
+  { english: "white", bemba: "-buuta" },
+  { english: "blue", bemba: "blue" },
+  { english: "grey", bemba: "grey" },
+  { english: "purple", bemba: "Pepo" },
+  { english: "orange", bemba: "olenji" },
+  { english: "yellow", bemba: "umutuntulwa" },
+
+  // =========================================================
+  // SIZES
+  // =========================================================
+
+  { english: "sizes", bemba: "Ubukulu" },
+  { english: "big", bemba: "-kulu" },
+  { english: "small", bemba: "-nono" },
+  { english: "small alternative", bemba: "-cepa" },
+  { english: "long", bemba: "-leepa" },
+  { english: "tall", bemba: "-leepa" },
+  { english: "short", bemba: "-ipipa" },
+  { english: "narrow", bemba: "-ipipa" },
+  { english: "deep", bemba: "-shika" },
+
+  // =========================================================
+  // FOOD TASTE
+  // =========================================================
+
+  { english: "food taste", bemba: "-sonda" },
+  { english: "taste", bemba: "-sonda" },
+  { english: "sweet", bemba: "-lowa" },
+  { english: "sour like lemon", bemba: "-sasamina" },
+  { english: "bitter", bemba: "-lula" },
   ];
 
