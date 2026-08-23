@@ -6,30 +6,26 @@ import {
   Heart,
   History as HistoryIcon,
   Languages,
-  LocateFixed,
-  Map,
-  Navigation,
+  Navigation as NavigationIcon,
   Search,
   Settings,
   ShieldCheck,
   Sparkles,
   Volume2,
-  WifiOff,
-  X,
-  ZoomIn,
-  ZoomOut,
 } from "lucide-react";
 
 import { bembaDictionary } from "./data/bembaDictionary";
 import { translateWithFallback } from "./engine/bembaTranslator";
+import Navigation from "./navigation/Navigation";
+
 import "./styles/global.css";
 
 type Page =
   | "translate"
   | "dictionary"
   | "learn"
-  | "history"
   | "navigation"
+  | "history"
   | "settings";
 
 type HistoryItem = {
@@ -53,92 +49,69 @@ const navigationItems: {
   label: string;
   icon: typeof Languages;
 }[] = [
-  { id: "translate", label: "Translate", icon: Languages },
-  { id: "dictionary", label: "Dictionary", icon: BookOpen },
-  { id: "learn", label: "Learn", icon: Sparkles },
-  { id: "history", label: "History", icon: HistoryIcon },
-  { id: "navigation", label: "Navigate", icon: Navigation },
-  { id: "settings", label: "Settings", icon: Settings },
-];
-
-const campusPlaces = [
   {
-    id: "main-gate",
-    name: "Main Gate",
-    type: "Entrance",
-    x: 16,
-    y: 78,
+    id: "translate",
+    label: "Translate",
+    icon: Languages,
   },
   {
-    id: "admin",
-    name: "Administration Block",
-    type: "Administration",
-    x: 38,
-    y: 61,
+    id: "dictionary",
+    label: "Dictionary",
+    icon: BookOpen,
   },
   {
-    id: "library",
-    name: "University Library",
-    type: "Library",
-    x: 61,
-    y: 48,
+    id: "learn",
+    label: "Learn",
+    icon: Sparkles,
   },
   {
-    id: "student-centre",
-    name: "Student Centre",
-    type: "Student Services",
-    x: 74,
-    y: 66,
+    id: "navigation",
+    label: "Navigate",
+    icon: NavigationIcon,
   },
   {
-    id: "lecture-block",
-    name: "Lecture Block",
-    type: "Academic",
-    x: 46,
-    y: 31,
+    id: "history",
+    label: "History",
+    icon: HistoryIcon,
   },
   {
-    id: "hostels",
-    name: "Student Hostels",
-    type: "Accommodation",
-    x: 78,
-    y: 28,
-  },
-  {
-    id: "clinic",
-    name: "Campus Clinic",
-    type: "Health",
-    x: 25,
-    y: 32,
-  },
-  {
-    id: "sports",
-    name: "Sports Ground",
-    type: "Recreation",
-    x: 68,
-    y: 82,
+    id: "settings",
+    label: "Settings",
+    icon: Settings,
   },
 ];
 
 function App() {
   const [launching, setLaunching] = useState(true);
   const [progress, setProgress] = useState(0);
-  const [page, setPage] = useState<Page>("translate");
+
+  const [page, setPage] =
+    useState<Page>("translate");
 
   const [english, setEnglish] = useState("");
   const [bemba, setBemba] = useState("");
-  const [translating, setTranslating] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [favourite, setFavourite] = useState(false);
-  const [speaking, setSpeaking] = useState(false);
 
-  const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [searchText, setSearchText] = useState("");
+  const [translating, setTranslating] =
+    useState(false);
 
-  const [selectedPlace, setSelectedPlace] = useState("library");
-  const [destination, setDestination] = useState("");
-  const [navigationStarted, setNavigationStarted] = useState(false);
-  const [mapZoom, setMapZoom] = useState(1);
+  const [copied, setCopied] =
+    useState(false);
+
+  const [favourite, setFavourite] =
+    useState(false);
+
+  const [speaking, setSpeaking] =
+    useState(false);
+
+  const [history, setHistory] =
+    useState<HistoryItem[]>([]);
+
+  const [searchText, setSearchText] =
+    useState("");
+
+  /* --------------------------------------------------
+     Launch screen
+  -------------------------------------------------- */
 
   useEffect(() => {
     let current = 0;
@@ -148,7 +121,9 @@ function App() {
 
       if (current >= 100) {
         current = 100;
+
         setProgress(100);
+
         window.clearInterval(timer);
 
         window.setTimeout(() => {
@@ -157,46 +132,58 @@ function App() {
       } else {
         setProgress(current);
       }
-    }, 45);
+    }, 55);
 
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearInterval(timer);
+    };
   }, []);
 
+  /* --------------------------------------------------
+     Dictionary
+  -------------------------------------------------- */
+
   const dictionaryResults = useMemo(() => {
-    const query = searchText.trim().toLowerCase();
+    const query =
+      searchText.trim().toLowerCase();
 
     if (!query) {
       return bembaDictionary.slice(0, 100);
     }
 
     return bembaDictionary
-      .filter(
-        (item) =>
-          item.english.toLowerCase().includes(query) ||
-          item.bemba.toLowerCase().includes(query),
-      )
+      .filter((item) => {
+        return (
+          item.english
+            .toLowerCase()
+            .includes(query) ||
+          item.bemba
+            .toLowerCase()
+            .includes(query)
+        );
+      })
       .slice(0, 200);
   }, [searchText]);
 
-  const selectedPlaceData =
-    campusPlaces.find((place) => place.id === selectedPlace) ??
-    campusPlaces[0];
-
-  const destinationData = campusPlaces.find(
-    (place) => place.id === destination,
-  );
+  /* --------------------------------------------------
+     Translation
+  -------------------------------------------------- */
 
   const translate = () => {
     const input = english.trim();
 
-    if (!input || translating) return;
+    if (!input || translating) {
+      return;
+    }
 
     setTranslating(true);
     setCopied(false);
 
     window.setTimeout(() => {
       const match = quickPhrases.find(
-        ([source]) => source.toLowerCase() === input.toLowerCase(),
+        ([source]) =>
+          source.toLowerCase() ===
+          input.toLowerCase(),
       );
 
       const result =
@@ -212,10 +199,13 @@ function App() {
             id: Date.now(),
             english: input,
             bemba: result,
-            time: new Date().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
+            time: new Date().toLocaleTimeString(
+              [],
+              {
+                hour: "2-digit",
+                minute: "2-digit",
+              },
+            ),
           },
           ...items,
         ]);
@@ -225,7 +215,14 @@ function App() {
     }, 160);
   };
 
-  const selectPhrase = (source: string, translation: string) => {
+  /* --------------------------------------------------
+     Select phrase
+  -------------------------------------------------- */
+
+  const selectPhrase = (
+    source: string,
+    translation: string,
+  ) => {
     setEnglish(source);
     setBemba(translation);
     setFavourite(false);
@@ -233,77 +230,108 @@ function App() {
     setPage("translate");
   };
 
+  /* --------------------------------------------------
+     Copy
+  -------------------------------------------------- */
+
   const copy = async () => {
-    if (!bemba) return;
+    if (!bemba) {
+      return;
+    }
 
     try {
-      await navigator.clipboard.writeText(bemba);
+      await navigator.clipboard.writeText(
+        bemba,
+      );
+
       setCopied(true);
 
-      window.setTimeout(() => setCopied(false), 1400);
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 1400);
     } catch {
       setCopied(false);
     }
   };
 
+  /* --------------------------------------------------
+     Audio
+  -------------------------------------------------- */
+
   const listen = () => {
-    if (!bemba || speaking) return;
+    if (!bemba || speaking) {
+      return;
+    }
 
     setSpeaking(true);
 
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-
-      const utterance = new SpeechSynthesisUtterance(bemba);
-      utterance.rate = 0.85;
-      utterance.onend = () => setSpeaking(false);
-      utterance.onerror = () => setSpeaking(false);
-
-      window.speechSynthesis.speak(utterance);
-    } else {
-      window.setTimeout(() => setSpeaking(false), 900);
-    }
+    window.setTimeout(() => {
+      setSpeaking(false);
+    }, 900);
   };
 
-  const startNavigation = () => {
-    if (!destinationData) return;
-    setNavigationStarted(true);
-    setSelectedPlace(destinationData.id);
-  };
+  /* --------------------------------------------------
+     Launch screen
+  -------------------------------------------------- */
 
   if (launching) {
     return (
       <div className="launch-screen">
         <div className="launch-content">
+
           <div className="launch-logo">
-            <Languages size={36} strokeWidth={1.7} />
+            <Languages
+              size={36}
+              strokeWidth={1.7}
+            />
           </div>
 
-          <div className="launch-kicker">OFFLINE LANGUAGE</div>
+          <div className="launch-kicker">
+            OFFLINE LANGUAGE
+          </div>
 
           <h1>BembaTranslate</h1>
-          <p>English • Bemba</p>
+
+          <p>
+            English • Bemba
+          </p>
 
           <div className="launch-status">
+
             <div className="launch-status-row">
-              <span>Preparing your dictionary</span>
-              <strong>{progress}%</strong>
+              <span>
+                Preparing your dictionary
+              </span>
+
+              <strong>
+                {progress}%
+              </strong>
             </div>
 
             <div className="progress-track">
               <div
                 className="progress-fill"
-                style={{ width: `${progress}%` }}
+                style={{
+                  width: `${progress}%`,
+                }}
               />
             </div>
+
           </div>
 
           <div className="launch-message">
+
             <span className="status-check">
               <Check size={12} />
             </span>
-            <span>Private. Fast. Works without internet.</span>
+
+            <span>
+              Private. Fast. Works without
+              internet.
+            </span>
+
           </div>
+
         </div>
 
         <div className="launch-footer">
@@ -314,50 +342,76 @@ function App() {
     );
   }
 
-  const pageTitle =
-    page === "translate"
-      ? "Translate"
-      : page === "dictionary"
-        ? "Dictionary"
-        : page === "learn"
-          ? "Learn Bemba"
-          : page === "history"
-            ? "History"
-            : page === "navigation"
-              ? "Campus Navigation"
-              : "Settings";
+  /* --------------------------------------------------
+     Main application
+  -------------------------------------------------- */
 
   return (
     <div className="app">
+
       <div className="wallpaper" />
 
       <main className="app-content">
+
+        {/* HEADER */}
+
         <header className="app-header">
+
           <div className="header-title">
+
             <span className="header-icon">
-              <Languages size={17} />
+              {page === "navigation" ? (
+                <NavigationIcon size={17} />
+              ) : (
+                <Languages size={17} />
+              )}
             </span>
 
             <div>
-              <strong>{pageTitle}</strong>
+
+              <strong>
+                {page === "translate"
+                  ? "Translate"
+                  : page === "dictionary"
+                    ? "Dictionary"
+                    : page === "learn"
+                      ? "Learn Bemba"
+                      : page === "navigation"
+                        ? "Navigate"
+                        : page === "history"
+                          ? "History"
+                          : "Settings"}
+              </strong>
+
               <span>
                 {page === "navigation"
-                  ? "Offline campus map"
+                  ? "Offline GPS navigation"
                   : "English → Bemba"}
               </span>
+
             </div>
+
           </div>
 
           <div className="offline-badge">
-            <WifiOff size={12} />
+            <span />
             Offline
           </div>
+
         </header>
+
+        {/* ==================================================
+            TRANSLATE
+        ================================================== */}
 
         {page === "translate" && (
           <section className="page">
+
             <div className="welcome-card">
-              <span className="eyebrow">BEMBATRANSLATE</span>
+
+              <span className="eyebrow">
+                BEMBATRANSLATE
+              </span>
 
               <h1>
                 Speak Bemba
@@ -366,61 +420,104 @@ function App() {
               </h1>
 
               <p>
-                Translate everyday English privately,
-                quickly and completely offline.
+                Translate everyday English
+                privately, quickly and
+                completely offline.
               </p>
+
             </div>
 
             <div className="section-title">
+
               <div>
-                <h2>Translate</h2>
-                <p>English to Bemba</p>
+                <h2>
+                  Translate
+                </h2>
+
+                <p>
+                  English to Bemba
+                </p>
               </div>
 
               <span className="local-pill">
                 <Check size={12} />
                 Local
               </span>
+
             </div>
 
             <div className="translation-card">
+
               <div className="language-strip">
-                <div>
-                  <small>FROM</small>
-                  <strong>English</strong>
-                </div>
-
-                <div className="language-arrow">→</div>
 
                 <div>
-                  <small>TO</small>
-                  <strong>Bemba</strong>
+                  <small>
+                    FROM
+                  </small>
+
+                  <strong>
+                    English
+                  </strong>
                 </div>
+
+                <div className="language-arrow">
+                  →
+                </div>
+
+                <div>
+                  <small>
+                    TO
+                  </small>
+
+                  <strong>
+                    Bemba
+                  </strong>
+                </div>
+
               </div>
 
               <div className="input-label-row">
-                <span>English text</span>
-                <span>{english.length}/5000</span>
+
+                <span>
+                  English text
+                </span>
+
+                <span>
+                  {english.length}/5000
+                </span>
+
               </div>
 
               <textarea
                 value={english}
                 maxLength={5000}
-                onChange={(event) => setEnglish(event.target.value)}
+                onChange={(event) => {
+                  setEnglish(
+                    event.target.value,
+                  );
+                }}
                 placeholder="Type something in English..."
               />
 
               <button
                 className="translate-button"
                 onClick={translate}
-                disabled={!english.trim() || translating}
+                disabled={
+                  !english.trim() ||
+                  translating
+                }
               >
                 <Languages size={17} />
-                {translating ? "Translating..." : "Translate to Bemba"}
+
+                {translating
+                  ? "Translating..."
+                  : "Translate to Bemba"}
               </button>
 
               <div className="result-box">
+
                 <div className="result-heading">
+
                   <span>
                     <span className="bemba-dot" />
                     Bemba translation
@@ -432,27 +529,46 @@ function App() {
                       Ready
                     </span>
                   )}
+
                 </div>
 
                 {bemba ? (
                   <div className="translation-result">
-                    <strong>{bemba}</strong>
+
+                    <strong>
+                      {bemba}
+                    </strong>
 
                     <div className="result-actions">
+
                       <button
-                        className={favourite ? "selected" : ""}
-                        onClick={() =>
-                          setFavourite((value) => !value)
+                        className={
+                          favourite
+                            ? "selected"
+                            : ""
                         }
+                        onClick={() => {
+                          setFavourite(
+                            (value) =>
+                              !value,
+                          );
+                        }}
                         aria-label="Favourite"
                       >
                         <Heart
                           size={16}
-                          fill={favourite ? "currentColor" : "none"}
+                          fill={
+                            favourite
+                              ? "currentColor"
+                              : "none"
+                          }
                         />
                       </button>
 
-                      <button onClick={copy} aria-label="Copy">
+                      <button
+                        onClick={copy}
+                        aria-label="Copy"
+                      >
                         {copied ? (
                           <Check size={16} />
                         ) : (
@@ -460,79 +576,148 @@ function App() {
                         )}
                       </button>
 
-                      <button onClick={listen} aria-label="Listen">
+                      <button
+                        onClick={listen}
+                        aria-label="Listen"
+                      >
                         <Volume2 size={16} />
-                        {speaking ? "Playing" : "Listen"}
+
+                        {speaking
+                          ? "Playing"
+                          : "Listen"}
                       </button>
+
                     </div>
+
                   </div>
                 ) : (
                   <div className="empty-result">
+
                     <BookOpen size={21} />
-                    <strong>Your translation will appear here</strong>
-                    <span>Enter an English word or phrase above.</span>
+
+                    <strong>
+                      Your translation will
+                      appear here
+                    </strong>
+
+                    <span>
+                      Enter an English word
+                      or phrase above.
+                    </span>
+
                   </div>
                 )}
+
               </div>
+
             </div>
 
             <div className="section-title">
+
               <div>
-                <h2>Popular phrases</h2>
-                <p>Useful expressions for everyday life</p>
+                <h2>
+                  Popular phrases
+                </h2>
+
+                <p>
+                  Useful expressions for
+                  everyday life
+                </p>
               </div>
 
-              <span className="count-pill">{quickPhrases.length}</span>
+              <span className="count-pill">
+                {quickPhrases.length}
+              </span>
+
             </div>
 
             <div className="phrase-grid">
-              {quickPhrases.map(([source, translation]) => (
-                <button
-                  key={source}
-                  className="phrase-card"
-                  onClick={() => selectPhrase(source, translation)}
-                >
-                  <span>{source}</span>
-                  <strong>{translation}</strong>
-                </button>
-              ))}
+
+              {quickPhrases.map(
+                ([source, translation]) => (
+                  <button
+                    key={source}
+                    className="phrase-card"
+                    onClick={() =>
+                      selectPhrase(
+                        source,
+                        translation,
+                      )
+                    }
+                  >
+                    <span>
+                      {source}
+                    </span>
+
+                    <strong>
+                      {translation}
+                    </strong>
+                  </button>
+                ),
+              )}
+
             </div>
 
             <div className="offline-info">
+
               <div className="info-icon">
                 <Check size={15} />
               </div>
 
               <div>
-                <strong>Works completely offline</strong>
-                <span>Your translations stay on your device.</span>
+                <strong>
+                  Works completely offline
+                </strong>
+
+                <span>
+                  Your translations stay
+                  on your device.
+                </span>
               </div>
+
             </div>
+
           </section>
         )}
 
+        {/* ==================================================
+            DICTIONARY
+        ================================================== */}
+
         {page === "dictionary" && (
           <section className="page">
+
             <div className="page-intro">
-              <span className="eyebrow">BEMBA LANGUAGE</span>
-              <h1>Dictionary</h1>
-              <p>Search the built-in English → Bemba dictionary.</p>
+
+              <span className="eyebrow">
+                BEMBA LANGUAGE
+              </span>
+
+              <h1>
+                Dictionary
+              </h1>
+
+              <p>
+                Search the built-in
+                English → Bemba dictionary.
+              </p>
+
             </div>
 
             <div className="search-field">
+
               <Search size={17} />
 
               <input
                 value={searchText}
-                onChange={(event) => setSearchText(event.target.value)}
+                onChange={(event) => {
+                  setSearchText(
+                    event.target.value,
+                  );
+                }}
                 placeholder="Search words or phrases..."
               />
 
-              {searchText && (
-                <button onClick={() => setSearchText("")}>
-                  <X size={15} />
-                </button>
-              )}
             </div>
 
             <div className="dictionary-count">
@@ -542,79 +727,248 @@ function App() {
             </div>
 
             <div className="dictionary-list">
-              {dictionaryResults.length > 0 ? (
-                dictionaryResults.map((item, index) => (
-                  <button
-                    key={`${item.english}-${index}`}
-                    className="dictionary-card"
-                    onClick={() =>
-                      selectPhrase(item.english, item.bemba)
-                    }
-                  >
-                    <div>
-                      <span>{item.english}</span>
-                      <strong>{item.bemba}</strong>
-                    </div>
 
-                    <Languages size={16} />
-                  </button>
-                ))
+              {dictionaryResults.length > 0 ? (
+                dictionaryResults.map(
+                  (item, index) => (
+                    <button
+                      key={`${item.english}-${index}`}
+                      className="dictionary-card"
+                      onClick={() =>
+                        selectPhrase(
+                          item.english,
+                          item.bemba,
+                        )
+                      }
+                    >
+
+                      <div>
+
+                        <span>
+                          {item.english}
+                        </span>
+
+                        <strong>
+                          {item.bemba}
+                        </strong>
+
+                      </div>
+
+                      <Languages size={16} />
+
+                    </button>
+                  ),
+                )
               ) : (
                 <div className="large-empty">
+
                   <Search size={30} />
-                  <strong>No dictionary entry found</strong>
-                  <span>Try another English or Bemba word.</span>
+
+                  <strong>
+                    No dictionary entry found
+                  </strong>
+
+                  <span>
+                    Try another English or
+                    Bemba word.
+                  </span>
+
                 </div>
               )}
+
             </div>
+
           </section>
         )}
+
+        {/* ==================================================
+            LEARN
+        ================================================== */}
 
         {page === "learn" && (
           <section className="page">
+
             <div className="page-intro">
-              <span className="eyebrow">LEARN BEMBA</span>
-              <h1>Build your vocabulary.</h1>
+
+              <span className="eyebrow">
+                LEARN BEMBA
+              </span>
+
+              <h1>
+                Build your vocabulary.
+              </h1>
+
               <p>
-                Explore useful Bemba words and everyday expressions.
+                Explore useful Bemba words
+                and everyday expressions.
               </p>
+
             </div>
 
             <div className="learn-grid">
-              {[
-                ["01", "Greetings", "Everyday greetings"],
-                ["02", "Family", "Family vocabulary"],
-                ["03", "Food & Drink", "Useful food words"],
-                ["04", "Travel", "Words for travelling"],
-                ["05", "Everyday Life", "Common expressions"],
-              ].map(([number, title, description]) => (
-                <button className="learn-card" key={number}>
-                  <span className="learn-number">{number}</span>
-                  <strong>{title}</strong>
-                  <small>{description}</small>
-                </button>
-              ))}
+
+              <button className="learn-card">
+
+                <span className="learn-number">
+                  01
+                </span>
+
+                <strong>
+                  Greetings
+                </strong>
+
+                <small>
+                  Everyday greetings
+                </small>
+
+              </button>
+
+              <button className="learn-card">
+
+                <span className="learn-number">
+                  02
+                </span>
+
+                <strong>
+                  Family
+                </strong>
+
+                <small>
+                  Family vocabulary
+                </small>
+
+              </button>
+
+              <button className="learn-card">
+
+                <span className="learn-number">
+                  03
+                </span>
+
+                <strong>
+                  Food &amp; Drink
+                </strong>
+
+                <small>
+                  Useful food words
+                </small>
+
+              </button>
+
+              <button className="learn-card">
+
+                <span className="learn-number">
+                  04
+                </span>
+
+                <strong>
+                  Travel
+                </strong>
+
+                <small>
+                  Words for travelling
+                </small>
+
+              </button>
+
+              <button className="learn-card">
+
+                <span className="learn-number">
+                  05
+                </span>
+
+                <strong>
+                  Everyday Life
+                </strong>
+
+                <small>
+                  Common expressions
+                </small>
+
+              </button>
+
             </div>
+
+            <div className="offline-info">
+
+              <div className="info-icon">
+                <Sparkles size={15} />
+              </div>
+
+              <div>
+
+                <strong>
+                  Number lessons removed
+                </strong>
+
+                <span>
+                  Bemba number counting is
+                  removed for now and can
+                  be added correctly later.
+                </span>
+
+              </div>
+
+            </div>
+
           </section>
         )}
 
+        {/* ==================================================
+            NAVIGATION
+        ================================================== */}
+
+        {page === "navigation" && (
+          <Navigation
+            onBack={() =>
+              setPage("translate")
+            }
+          />
+        )}
+
+        {/* ==================================================
+            HISTORY
+        ================================================== */}
+
         {page === "history" && (
           <section className="page">
+
             <div className="page-intro">
-              <span className="eyebrow">LOCAL HISTORY</span>
-              <h1>History</h1>
-              <p>Your recent translations are stored locally.</p>
+
+              <span className="eyebrow">
+                LOCAL HISTORY
+              </span>
+
+              <h1>
+                History
+              </h1>
+
+              <p>
+                Your recent translations
+                are stored locally.
+              </p>
+
             </div>
 
             {history.length === 0 ? (
               <div className="large-empty">
+
                 <HistoryIcon size={30} />
-                <strong>No translations yet</strong>
-                <span>Your recent translations will appear here.</span>
+
+                <strong>
+                  No translations yet
+                </strong>
+
+                <span>
+                  Your recent translations
+                  will appear here.
+                </span>
+
               </div>
             ) : (
               <>
                 <div className="history-toolbar">
+
                   <span>
                     {history.length}{" "}
                     {history.length === 1
@@ -622,268 +976,239 @@ function App() {
                       : "translations"}
                   </span>
 
-                  <button onClick={() => setHistory([])}>Clear</button>
+                  <button
+                    onClick={() => {
+                      setHistory([]);
+                    }}
+                  >
+                    Clear
+                  </button>
+
                 </div>
 
                 <div className="history-list">
+
                   {history.map((item) => (
                     <button
                       key={item.id}
                       className="history-card"
                       onClick={() =>
-                        selectPhrase(item.english, item.bemba)
+                        selectPhrase(
+                          item.english,
+                          item.bemba,
+                        )
                       }
                     >
+
                       <div>
-                        <small>{item.time}</small>
-                        <span>{item.english}</span>
-                        <strong>{item.bemba}</strong>
+
+                        <small>
+                          {item.time}
+                        </small>
+
+                        <span>
+                          {item.english}
+                        </span>
+
+                        <strong>
+                          {item.bemba}
+                        </strong>
+
                       </div>
 
                       <Languages size={16} />
+
                     </button>
                   ))}
+
                 </div>
               </>
             )}
+
           </section>
         )}
 
-        {page === "navigation" && (
-          <section className="page navigation-page">
-            <div className="page-intro navigation-intro">
-              <div>
-                <span className="eyebrow">OFFLINE CAMPUS MAP</span>
-                <h1>Navigate Campus</h1>
-                <p>
-                  Find buildings and follow simple offline walking
-                  directions.
-                </p>
-              </div>
-
-              <div className="map-status">
-                <span />
-                GPS Ready
-              </div>
-            </div>
-
-            <div className="navigation-controls">
-              <div className="location-card">
-                <div className="location-icon">
-                  <LocateFixed size={18} />
-                </div>
-
-                <div>
-                  <small>YOUR LOCATION</small>
-                  <strong>Main Campus</strong>
-                  <span>Offline position available</span>
-                </div>
-              </div>
-
-              <div className="destination-control">
-                <label htmlFor="destination">Where do you want to go?</label>
-
-                <select
-                  id="destination"
-                  value={destination}
-                  onChange={(event) => {
-                    setDestination(event.target.value);
-                    setNavigationStarted(false);
-                  }}
-                >
-                  <option value="">Select a destination</option>
-
-                  {campusPlaces.map((place) => (
-                    <option key={place.id} value={place.id}>
-                      {place.name}
-                    </option>
-                  ))}
-                </select>
-
-                <button
-                  className="start-navigation"
-                  onClick={startNavigation}
-                  disabled={!destination}
-                >
-                  <Navigation size={16} />
-                  Start walking route
-                </button>
-              </div>
-            </div>
-
-            <div className="map-card">
-              <div className="map-toolbar">
-                <div>
-                  <Map size={16} />
-                  <strong>Campus Map</strong>
-                </div>
-
-                <div className="map-zoom">
-                  <button
-                    onClick={() =>
-                      setMapZoom((value) =>
-                        Math.min(1.5, value + 0.1),
-                      )
-                    }
-                    aria-label="Zoom in"
-                  >
-                    <ZoomIn size={15} />
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      setMapZoom((value) =>
-                        Math.max(0.8, value - 0.1),
-                      )
-                    }
-                    aria-label="Zoom out"
-                  >
-                    <ZoomOut size={15} />
-                  </button>
-                </div>
-              </div>
-
-              <div className="campus-map">
-                <div
-                  className="map-inner"
-                  style={{ transform: `scale(${mapZoom})` }}
-                >
-                  <div className="road road-one" />
-                  <div className="road road-two" />
-                  <div className="road road-three" />
-                  <div className="road road-four" />
-
-                  <div className="green-area green-one" />
-                  <div className="green-area green-two" />
-
-                  {campusPlaces.map((place) => {
-                    const active =
-                      selectedPlace === place.id ||
-                      destination === place.id;
-
-                    return (
-                      <button
-                        key={place.id}
-                        className={`map-marker ${
-                          active ? "active" : ""
-                        }`}
-                        style={{
-                          left: `${place.x}%`,
-                          top: `${place.y}%`,
-                        }}
-                        onClick={() => {
-                          setSelectedPlace(place.id);
-                          setDestination(place.id);
-                          setNavigationStarted(false);
-                        }}
-                      >
-                        <span className="marker-dot">
-                          <Map size={12} />
-                        </span>
-
-                        <span className="marker-label">
-                          {place.name}
-                        </span>
-                      </button>
-                    );
-                  })}
-
-                  <div className="you-are-here">
-                    <span />
-                    <strong>You are here</strong>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="selected-place-card">
-              <div className="selected-place-icon">
-                <Map size={19} />
-              </div>
-
-              <div>
-                <small>SELECTED LOCATION</small>
-                <strong>{selectedPlaceData.name}</strong>
-                <span>{selectedPlaceData.type}</span>
-              </div>
-
-              <button
-                onClick={() => {
-                  setDestination(selectedPlaceData.id);
-                  setNavigationStarted(true);
-                }}
-              >
-                <Navigation size={15} />
-                Go
-              </button>
-            </div>
-
-            {navigationStarted && destinationData && (
-              <div className="route-card">
-                <div className="route-icon">
-                  <Navigation size={18} />
-                </div>
-
-                <div>
-                  <small>OFFLINE WALKING ROUTE</small>
-                  <strong>
-                    Walk toward {destinationData.name}
-                  </strong>
-                  <span>
-                    Follow the highlighted campus paths. Route
-                    calculation works without internet.
-                  </span>
-                </div>
-              </div>
-            )}
-
-            <div className="offline-info">
-              <div className="info-icon">
-                <WifiOff size={15} />
-              </div>
-
-              <div>
-                <strong>Offline navigation</strong>
-                <span>
-                  The campus map is packaged inside the application.
-                </span>
-              </div>
-            </div>
-          </section>
-        )}
+        {/* ==================================================
+            SETTINGS
+        ================================================== */}
 
         {page === "settings" && (
           <section className="page">
+
             <div className="page-intro">
-              <span className="eyebrow">APPLICATION</span>
-              <h1>Settings</h1>
-              <p>BembaTranslate preferences and information.</p>
+
+              <span className="eyebrow">
+                APPLICATION
+              </span>
+
+              <h1>
+                Settings
+              </h1>
+
+              <p>
+                BembaTranslate preferences
+                and information.
+              </p>
+
             </div>
 
             <div className="settings-card">
+
               <div className="setting-row">
+
                 <div>
-                  <strong>Offline mode</strong>
+
+                  <strong>
+                    Offline mode
+                  </strong>
+
                   <span>
-                    Translation and navigation can work without
-                    internet.
+                    Translation works without
+                    an internet connection.
                   </span>
+
                 </div>
 
                 <span className="status-on">
                   <Check size={11} />
                   ON
                 </span>
+
               </div>
 
               <div className="setting-row">
+
                 <div>
-                  <strong>Dictionary</strong>
-                  <span>Built into the application.</span>
+
+                  <strong>
+                    Dictionary
+                  </strong>
+
+                  <span>
+                    Built into the application.
+                  </span>
+
                 </div>
 
                 <BookOpen size={17} />
+
               </div>
 
               <div className="setting-row">
-                <
+
+                <div>
+
+                  <strong>
+                    Audio
+                  </strong>
+
+                  <span>
+                    Manual playback only.
+                  </span>
+
+                </div>
+
+                <Volume2 size={17} />
+
+              </div>
+
+              <div className="setting-row">
+
+                <div>
+
+                  <strong>
+                    Internet connection
+                  </strong>
+
+                  <span>
+                    Not required for core
+                    translation.
+                  </span>
+
+                </div>
+
+                <span className="status-off">
+                  Not required
+                </span>
+
+              </div>
+
+            </div>
+
+            <div className="privacy-card">
+
+              <div className="privacy-icon">
+                <ShieldCheck size={16} />
+              </div>
+
+              <div>
+
+                <strong>
+                  Your privacy matters
+                </strong>
+
+                <span>
+                  Your translations are
+                  designed to remain on
+                  your device.
+                </span>
+
+              </div>
+
+            </div>
+
+          </section>
+        )}
+
+      </main>
+
+      {/* ==================================================
+          BOTTOM NAVIGATION
+      ================================================== */}
+
+      <nav className="bottom-navigation">
+
+        {navigationItems.map((item) => {
+          const Icon = item.icon;
+
+          const active =
+            page === item.id;
+
+          return (
+            <button
+              key={item.id}
+              className={
+                active
+                  ? "active"
+                  : ""
+              }
+              onClick={() =>
+                setPage(item.id)
+              }
+              aria-label={item.label}
+              aria-current={
+                active
+                  ? "page"
+                  : undefined
+              }
+            >
+
+              <span className="nav-icon">
+                <Icon size={18} />
+              </span>
+
+              <span>
+                {item.label}
+              </span>
+
+            </button>
+          );
+        })}
+
+      </nav>
+
+    </div>
+  );
+}
+
+export default App;
