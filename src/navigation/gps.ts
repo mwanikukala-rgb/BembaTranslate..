@@ -1,16 +1,12 @@
 /* =========================================================
    BEMBATRANSLATE
-   GPS SERVICE
+   OFFLINE GPS SERVICE
    ========================================================= */
 
 import {
   Geolocation,
   type Position,
 } from "@capacitor/geolocation";
-
-/* =========================================================
-   TYPES
-   ========================================================= */
 
 export type GPSLocation = {
   latitude: number;
@@ -21,13 +17,14 @@ export type GPSLocation = {
   heading: number | null;
 };
 
-export type GPSPosition = GPSLocation;
-
+/*
+ * Capacitor returns a string watch ID.
+ *
+ * We define the type locally instead of importing WatchId
+ * because different Capacitor Geolocation versions expose
+ * that type differently.
+ */
 export type GPSWatchId = string;
-
-/* =========================================================
-   CONVERT CAPACITOR POSITION
-   ========================================================= */
 
 function convertPosition(
   position: Position,
@@ -36,28 +33,25 @@ function convertPosition(
     latitude: position.coords.latitude,
     longitude: position.coords.longitude,
     accuracy: position.coords.accuracy,
-    altitude:
-      position.coords.altitude ?? null,
-    speed:
-      position.coords.speed ?? null,
-    heading:
-      position.coords.heading ?? null,
+    altitude: position.coords.altitude ?? null,
+    speed: position.coords.speed ?? null,
+    heading: position.coords.heading ?? null,
   };
 }
 
 /* =========================================================
-   REQUEST PERMISSION
+   PERMISSION
    ========================================================= */
 
 export async function requestLocationPermission(): Promise<void> {
   const permissions =
     await Geolocation.requestPermissions();
 
-  const locationGranted =
+  const granted =
     permissions.location === "granted" ||
     permissions.coarseLocation === "granted";
 
-  if (!locationGranted) {
+  if (!granted) {
     throw new Error(
       "Location permission was not granted.",
     );
@@ -65,7 +59,7 @@ export async function requestLocationPermission(): Promise<void> {
 }
 
 /* =========================================================
-   GET CURRENT LOCATION
+   CURRENT LOCATION
    ========================================================= */
 
 export async function getCurrentLocation(): Promise<GPSLocation> {
@@ -86,12 +80,8 @@ export async function getCurrentLocation(): Promise<GPSLocation> {
    ========================================================= */
 
 export async function watchLocation(
-  onLocation: (
-    location: GPSLocation,
-  ) => void,
-  onError?: (
-    error: unknown,
-  ) => void,
+  callback: (location: GPSLocation) => void,
+  onError?: (error: unknown) => void,
 ): Promise<GPSWatchId> {
   await requestLocationPermission();
 
@@ -102,17 +92,14 @@ export async function watchLocation(
         timeout: 15000,
         maximumAge: 2000,
       },
-      (
-        position,
-        error,
-      ) => {
+      (position, error) => {
         if (error) {
           onError?.(error);
           return;
         }
 
         if (position) {
-          onLocation(
+          callback(
             convertPosition(position),
           );
         }
@@ -123,7 +110,7 @@ export async function watchLocation(
 }
 
 /* =========================================================
-   CLEAR LOCATION WATCH
+   STOP WATCH
    ========================================================= */
 
 export async function clearLocationWatch(
@@ -136,6 +123,9 @@ export async function clearLocationWatch(
 
 /* =========================================================
    COMPATIBILITY EXPORTS
+   =========================================================
+   These names allow older navigation code to continue
+   working without creating duplicate GPS implementations.
    ========================================================= */
 
 export const getCurrentPosition =
@@ -145,4 +135,7 @@ export const watchPosition =
   watchLocation;
 
 export const clearPositionWatch =
+  clearLocationWatch;
+
+export const stopWatchingLocation =
   clearLocationWatch;
