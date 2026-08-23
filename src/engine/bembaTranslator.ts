@@ -8,46 +8,50 @@ export type BembaEntry = {
 /*
  * ============================================================
  * BEMBATRANSLATE
- * OFFLINE ENGLISH → BEMBA TRANSLATION ENGINE
+ * FULL LOCAL DICTIONARY TRANSLATION ENGINE
  * ============================================================
  *
  * IMPORTANT:
  *
- * The local dictionary is the primary source of translations.
+ * The local dictionary is the SOURCE OF TRUTH.
  *
- * This engine does NOT use:
- * - Internet
+ * This engine does NOT contain a small replacement dictionary.
+ * It indexes the COMPLETE bembaDictionary imported above.
+ *
+ * Supports:
+ *
+ * - thousands of dictionary entries
+ * - exact phrases
+ * - normalized phrases
+ * - longest phrase matching
+ * - individual word matching
+ * - aliases
+ * - common sentence structures
+ * - Bemba verb roots
+ * - possessives
+ * - numbers
+ * - conservative fuzzy matching
+ * - dictionary search
+ *
+ * Completely offline.
+ *
+ * No:
  * - API
- * - Cloud
+ * - cloud
+ * - internet
  * - AI service
- *
- * Translation order:
- *
- * 1. Exact important phrase
- * 2. Exact dictionary phrase
- * 3. Normalized dictionary phrase
- * 4. High-confidence sentence patterns
- * 5. Verb-root conjugation
- * 6. Possessives
- * 7. Longest dictionary phrase matching
- * 8. Exact dictionary word matching
- * 9. Very conservative fuzzy matching
- *
- * The complete dictionary is indexed.
  *
  * ============================================================
  */
 
-
 /* ============================================================
-   DICTIONARY
+   COMPLETE DICTIONARY
 ============================================================ */
 
 const dictionary: BembaEntry[] =
   Array.isArray(bembaDictionary)
     ? (bembaDictionary as BembaEntry[])
     : [];
-
 
 /* ============================================================
    NORMALIZATION
@@ -59,7 +63,7 @@ function normalize(text: string): string {
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim()
-    .replace(/[“”‘’"'`.,!?;:()[\]{}]/g, "")
+    .replace(/[“”‘’"'`.,!?;:()[\]{}]/g, " ")
     .replace(/\s+/g, " ");
 }
 
@@ -69,46 +73,42 @@ function cleanTranslation(text: string): string {
     .trim();
 }
 
-
 /* ============================================================
    DICTIONARY INDEX
 ============================================================ */
 
 /*
- * Main lookup.
+ * Every valid dictionary entry is indexed here.
  *
- * English phrase -> first Bemba translation.
+ * This is extremely important.
+ *
+ * We do NOT limit the dictionary to a selected list of words.
  */
 
 const dictionaryLookup =
   new Map<string, string>();
 
-
-/*
- * All translations for an English phrase.
- *
- * English phrase -> multiple Bemba translations.
- */
-
 const dictionaryAlternatives =
   new Map<string, string[]>();
 
-
 /*
- * Word-only index.
+ * Also maintain a list of single-word entries.
  *
- * This is deliberately separate from the main index.
- * It prevents multi-word dictionary entries from being
- * incorrectly used as single words.
+ * This makes fuzzy matching much faster than repeatedly
+ * walking the entire dictionary.
  */
 
-const dictionaryWordLookup =
+const singleWordDictionary =
   new Map<string, string>();
 
-
 /*
- * Build indexes from the ENTIRE dictionary.
+ * Keep the longest dictionary phrase length.
+ *
+ * This allows the engine to use phrases containing more than
+ * the old hard-coded 12-word limit.
  */
+
+let maximumDictionaryPhraseLength = 1;
 
 for (const entry of dictionary) {
   if (!entry) continue;
@@ -124,7 +124,7 @@ for (const entry of dictionary) {
   }
 
   /*
-   * Main dictionary.
+   * Save the first translation as the primary translation.
    */
 
   if (!dictionaryLookup.has(english)) {
@@ -135,7 +135,7 @@ for (const entry of dictionary) {
   }
 
   /*
-   * Alternatives.
+   * Save ALL alternatives.
    */
 
   const alternatives =
@@ -153,12 +153,27 @@ for (const entry of dictionary) {
   );
 
   /*
-   * Word-only lookup.
+   * Determine phrase length.
    */
 
-  if (!english.includes(" ")) {
-    if (!dictionaryWordLookup.has(english)) {
-      dictionaryWordLookup.set(
+  const wordCount =
+    english.split(" ").filter(Boolean).length;
+
+  if (
+    wordCount >
+    maximumDictionaryPhraseLength
+  ) {
+    maximumDictionaryPhraseLength =
+      wordCount;
+  }
+
+  /*
+   * Single-word index.
+   */
+
+  if (wordCount === 1) {
+    if (!singleWordDictionary.has(english)) {
+      singleWordDictionary.set(
         english,
         bemba
       );
@@ -166,82 +181,83 @@ for (const entry of dictionary) {
   }
 }
 
-
 /* ============================================================
    CONTRACTIONS
 ============================================================ */
 
-const contractionMap: Record<string, string> = {
+const contractionMap: Record<
+  string,
+  string
+> = {
   "i'm": "i am",
-  "im": "i am",
+  im: "i am",
 
   "you're": "you are",
-  "youre": "you are",
+  youre: "you are",
 
   "he's": "he is",
-  "hes": "he is",
+  hes: "he is",
 
   "she's": "she is",
-  "shes": "she is",
+  shes: "she is",
 
   "it's": "it is",
-  "its": "it is",
+  its: "it is",
 
   "we're": "we are",
-  "were": "we are",
+  were: "we are",
 
   "they're": "they are",
-  "theyre": "they are",
+  theyre: "they are",
 
   "i've": "i have",
-  "ive": "i have",
+  ive: "i have",
 
   "you've": "you have",
-  "youve": "you have",
+  youve: "you have",
 
   "we've": "we have",
-  "weve": "we have",
+  weve: "we have",
 
   "they've": "they have",
-  "theyve": "they have",
+  theyve: "they have",
 
   "can't": "cannot",
-  "cant": "cannot",
+  cant: "cannot",
 
   "don't": "do not",
-  "dont": "do not",
+  dont: "do not",
 
   "doesn't": "does not",
-  "doesnt": "does not",
+  doesnt: "does not",
 
   "didn't": "did not",
-  "didnt": "did not",
+  didnt: "did not",
 
   "isn't": "is not",
-  "isnt": "is not",
+  isnt: "is not",
 
   "aren't": "are not",
-  "arent": "are not",
+  arent: "are not",
 
   "wasn't": "was not",
-  "wasnt": "was not",
+  wasnt: "was not",
 
   "weren't": "were not",
-  "werent": "were not",
+  werent: "were not",
 
   "won't": "will not",
-  "wont": "will not",
+  wont: "will not",
 
   "wouldn't": "would not",
-  "wouldnt": "would not",
+  wouldnt: "would not",
 
   "couldn't": "could not",
-  "couldnt": "could not",
+  couldnt: "could not",
 
   "shouldn't": "should not",
-  "shouldnt": "should not",
+  shouldnt: "should not",
 };
-
 
 function expandContractions(
   text: string
@@ -249,8 +265,9 @@ function expandContractions(
   let result = String(text ?? "");
 
   for (
-    const [from, to]
-    of Object.entries(contractionMap)
+    const [from, to] of Object.entries(
+      contractionMap
+    )
   ) {
     const escaped =
       from.replace(
@@ -270,7 +287,6 @@ function expandContractions(
 
   return result;
 }
-
 
 /* ============================================================
    TOKENIZATION
@@ -293,21 +309,14 @@ function tokenize(
     .filter(Boolean);
 }
 
-
 /* ============================================================
-   ENGLISH ALIASES
+   ENGLISH VARIATIONS
 ============================================================ */
 
-/*
- * These convert common English variations to dictionary
- * headwords.
- *
- * They are ONLY used when the canonical word exists in
- * the local dictionary.
- */
-
-const englishAliases: Record<string, string> = {
-
+const englishAliases: Record<
+  string,
+  string
+> = {
   ill: "sick",
   unwell: "sick",
 
@@ -366,9 +375,13 @@ const englishAliases: Record<string, string> = {
   washing: "wash",
   washes: "wash",
 
-  looked: "look",
-  looking: "look",
-  looks: "look",
+  cooked: "cook",
+  cooking: "cook",
+  cooks: "cook",
+
+  slept: "sleep",
+  sleeping: "sleep",
+  sleeps: "sleep",
 
   remembered: "remember",
   remembering: "remember",
@@ -402,10 +415,6 @@ const englishAliases: Record<string, string> = {
   saying: "speak",
   said: "speak",
 
-  slept: "sleep",
-  sleeping: "sleep",
-  sleeps: "sleep",
-
   ate: "eat",
   eating: "eat",
   eats: "eat",
@@ -414,41 +423,38 @@ const englishAliases: Record<string, string> = {
   drinking: "drink",
   drinks: "drink",
 
-  angry: "angry",
   anger: "angry",
 };
 
-
 /* ============================================================
-   LOOKUP
+   DICTIONARY LOOKUP
 ============================================================ */
 
 function lookupEnglish(
-  wordOrPhrase: string
+  word: string
 ): string | undefined {
-
   const normalized =
-    normalize(wordOrPhrase);
+    normalize(word);
 
   if (!normalized) {
     return undefined;
   }
 
   /*
-   * 1. Exact dictionary lookup.
+   * 1. Exact dictionary entry.
    */
 
-  const exact =
+  const direct =
     dictionaryLookup.get(
       normalized
     );
 
-  if (exact) {
-    return exact;
+  if (direct) {
+    return direct;
   }
 
   /*
-   * 2. Alias lookup.
+   * 2. Alias.
    */
 
   const alias =
@@ -468,78 +474,23 @@ function lookupEnglish(
   return undefined;
 }
 
-
 /* ============================================================
-   WORD-ONLY LOOKUP
-============================================================ */
-
-function lookupEnglishWord(
-  word: string
-): string | undefined {
-
-  const normalized =
-    normalize(word);
-
-  if (!normalized) {
-    return undefined;
-  }
-
-  /*
-   * Exact word.
-   */
-
-  const direct =
-    dictionaryWordLookup.get(
-      normalized
-    );
-
-  if (direct) {
-    return direct;
-  }
-
-  /*
-   * Alias.
-   */
-
-  const alias =
-    englishAliases[normalized];
-
-  if (alias) {
-    return dictionaryWordLookup.get(
-      normalize(alias)
-    );
-  }
-
-  return undefined;
-}
-
-
-/* ============================================================
-   ROOT CLEANING
+   VERB ROOT
 ============================================================ */
 
 function cleanRoot(
   root: string
 ): string {
-  return root
-    .replace(
-      /^[-–—]/,
-      ""
-    )
+  return String(root)
+    .replace(/^[-–—]/, "")
     .trim();
 }
-
-
-/* ============================================================
-   VERB ROOT
-============================================================ */
 
 function getVerbRoot(
   englishWord: string
 ): string | undefined {
-
   const translation =
-    lookupEnglishWord(
+    lookupEnglish(
       englishWord
     );
 
@@ -547,20 +498,11 @@ function getVerbRoot(
     return undefined;
   }
 
-  /*
-   * Example:
-   *
-   * -landa
-   * -sosa
-   * -landa/-sosa
-   */
-
   const first =
     translation
       .split("/")
-      .map(
-        (item) =>
-          item.trim()
+      .map((value) =>
+        value.trim()
       )
       .find(Boolean);
 
@@ -579,16 +521,14 @@ function getVerbRoot(
   return undefined;
 }
 
-
 /* ============================================================
-   CONJUGATION
+   PRESENT VERB CONJUGATION
 ============================================================ */
 
 function conjugatePresent(
   subject: string,
   verb: string
 ): string | undefined {
-
   const root =
     getVerbRoot(verb);
 
@@ -597,7 +537,6 @@ function conjugatePresent(
   }
 
   switch (subject) {
-
     case "i":
       return `Nde${root}`;
 
@@ -614,9 +553,6 @@ function conjugatePresent(
     case "they":
       return `Bale${root}`;
 
-    case "people":
-      return `Bale${root}`;
-
     case "it":
       return `Cile${root}`;
 
@@ -625,147 +561,6 @@ function conjugatePresent(
   }
 }
 
-
-/* ============================================================
-   SPECIAL SUBJECTS
-============================================================ */
-
-/*
- * These are high-confidence English subjects.
- *
- * IMPORTANT:
- *
- * We do not simply translate the subject word and then
- * concatenate it with a Bemba verb.
- *
- * We explicitly handle the grammatical subject.
- */
-
-const subjectMap: Record<
-  string,
-  string
-> = {
-
-  people: "abantu",
-
-  person: "umuntu",
-
-  man: "umuntu",
-
-  woman: "umukashana",
-
-  child: "umwana",
-
-  children: "abana",
-
-  boy: "umwaice",
-
-  boys: "abaice",
-
-  girl: "umukashana",
-
-  girls: "abakashana",
-
-  men: "abantu",
-
-  women: "abantu",
-
-  friend: "umusuma",
-
-  friends: "abasuma",
-
-  family: "umuryango",
-
-  families: "imiryango",
-
-  students: "abafundi",
-
-  student: "umufundi",
-
-  teachers: "abasambilishi",
-
-  teacher: "umusambilishi",
-
-  workers: "ababomba",
-
-  worker: "umubombi",
-};
-
-
-/* ============================================================
-   SUBJECT LOOKUP
-============================================================ */
-
-function lookupSubject(
-  subject: string
-): string | undefined {
-
-  const normalized =
-    normalize(subject);
-
-  /*
-   * First use explicit grammatical subject
-   * mappings.
-   */
-
-  const mapped =
-    subjectMap[normalized];
-
-  if (mapped) {
-    return mapped;
-  }
-
-  /*
-   * Then use the dictionary.
-   *
-   * This allows the large dictionary to provide
-   * subjects not explicitly listed above.
-   */
-
-  return lookupEnglishWord(
-    normalized
-  );
-}
-
-
-/* ============================================================
-   SPECIAL PRESENT-TENSE SUBJECT FORMS
-============================================================ */
-
-function getSubjectPrefix(
-  subject: string
-): string | undefined {
-
-  switch (
-    normalize(subject)
-  ) {
-
-    case "i":
-      return "Nde";
-
-    case "you":
-      return "Ule";
-
-    case "he":
-    case "she":
-      return "Ale";
-
-    case "we":
-      return "Tule";
-
-    case "they":
-    case "people":
-      return "Bale";
-
-    case "it":
-      return "Cile";
-
-    default:
-      return undefined;
-  }
-}
-
-
 /* ============================================================
    OBJECT TRANSLATION
 ============================================================ */
@@ -773,7 +568,6 @@ function getSubjectPrefix(
 function translateObject(
   text: string
 ): string | undefined {
-
   const normalized =
     normalize(text);
 
@@ -782,17 +576,22 @@ function translateObject(
   }
 
   /*
-   * First try the complete phrase.
+   * First: complete phrase.
    */
 
-  const direct =
+  const complete =
     lookupEnglish(
       normalized
     );
 
-  if (direct) {
-    return direct;
+  if (complete) {
+    return complete;
   }
+
+  /*
+   * Second: use the complete dictionary
+   * word-by-word.
+   */
 
   const words =
     tokenize(normalized);
@@ -801,49 +600,14 @@ function translateObject(
     return undefined;
   }
 
-  const translated: string[] =
-    [];
+  const translated =
+    translateByWords(
+      normalized,
+      false
+    );
 
-  let index = 0;
-
-  while (
-    index < words.length
-  ) {
-
-    const phrase =
-      findLongestMatch(
-        words,
-        index
-      );
-
-    if (phrase) {
-      translated.push(
-        phrase.translation
-      );
-
-      index +=
-        phrase.length;
-
-      continue;
-    }
-
-    const word =
-      lookupEnglishWord(
-        words[index]
-      );
-
-    if (!word) {
-      return undefined;
-    }
-
-    translated.push(word);
-
-    index++;
-  }
-
-  return translated.join(" ");
+  return translated || undefined;
 }
-
 
 /* ============================================================
    POSSESSIVES
@@ -853,25 +617,17 @@ const possessiveMap: Record<
   string,
   string
 > = {
-
   my: "yandi",
-
   your: "yobe",
-
   his: "akwe",
-
   her: "akwe",
-
   our: "yesu",
-
   their: "babo",
 };
-
 
 function translatePossessive(
   text: string
 ): string | undefined {
-
   const normalized =
     normalize(
       expandContractions(text)
@@ -903,130 +659,32 @@ function translatePossessive(
   return `${noun} ${owner}`;
 }
 
-
 /* ============================================================
-   IMPORTANT EVERYDAY PHRASES
+   IMPORTANT PHRASES
 ============================================================ */
 
 const importantPhrases =
   new Map<string, string>([
-
-    [
-      "how are you",
-      "Mulishani?",
-    ],
-
-    [
-      "good morning",
-      "Mwashibukeni!",
-    ],
-
-    [
-      "good afternoon",
-      "Kasuba mukwai",
-    ],
-
-    [
-      "good evening",
-      "Chungulo mukwai",
-    ],
-
-    [
-      "good night",
-      "Sendameenipo",
-    ],
-
-    [
-      "goodbye",
-      "Shalenipo",
-    ],
-
-    [
-      "thank you",
-      "Natotela",
-    ],
-
-    [
-      "thanks",
-      "Natotela",
-    ],
-
-    [
-      "thanks a lot",
-      "Natotela saana",
-    ],
-
-    [
-      "a lot",
-      "Saana",
-    ],
-
-    [
-      "yes",
-      "Ee",
-    ],
-
-    [
-      "no",
-      "Awe",
-    ],
-
-    [
-      "where are you",
-      "Ulikwisa?",
-    ],
-
-    [
-      "where are they",
-      "Balikwisa?",
-    ],
-
-    [
-      "i want money",
-      "Ndefwaya indalama",
-    ],
-
-    [
-      "i am angry",
-      "Nimfulwa",
-    ],
-
-    [
-      "i'm angry",
-      "Nimfulwa",
-    ],
-
-    [
-      "i am sick",
-      "Ndelwala",
-    ],
-
-    [
-      "i'm sick",
-      "Ndelwala",
-    ],
-
-    [
-      "people are sick",
-      "Abantu balwala",
-    ],
-
-    [
-      "the people are sick",
-      "Abantu balwala",
-    ],
-
-    [
-      "people are ill",
-      "Abantu balwala",
-    ],
-
-    [
-      "the people are ill",
-      "Abantu balwala",
-    ],
+    ["how are you", "Mulishani?"],
+    ["good morning", "Mwashibukeni!"],
+    ["good afternoon", "Kasuba mukwai"],
+    ["good evening", "Chungulo mukwai"],
+    ["good night", "Sendameenipo"],
+    ["goodbye", "Shalenipo"],
+    ["thank you", "Natotela"],
+    ["thanks", "Natotela"],
+    ["thanks a lot", "Natotela saana"],
+    ["a lot", "Saana"],
+    ["yes", "Ee"],
+    ["no", "Awe"],
+    ["where are you", "Ulikwisa?"],
+    ["where are they", "Balikwisa?"],
+    ["i want money", "Ndefwaya indalama"],
+    ["i am angry", "Nimfulwa"],
+    ["i'm angry", "Nimfulwa"],
+    ["i am sick", "Ndelwala"],
+    ["i'm sick", "Ndelwala"],
   ]);
-
 
 /* ============================================================
    DIRECT HIGH-CONFIDENCE SENTENCES
@@ -1038,18 +696,23 @@ const directPatterns: Array<{
     | string
     | ((match: RegExpMatchArray) => string);
 }> = [
-
-  /*
-   * I
-   */
-
   {
     pattern: /^i am sick$/,
     result: "Ndelwala",
   },
 
   {
+    pattern: /^i'm sick$/,
+    result: "Ndelwala",
+  },
+
+  {
     pattern: /^i am angry$/,
+    result: "Nimfulwa",
+  },
+
+  {
+    pattern: /^i'm angry$/,
     result: "Nimfulwa",
   },
 
@@ -1061,16 +724,6 @@ const directPatterns: Array<{
   {
     pattern: /^i work$/,
     result: "Ndebomba",
-  },
-
-  {
-    pattern: /^i am suffering$/,
-    result: "Ndecula",
-  },
-
-  {
-    pattern: /^i suffer$/,
-    result: "Ndecula",
   },
 
   {
@@ -1224,13 +877,12 @@ const directPatterns: Array<{
   },
 
   /*
-   * I WANT
+   * Dynamic object patterns.
    */
 
   {
     pattern: /^i want (.+)$/,
     result: (match) => {
-
       const object =
         translateObject(
           match[1]
@@ -1245,7 +897,6 @@ const directPatterns: Array<{
   {
     pattern: /^i need (.+)$/,
     result: (match) => {
-
       const object =
         translateObject(
           match[1]
@@ -1258,477 +909,8 @@ const directPatterns: Array<{
   },
 ];
 
-
 /* ============================================================
-   SPECIAL PLURAL SUBJECT SENTENCES
-============================================================ */
-
-/*
- * This section is important.
- *
- * We must NOT translate:
- *
- * people are sick
- *
- * as:
- *
- * people -> whatever dictionary entry happens to exist
- *
- * Instead:
- *
- * people -> abantu
- * sick -> -lwala
- *
- * resulting in:
- *
- * Abantu balwala
- *
- * ============================================================
- */
-
-function translatePluralSubjectSentence(
-  text: string
-): string | undefined {
-
-  const normalized =
-    normalize(
-      expandContractions(text)
-    );
-
-  /*
-   * PEOPLE + ARE + SICK
-   */
-
-  const peopleSick =
-    normalized.match(
-      /^(?:the\s+)?people\s+(?:are|were)\s+(sick|ill|unwell)$/
-    );
-
-  if (peopleSick) {
-    return "Abantu balwala";
-  }
-
-  /*
-   * PEOPLE + ARE + ANGRY
-   */
-
-  const peopleAngry =
-    normalized.match(
-      /^(?:the\s+)?people\s+(?:are|were)\s+angry$/
-    );
-
-  if (peopleAngry) {
-    return "Abantu bafululuka";
-  }
-
-  /*
-   * PEOPLE + VERB
-   *
-   * Example:
-   *
-   * people work
-   * people are working
-   *
-   * The dictionary still determines the verb root.
-   */
-
-  const peopleVerb =
-    normalized.match(
-      /^(?:the\s+)?people\s+(?:are\s+|do\s+|will\s+)?(.+)$/
-    );
-
-  if (peopleVerb) {
-
-    const rest =
-      peopleVerb[1].trim();
-
-    /*
-     * Do not treat adjectives as verbs here.
-     */
-
-    const verbWords =
-      rest.split(" ");
-
-    if (!verbWords.length) {
-      return undefined;
-    }
-
-    const verb =
-      verbWords[0];
-
-    const root =
-      getVerbRoot(verb);
-
-    if (!root) {
-      return undefined;
-    }
-
-    const objectWords =
-      verbWords.slice(1);
-
-    const verbForm =
-      `Bale${root}`;
-
-    if (!objectWords.length) {
-      return `Abantu ${verbForm}`;
-    }
-
-    const object =
-      translateObject(
-        objectWords.join(" ")
-      );
-
-    if (!object) {
-      return undefined;
-    }
-
-    return `Abantu ${verbForm} ${object}`;
-  }
-
-  return undefined;
-}
-
-
-/* ============================================================
-   GENERAL SUBJECT + VERB
-============================================================ */
-
-function translateSubjectVerb(
-  subject: string,
-  rest: string
-): string | undefined {
-
-  let cleaned =
-    rest.trim();
-
-  /*
-   * Remove English auxiliaries.
-   */
-
-  cleaned =
-    cleaned.replace(
-      /^(am|are|is|do|does|will|can|must)\s+/,
-      ""
-    );
-
-  cleaned =
-    cleaned.trim();
-
-  if (!cleaned) {
-    return undefined;
-  }
-
-  const words =
-    cleaned.split(" ");
-
-  const verb =
-    words[0];
-
-  const conjugated =
-    conjugatePresent(
-      subject,
-      verb
-    );
-
-  if (!conjugated) {
-    return undefined;
-  }
-
-  const objectWords =
-    words.slice(1);
-
-  if (!objectWords.length) {
-    return conjugated;
-  }
-
-  const object =
-    translateObject(
-      objectWords.join(" ")
-    );
-
-  if (!object) {
-    return undefined;
-  }
-
-  return `${conjugated} ${object}`;
-}
-
-
-/* ============================================================
-   SENTENCE ENGINE
-============================================================ */
-
-function translateSentencePattern(
-  text: string
-): string | undefined {
-
-  const normalized =
-    normalize(
-      expandContractions(text)
-    );
-
-  /*
-   * Important phrases.
-   */
-
-  const important =
-    importantPhrases.get(
-      normalized
-    );
-
-  if (important) {
-    return important;
-  }
-
-  /*
-   * Plural subjects.
-   */
-
-  const plural =
-    translatePluralSubjectSentence(
-      normalized
-    );
-
-  if (plural) {
-    return plural;
-  }
-
-  /*
-   * Explicit high-confidence patterns.
-   */
-
-  for (
-    const item
-    of directPatterns
-  ) {
-
-    const match =
-      normalized.match(
-        item.pattern
-      );
-
-    if (!match) {
-      continue;
-    }
-
-    if (
-      typeof item.result ===
-      "string"
-    ) {
-      return item.result;
-    }
-
-    const result =
-      item.result(match);
-
-    if (result) {
-      return result;
-    }
-  }
-
-  /*
-   * I + verb
-   */
-
-  const iMatch =
-    normalized.match(
-      /^i\s+(.+)$/
-    );
-
-  if (iMatch) {
-
-    const result =
-      translateSubjectVerb(
-        "i",
-        iMatch[1]
-      );
-
-    if (result) {
-      return result;
-    }
-  }
-
-  /*
-   * YOU + verb
-   */
-
-  const youMatch =
-    normalized.match(
-      /^you\s+(.+)$/
-    );
-
-  if (youMatch) {
-
-    const result =
-      translateSubjectVerb(
-        "you",
-        youMatch[1]
-      );
-
-    if (result) {
-      return result;
-    }
-  }
-
-  /*
-   * HE / SHE + verb
-   */
-
-  const thirdPerson =
-    normalized.match(
-      /^(he|she)\s+(.+)$/
-    );
-
-  if (thirdPerson) {
-
-    const result =
-      translateSubjectVerb(
-        thirdPerson[1],
-        thirdPerson[2]
-      );
-
-    if (result) {
-      return result;
-    }
-  }
-
-  /*
-   * WE + verb
-   */
-
-  const weMatch =
-    normalized.match(
-      /^we\s+(.+)$/
-    );
-
-  if (weMatch) {
-
-    const result =
-      translateSubjectVerb(
-        "we",
-        weMatch[1]
-      );
-
-    if (result) {
-      return result;
-    }
-  }
-
-  /*
-   * THEY + verb
-   */
-
-  const theyMatch =
-    normalized.match(
-      /^they\s+(.+)$/
-    );
-
-  if (theyMatch) {
-
-    const result =
-      translateSubjectVerb(
-        "they",
-        theyMatch[1]
-      );
-
-    if (result) {
-      return result;
-    }
-  }
-
-  /*
-   * I AM + adjective / condition.
-   */
-
-  const iAm =
-    normalized.match(
-      /^i am (.+)$/
-    );
-
-  if (iAm) {
-
-    const value =
-      iAm[1];
-
-    const root =
-      getVerbRoot(value);
-
-    if (root) {
-      return `Nde${root}`;
-    }
-
-    const translation =
-      lookupEnglish(value);
-
-    if (translation) {
-      return `Ndi ${translation}`;
-    }
-  }
-
-  /*
-   * YOU ARE + adjective.
-   */
-
-  const youAre =
-    normalized.match(
-      /^you are (.+)$/
-    );
-
-  if (youAre) {
-
-    const value =
-      youAre[1];
-
-    const root =
-      getVerbRoot(value);
-
-    if (root) {
-      return `Ule${root}`;
-    }
-
-    const translation =
-      lookupEnglish(value);
-
-    if (translation) {
-      return `Uli ${translation}`;
-    }
-  }
-
-  /*
-   * HE / SHE IS + adjective.
-   */
-
-  const heSheIs =
-    normalized.match(
-      /^(he|she) is (.+)$/
-    );
-
-  if (heSheIs) {
-
-    const value =
-      heSheIs[2];
-
-    const root =
-      getVerbRoot(value);
-
-    if (root) {
-      return `Ale${root}`;
-    }
-
-    const translation =
-      lookupEnglish(value);
-
-    if (translation) {
-      return `Ali ${translation}`;
-    }
-  }
-
-  return undefined;
-}
-
-
-/* ============================================================
-   LONGEST PHRASE MATCH
+   LONGEST DICTIONARY PHRASE
 ============================================================ */
 
 function findLongestMatch(
@@ -1740,20 +922,14 @@ function findLongestMatch(
       length: number;
     }
   | undefined {
-
   const remaining =
     words.length -
     startIndex;
 
-  /*
-   * Large enough for dictionary phrases,
-   * while avoiding unreasonable searches.
-   */
-
   const maxLength =
     Math.min(
       remaining,
-      20
+      maximumDictionaryPhraseLength
     );
 
   for (
@@ -1761,7 +937,6 @@ function findLongestMatch(
     length >= 1;
     length--
   ) {
-
     const phrase =
       words
         .slice(
@@ -1786,7 +961,6 @@ function findLongestMatch(
   return undefined;
 }
 
-
 /* ============================================================
    LEVENSHTEIN
 ============================================================ */
@@ -1795,7 +969,6 @@ function levenshtein(
   a: string,
   b: string
 ): number {
-
   const previous: number[] =
     new Array(
       b.length + 1
@@ -1819,7 +992,6 @@ function levenshtein(
     i <= a.length;
     i++
   ) {
-
     current[0] = i;
 
     for (
@@ -1827,10 +999,8 @@ function levenshtein(
       j <= b.length;
       j++
     ) {
-
       const cost =
-        a[i - 1] ===
-        b[j - 1]
+        a[i - 1] === b[j - 1]
           ? 0
           : 1;
 
@@ -1856,31 +1026,25 @@ function levenshtein(
   return previous[b.length];
 }
 
-
 /* ============================================================
-   CONSERVATIVE FUZZY LOOKUP
+   FUZZY DICTIONARY LOOKUP
 ============================================================ */
 
 function fuzzyLookup(
   word: string
 ): string | undefined {
-
   const normalized =
     normalize(word);
 
-  /*
-   * Never fuzzy-match very short words.
-   */
-
   if (
     !normalized ||
-    normalized.length < 5
+    normalized.length < 4
   ) {
     return undefined;
   }
 
   /*
-   * Alias first.
+   * Alias before fuzzy matching.
    */
 
   const alias =
@@ -1889,9 +1053,8 @@ function fuzzyLookup(
     ];
 
   if (alias) {
-
     const aliasResult =
-      dictionaryWordLookup.get(
+      dictionaryLookup.get(
         normalize(alias)
       );
 
@@ -1908,47 +1071,24 @@ function fuzzyLookup(
     Number.POSITIVE_INFINITY;
 
   /*
-   * Only inspect word entries.
+   * IMPORTANT:
    *
-   * This means a phrase such as:
-   *
-   * "people"
-   *
-   * cannot accidentally match a completely
-   * unrelated multi-word phrase.
+   * This loops through the SINGLE-WORD INDEX,
+   * which itself was built from the COMPLETE
+   * dictionary.
    */
 
   for (
     const [
       english,
       translation,
-    ]
-    of dictionaryWordLookup
+    ] of singleWordDictionary
   ) {
-
-    /*
-     * Prevent wildly different lengths.
-     */
-
     if (
       Math.abs(
         english.length -
-        normalized.length
+          normalized.length
       ) > 2
-    ) {
-      continue;
-    }
-
-    /*
-     * First character should normally match.
-     *
-     * This dramatically reduces dangerous
-     * substitutions.
-     */
-
-    if (
-      english[0] !==
-      normalized[0]
     ) {
       continue;
     }
@@ -1960,7 +1100,7 @@ function fuzzyLookup(
       );
 
     const allowed =
-      normalized.length >= 9
+      normalized.length >= 8
         ? 2
         : 1;
 
@@ -1968,7 +1108,6 @@ function fuzzyLookup(
       distance <= allowed &&
       distance < bestDistance
     ) {
-
       bestDistance =
         distance;
 
@@ -1980,15 +1119,14 @@ function fuzzyLookup(
   return best;
 }
 
-
 /* ============================================================
-   WORD TRANSLATION
+   WORD / PHRASE TRANSLATION
 ============================================================ */
 
 function translateByWords(
-  text: string
+  text: string,
+  allowPartial = true
 ): string {
-
   const words =
     tokenize(text);
 
@@ -1996,17 +1134,17 @@ function translateByWords(
     return "";
   }
 
-  const output: string[] =
-    [];
+  const output: string[] = [];
 
   let index = 0;
 
   while (
     index < words.length
   ) {
-
     /*
-     * 1. Longest phrase.
+     * --------------------------------------------------------
+     * 1. LONGEST COMPLETE DICTIONARY PHRASE
+     * --------------------------------------------------------
      */
 
     const phrase =
@@ -2016,7 +1154,6 @@ function translateByWords(
       );
 
     if (phrase) {
-
       output.push(
         phrase.translation
       );
@@ -2028,19 +1165,19 @@ function translateByWords(
     }
 
     /*
-     * 2. Exact dictionary word.
+     * --------------------------------------------------------
+     * 2. EXACT SINGLE WORD
+     * --------------------------------------------------------
      */
 
+    const word =
+      words[index];
+
     const direct =
-      lookupEnglishWord(
-        words[index]
-      );
+      lookupEnglish(word);
 
     if (direct) {
-
-      output.push(
-        direct
-      );
+      output.push(direct);
 
       index++;
 
@@ -2048,19 +1185,16 @@ function translateByWords(
     }
 
     /*
-     * 3. Conservative fuzzy lookup.
+     * --------------------------------------------------------
+     * 3. FUZZY SINGLE WORD
+     * --------------------------------------------------------
      */
 
     const fuzzy =
-      fuzzyLookup(
-        words[index]
-      );
+      fuzzyLookup(word);
 
     if (fuzzy) {
-
-      output.push(
-        fuzzy
-      );
+      output.push(fuzzy);
 
       index++;
 
@@ -2068,13 +1202,31 @@ function translateByWords(
     }
 
     /*
-     * 4. Unknown word.
+     * --------------------------------------------------------
+     * 4. UNKNOWN WORD
+     * --------------------------------------------------------
      *
-     * IMPORTANT:
+     * This is the important change.
      *
-     * We do NOT substitute a random dictionary
-     * entry.
+     * The old engine returned "" immediately.
+     *
+     * That caused a sentence containing one unknown
+     * English connector to make valid dictionary data
+     * disappear.
+     *
+     * Example:
+     *
+     *     people are sick
+     *
+     * If "people" exists in the dictionary but "are"
+     * needs grammatical processing, we do NOT throw
+     * away "people".
      */
+
+    if (allowPartial) {
+      index++;
+      continue;
+    }
 
     return "";
   }
@@ -2082,53 +1234,549 @@ function translateByWords(
   return output.join(" ");
 }
 
-
 /* ============================================================
-   NUMBERS
+   NUMBER SUPPORT
 ============================================================ */
 
 const numberWords: Record<
   string,
   string
 > = {
-
   one: "-mo",
-
   two: "-bili",
-
   three: "-tatu",
-
   four: "-ne",
-
   five: "sano",
-
   six: "mutanda",
-
   seven: "cine lubali",
-
   eight: "cine konse konse",
-
   nine: "paabula",
-
   ten: "ikumi",
-
   eleven: "ikumi na -mo",
-
   twelve: "ikumi na -bili",
-
   thirteen: "ikumi na -tatu",
 };
-
 
 function translateNumber(
   text: string
 ): string | undefined {
-
   return numberWords[
     normalize(text)
   ];
 }
 
+/* ============================================================
+   SENTENCE ENGINE
+============================================================ */
+
+function translateSubjectVerb(
+  subject: string,
+  rest: string
+): string | undefined {
+  let cleaned =
+    rest.trim();
+
+  /*
+   * Remove English auxiliary words.
+   *
+   * These are grammar words rather than dictionary
+   * content words.
+   */
+
+  cleaned =
+    cleaned.replace(
+      /^(am|are|is|do|does|did|will|can|could|must|should|would)\s+/,
+      ""
+    );
+
+  cleaned =
+    cleaned.trim();
+
+  if (!cleaned) {
+    return undefined;
+  }
+
+  const words =
+    tokenize(cleaned);
+
+  if (!words.length) {
+    return undefined;
+  }
+
+  /*
+   * First word is normally the verb.
+   */
+
+  const verb =
+    words[0];
+
+  const conjugated =
+    conjugatePresent(
+      subject,
+      verb
+    );
+
+  if (!conjugated) {
+    return undefined;
+  }
+
+  /*
+   * Translate the remaining object using the
+   * COMPLETE dictionary.
+   */
+
+  const objectWords =
+    words.slice(1);
+
+  if (!objectWords.length) {
+    return conjugated;
+  }
+
+  const object =
+    translateByWords(
+      objectWords.join(" "),
+      true
+    );
+
+  if (object) {
+    return `${conjugated} ${object}`;
+  }
+
+  return conjugated;
+}
+
+function translateSentencePattern(
+  text: string
+): string | undefined {
+  const normalized =
+    normalize(
+      expandContractions(text)
+    );
+
+  /*
+   * ----------------------------------------------------------
+   * IMPORTANT PHRASES
+   * ----------------------------------------------------------
+   */
+
+  const important =
+    importantPhrases.get(
+      normalized
+    );
+
+  if (important) {
+    return important;
+  }
+
+  /*
+   * ----------------------------------------------------------
+   * DIRECT PATTERNS
+   * ----------------------------------------------------------
+   */
+
+  for (
+    const item of directPatterns
+  ) {
+    const match =
+      normalized.match(
+        item.pattern
+      );
+
+    if (!match) {
+      continue;
+    }
+
+    if (
+      typeof item.result ===
+      "string"
+    ) {
+      return item.result;
+    }
+
+    const result =
+      item.result(match);
+
+    if (result) {
+      return result;
+    }
+  }
+
+  /*
+   * ----------------------------------------------------------
+   * I + ...
+   * ----------------------------------------------------------
+   */
+
+  const iMatch =
+    normalized.match(
+      /^i\s+(.+)$/
+    );
+
+  if (iMatch) {
+    const result =
+      translateSubjectVerb(
+        "i",
+        iMatch[1]
+      );
+
+    if (result) {
+      return result;
+    }
+  }
+
+  /*
+   * ----------------------------------------------------------
+   * YOU + ...
+   * ----------------------------------------------------------
+   */
+
+  const youMatch =
+    normalized.match(
+      /^you\s+(.+)$/
+    );
+
+  if (youMatch) {
+    const result =
+      translateSubjectVerb(
+        "you",
+        youMatch[1]
+      );
+
+    if (result) {
+      return result;
+    }
+  }
+
+  /*
+   * ----------------------------------------------------------
+   * HE / SHE + ...
+   * ----------------------------------------------------------
+   */
+
+  const thirdMatch =
+    normalized.match(
+      /^(he|she)\s+(.+)$/
+    );
+
+  if (thirdMatch) {
+    const result =
+      translateSubjectVerb(
+        thirdMatch[1],
+        thirdMatch[2]
+      );
+
+    if (result) {
+      return result;
+    }
+  }
+
+  /*
+   * ----------------------------------------------------------
+   * WE + ...
+   * ----------------------------------------------------------
+   */
+
+  const weMatch =
+    normalized.match(
+      /^we\s+(.+)$/
+    );
+
+  if (weMatch) {
+    const result =
+      translateSubjectVerb(
+        "we",
+        weMatch[1]
+      );
+
+    if (result) {
+      return result;
+    }
+  }
+
+  /*
+   * ----------------------------------------------------------
+   * THEY + ...
+   * ----------------------------------------------------------
+   */
+
+  const theyMatch =
+    normalized.match(
+      /^they\s+(.+)$/
+    );
+
+  if (theyMatch) {
+    const result =
+      translateSubjectVerb(
+        "they",
+        theyMatch[1]
+      );
+
+    if (result) {
+      return result;
+    }
+  }
+
+  /*
+   * ----------------------------------------------------------
+   * I AM + ADJECTIVE / CONDITION
+   * ----------------------------------------------------------
+   */
+
+  const iAm =
+    normalized.match(
+      /^i am (.+)$/
+    );
+
+  if (iAm) {
+    const value =
+      iAm[1];
+
+    const root =
+      getVerbRoot(value);
+
+    if (root) {
+      return `Nde${root}`;
+    }
+
+    const translation =
+      lookupEnglish(value);
+
+    if (translation) {
+      return `Ndi ${translation}`;
+    }
+  }
+
+  /*
+   * ----------------------------------------------------------
+   * YOU ARE + ADJECTIVE
+   * ----------------------------------------------------------
+   */
+
+  const youAre =
+    normalized.match(
+      /^you are (.+)$/
+    );
+
+  if (youAre) {
+    const value =
+      youAre[1];
+
+    const root =
+      getVerbRoot(value);
+
+    if (root) {
+      return `Ule${root}`;
+    }
+
+    const translation =
+      lookupEnglish(value);
+
+    if (translation) {
+      return `Uli ${translation}`;
+    }
+  }
+
+  /*
+   * ----------------------------------------------------------
+   * HE / SHE IS + ...
+   * ----------------------------------------------------------
+   */
+
+  const heSheIs =
+    normalized.match(
+      /^(he|she) is (.+)$/
+    );
+
+  if (heSheIs) {
+    const value =
+      heSheIs[2];
+
+    const root =
+      getVerbRoot(value);
+
+    if (root) {
+      return `Ale${root}`;
+    }
+
+    const translation =
+      lookupEnglish(value);
+
+    if (translation) {
+      return `Ali ${translation}`;
+    }
+  }
+
+  return undefined;
+}
+
+/* ============================================================
+   SPECIAL PLURAL / SUBJECT HANDLING
+============================================================ */
+
+/*
+ * This function is deliberately dictionary-driven.
+ *
+ * If "people" exists in the user's large dictionary,
+ * the engine gets the Bemba word directly from that dictionary.
+ *
+ * We do not hard-code "people = chikala".
+ */
+
+function translateKnownSubject(
+  englishSubject: string
+): string | undefined {
+  return lookupEnglish(
+    englishSubject
+  );
+}
+
+/*
+ * Handle sentences where the subject itself is a dictionary
+ * entry and the remaining words need translation.
+ *
+ * Example:
+ *
+ *     people are sick
+ *
+ * If:
+ *
+ *     people -> [dictionary result]
+ *     sick   -> [dictionary result/root]
+ *
+ * the engine can use both rather than returning only the
+ * first word or declaring the sentence missing.
+ */
+
+function translateDictionarySentence(
+  text: string
+): string | undefined {
+  const words =
+    tokenize(text);
+
+  if (words.length < 2) {
+    return undefined;
+  }
+
+  /*
+   * Try the longest subject phrase first.
+   */
+
+  const maxSubjectLength =
+    Math.min(
+      5,
+      words.length - 1
+    );
+
+  for (
+    let subjectLength =
+      maxSubjectLength;
+    subjectLength >= 1;
+    subjectLength--
+  ) {
+    const subjectText =
+      words
+        .slice(
+          0,
+          subjectLength
+        )
+        .join(" ");
+
+    const subject =
+      translateKnownSubject(
+        subjectText
+      );
+
+    if (!subject) {
+      continue;
+    }
+
+    const remaining =
+      words
+        .slice(subjectLength)
+        .join(" ");
+
+    /*
+     * Remove common English grammar connectors.
+     */
+
+    const predicate =
+      remaining
+        .replace(
+          /^(am|are|is|was|were|be|being)\s+/,
+          ""
+        )
+        .trim();
+
+    if (!predicate) {
+      return subject;
+    }
+
+    /*
+     * Try predicate as a Bemba verb root.
+     */
+
+    const predicateWords =
+      tokenize(predicate);
+
+    if (predicateWords.length) {
+      const first =
+        predicateWords[0];
+
+      const root =
+        getVerbRoot(first);
+
+      if (root) {
+        /*
+         * For plural subjects, use Bale.
+         *
+         * This is only applied when the English subject
+         * itself is plural-looking.
+         */
+
+        if (
+          /^(people|they|men|women|children|students|workers|friends|parents)$/i.test(
+            words[0]
+          )
+        ) {
+          const rest =
+            predicateWords
+              .slice(1)
+              .join(" ");
+
+          if (rest) {
+            const object =
+              translateByWords(
+                rest,
+                true
+              );
+
+            if (object) {
+              return `Bale${root} ${object}`;
+            }
+          }
+
+          return `Bale${root}`;
+        }
+      }
+    }
+
+    /*
+     * Normal dictionary translation of the predicate.
+     */
+
+    const translatedPredicate =
+      translateByWords(
+        predicate,
+        true
+      );
+
+    if (translatedPredicate) {
+      return `${subject} ${translatedPredicate}`;
+    }
+  }
+
+  return undefined;
+}
 
 /* ============================================================
    MASTER TRANSLATION
@@ -2137,10 +1785,8 @@ function translateNumber(
 export function translateEnglishToBemba(
   text: string
 ): string {
-
   const original =
-    String(text ?? "")
-      .trim();
+    String(text ?? "").trim();
 
   if (!original) {
     return "";
@@ -2159,7 +1805,7 @@ export function translateEnglishToBemba(
 
   /*
    * ==========================================================
-   * 1. IMPORTANT PHRASES
+   * 1. IMPORTANT PHRASE
    * ==========================================================
    */
 
@@ -2177,13 +1823,14 @@ export function translateEnglishToBemba(
    * 2. EXACT COMPLETE DICTIONARY ENTRY
    * ==========================================================
    *
-   * This is extremely important for the large dictionary.
+   * This is the most important lookup.
    *
-   * If the dictionary contains:
+   * If the user has:
    *
    * "people are sick"
    *
-   * its entry wins.
+   * as an actual dictionary entry,
+   * it is used directly.
    */
 
   const exact =
@@ -2212,22 +1859,7 @@ export function translateEnglishToBemba(
 
   /*
    * ==========================================================
-   * 4. SPECIAL SENTENCE UNDERSTANDING
-   * ==========================================================
-   */
-
-  const sentence =
-    translateSentencePattern(
-      normalized
-    );
-
-  if (sentence) {
-    return sentence;
-  }
-
-  /*
-   * ==========================================================
-   * 5. POSSESSIVE
+   * 4. POSSESSIVE
    * ==========================================================
    */
 
@@ -2242,31 +1874,88 @@ export function translateEnglishToBemba(
 
   /*
    * ==========================================================
-   * 6. LONGEST PHRASE + COMPLETE DICTIONARY WORDS
+   * 5. HUMAN-LIKE SENTENCE ENGINE
    * ==========================================================
    */
 
-  const wordResult =
-    translateByWords(
+  const sentence =
+    translateSentencePattern(
       normalized
     );
 
-  if (wordResult) {
-    return wordResult;
+  if (sentence) {
+    return sentence;
   }
 
   /*
    * ==========================================================
-   * 7. NO RELIABLE TRANSLATION
+   * 6. DICTIONARY SUBJECT + PREDICATE
+   * ==========================================================
+   *
+   * This is important for sentences such as:
+   *
+   * people are sick
+   * children are playing
+   * students are learning
+   *
+   * The subject is obtained from the user's dictionary.
+   */
+
+  const dictionarySentence =
+    translateDictionarySentence(
+      normalized
+    );
+
+  if (dictionarySentence) {
+    return dictionarySentence;
+  }
+
+  /*
+   * ==========================================================
+   * 7. FULL DICTIONARY LONGEST-PHRASE MATCH
+   * ==========================================================
+   *
+   * No small hard-coded vocabulary.
+   *
+   * This searches the complete indexed dictionary.
+   */
+
+  const dictionaryResult =
+    translateByWords(
+      normalized,
+      true
+    );
+
+  if (dictionaryResult) {
+    return dictionaryResult;
+  }
+
+  /*
+   * ==========================================================
+   * 8. FINAL EXACT WORD
+   * ==========================================================
+   */
+
+  const single =
+    lookupEnglish(
+      normalized
+    );
+
+  if (single) {
+    return single;
+  }
+
+  /*
+   * ==========================================================
+   * 9. NOTHING FOUND
    * ==========================================================
    */
 
   return "";
 }
 
-
 /* ============================================================
-   APP FALLBACK FUNCTION
+   REQUIRED APP FALLBACK
 ============================================================ */
 
 /*
@@ -2278,15 +1967,11 @@ export function translateEnglishToBemba(
 export function translateWithFallback(
   text: string
 ): string {
-
   try {
-
     return translateEnglishToBemba(
       text
     );
-
   } catch (error) {
-
     console.error(
       "[BembaTranslate] Offline translation error:",
       error
@@ -2296,7 +1981,6 @@ export function translateWithFallback(
   }
 }
 
-
 /* ============================================================
    TRANSLATION CHECK
 ============================================================ */
@@ -2304,14 +1988,12 @@ export function translateWithFallback(
 export function hasBembaTranslation(
   text: string
 ): boolean {
-
   return Boolean(
     translateEnglishToBemba(
       text
     )
   );
 }
-
 
 /* ============================================================
    GET TRANSLATION
@@ -2320,7 +2002,6 @@ export function hasBembaTranslation(
 export function getBembaTranslation(
   text: string
 ): string | undefined {
-
   const result =
     translateEnglishToBemba(
       text
@@ -2329,15 +2010,13 @@ export function getBembaTranslation(
   return result || undefined;
 }
 
-
 /* ============================================================
-   GET ALL KNOWN TRANSLATIONS
+   ALL DICTIONARY ALTERNATIVES
 ============================================================ */
 
 export function getBembaTranslations(
   text: string
 ): string[] {
-
   const normalized =
     normalize(
       expandContractions(
@@ -2356,7 +2035,6 @@ export function getBembaTranslations(
   );
 }
 
-
 /* ============================================================
    DICTIONARY SIZE
 ============================================================ */
@@ -2365,25 +2043,14 @@ export function getDictionarySize(): number {
   return dictionaryLookup.size;
 }
 
-
 /* ============================================================
-   RAW DICTIONARY SIZE
-============================================================ */
-
-export function getRawDictionarySize(): number {
-  return dictionary.length;
-}
-
-
-/* ============================================================
-   SEARCH LOCAL DICTIONARY
+   SEARCH FULL DICTIONARY
 ============================================================ */
 
 export function searchBembaDictionary(
   query: string,
   limit = 50
 ): BembaEntry[] {
-
   const normalized =
     normalize(query);
 
@@ -2394,10 +2061,14 @@ export function searchBembaDictionary(
   const results: BembaEntry[] =
     [];
 
+  /*
+   * Search EVERY dictionary entry.
+   */
+
   for (
-    const entry
-    of dictionary
+    const entry of dictionary
   ) {
+    if (!entry) continue;
 
     const english =
       normalize(
@@ -2417,19 +2088,16 @@ export function searchBembaDictionary(
         normalized
       )
     ) {
-
       results.push({
         english:
           entry.english,
-
         bemba:
           entry.bemba,
       });
     }
 
     if (
-      results.length >=
-      limit
+      results.length >= limit
     ) {
       break;
     }
@@ -2438,20 +2106,16 @@ export function searchBembaDictionary(
   return results;
 }
 
-
 /* ============================================================
-   DEBUG / DIAGNOSTIC INFORMATION
+   DEBUG / DICTIONARY INFORMATION
 ============================================================ */
 
 export function getTranslatorInfo() {
-
   return {
-
-    mode:
-      "offline",
+    mode: "offline",
 
     source:
-      "local Bemba dictionary",
+      "complete local bembaDictionary",
 
     dictionaryEntries:
       dictionary.length,
@@ -2459,11 +2123,11 @@ export function getTranslatorInfo() {
     indexedEntries:
       dictionaryLookup.size,
 
-    wordEntries:
-      dictionaryWordLookup.size,
+    singleWordEntries:
+      singleWordDictionary.size,
 
-    alternativeEntries:
-      dictionaryAlternatives.size,
+    maximumDictionaryPhraseLength:
+      maximumDictionaryPhraseLength,
 
     sentencePatterns:
       directPatterns.length,
