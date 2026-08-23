@@ -1,230 +1,217 @@
 /* =========================================================
    BEMBATRANSLATE
-   OFFLINE NAVIGATION MAP DATA
-
-   First Zambia map foundation.
-
-   These are locally packaged map points.
-   No internet is required to read them.
-
-   IMPORTANT:
-   This is the foundation of the navigation system.
-   We can expand this later with thousands of roads,
-   buildings, paths and landmarks.
+   OFFLINE MAP DATA
    ========================================================= */
 
 import type {
+  Coordinate,
   MapData,
   MapEdge,
   MapNode,
 } from "./mapTypes";
 
 /* =========================================================
-   ZAMBIA MAP NODES
+   HELPER
    ========================================================= */
 
-export const mapNodes: MapNode[] = [
-  {
-    id: "lusaka",
-    name: "Lusaka",
-    latitude: -15.3875,
-    longitude: 28.3228,
-  },
+function makeNode(
+  id: string,
+  name: string,
+  latitude: number,
+  longitude: number,
+  type: MapNode["type"],
+): MapNode {
+  const coordinate: Coordinate = {
+    latitude,
+    longitude,
+  };
 
-  {
-    id: "lusaka-city-centre",
-    name: "Lusaka City Centre",
-    latitude: -15.4167,
-    longitude: 28.2833,
-  },
+  return {
+    id,
+    name,
+    latitude,
+    longitude,
+    coordinate,
+    type,
+  };
+}
 
-  {
-    id: "cairo-road",
-    name: "Cairo Road",
-    latitude: -15.4167,
-    longitude: 28.2800,
-  },
+/* =========================================================
+   OFFLINE MAP NODES
+   ========================================================= */
 
-  {
-    id: "freedom-way",
-    name: "Freedom Way",
-    latitude: -15.4230,
-    longitude: 28.2870,
-  },
+export const zambiaMapNodes: MapNode[] = [
+  makeNode(
+    "lusaka-center",
+    "Lusaka Centre",
+    -15.4167,
+    28.2833,
+    "landmark",
+  ),
 
-  {
-    id: "arcades",
-    name: "Arcades",
-    latitude: -15.3940,
-    longitude: 28.3240,
-  },
+  makeNode(
+    "cbu",
+    "Copperbelt University",
+    -12.8106,
+    28.2132,
+    "building",
+  ),
 
-  {
-    id: "eastpark",
-    name: "East Park Mall",
-    latitude: -15.3958,
-    longitude: 28.3295,
-  },
+  makeNode(
+    "ndola-center",
+    "Ndola Centre",
+    -12.9680,
+    28.6337,
+    "landmark",
+  ),
 
-  {
-    id: "mandahill",
-    name: "Manda Hill",
-    latitude: -15.3915,
-    longitude: 28.3190,
-  },
-
-  {
-    id: "unza",
-    name: "University of Zambia",
-    latitude: -15.3969,
-    longitude: 28.3360,
-  },
-
-  {
-    id: "cbu",
-    name: "Copperbelt University",
-    latitude: -12.8024,
-    longitude: 28.2132,
-  },
-
-  {
-    id: "kitwe",
-    name: "Kitwe",
-    latitude: -12.8024,
-    longitude: 28.2132,
-  },
-
-  {
-    id: "ndola",
-    name: "Ndola",
-    latitude: -12.9587,
-    longitude: 28.6366,
-  },
-
-  {
-    id: "livingstone",
-    name: "Livingstone",
-    latitude: -17.8419,
-    longitude: 25.8543,
-  },
-
-  {
-    id: "chipata",
-    name: "Chipata",
-    latitude: -13.6333,
-    longitude: 32.6500,
-  },
-
-  {
-    id: "kabushi",
-    name: "Kabushi",
-    latitude: -12.9667,
-    longitude: 28.6333,
-  },
-
-  {
-    id: "kabwe",
-    name: "Kabwe",
-    latitude: -14.4469,
-    longitude: 28.4464,
-  },
+  makeNode(
+    "kitwe-center",
+    "Kitwe Centre",
+    -12.8024,
+    28.2132,
+    "landmark",
+  ),
 ];
 
 /* =========================================================
-   MAP CONNECTIONS
+   OFFLINE CONNECTIONS
    ========================================================= */
 
-export const mapEdges: MapEdge[] = [
+export const zambiaMapEdges: MapEdge[] = [
   {
-    from: "lusaka",
-    to: "lusaka-city-centre",
-    distance: 0,
-  },
-
-  {
-    from: "lusaka-city-centre",
-    to: "cairo-road",
-    distance: 0,
-  },
-
-  {
-    from: "cairo-road",
-    to: "freedom-way",
-    distance: 0,
-  },
-
-  {
-    from: "lusaka",
-    to: "arcades",
-    distance: 0,
-  },
-
-  {
-    from: "arcades",
-    to: "eastpark",
-    distance: 0,
-  },
-
-  {
-    from: "arcades",
-    to: "unza",
-    distance: 0,
-  },
-
-  {
-    from: "lusaka",
-    to: "mandahill",
-    distance: 0,
-  },
-
-  {
-    from: "mandahill",
-    to: "cairo-road",
-    distance: 0,
-  },
-
-  {
-    from: "lusaka",
-    to: "kabwe",
-    distance: 0,
-  },
-
-  {
-    from: "kabwe",
-    to: "ndola",
-    distance: 0,
-  },
-
-  {
-    from: "ndola",
-    to: "kitwe",
-    distance: 0,
-  },
-
-  {
-    from: "kitwe",
+    from: "lusaka-center",
     to: "cbu",
-    distance: 0,
+    distance: 330000,
+    bidirectional: true,
   },
 
   {
-    from: "livingstone",
-    to: "lusaka",
-    distance: 0,
+    from: "cbu",
+    to: "ndola-center",
+    distance: 11000,
+    bidirectional: true,
   },
 
   {
-    from: "lusaka",
-    to: "chipata",
-    distance: 0,
+    from: "ndola-center",
+    to: "kitwe-center",
+    distance: 60000,
+    bidirectional: true,
+  },
+
+  {
+    from: "cbu",
+    to: "kitwe-center",
+    distance: 1000,
+    bidirectional: true,
   },
 ];
 
 /* =========================================================
-   COMPLETE MAP DATA OBJECT
+   COMPLETE OFFLINE MAP
    ========================================================= */
 
-export const zambiaMap: MapData = {
-  nodes: mapNodes,
-  edges: mapEdges,
+export const zambiaOfflineMap: MapData = {
+  name: "Zambia Offline Map",
+  nodes: zambiaMapNodes,
+  edges: zambiaMapEdges,
 };
+
+/* =========================================================
+   FIND NODE
+   ========================================================= */
+
+export function getMapNode(
+  id: string,
+): MapNode | undefined {
+  return zambiaMapNodes.find(
+    (node) => node.id === id,
+  );
+}
+
+/* =========================================================
+   DISTANCE
+   ========================================================= */
+
+export function calculateDistance(
+  latitude1: number,
+  longitude1: number,
+  latitude2: number,
+  longitude2: number,
+): number {
+  const earthRadius = 6371000;
+
+  const lat1 =
+    (latitude1 * Math.PI) / 180;
+
+  const lat2 =
+    (latitude2 * Math.PI) / 180;
+
+  const deltaLat =
+    ((latitude2 - latitude1) *
+      Math.PI) /
+    180;
+
+  const deltaLon =
+    ((longitude2 - longitude1) *
+      Math.PI) /
+    180;
+
+  const a =
+    Math.sin(deltaLat / 2) *
+      Math.sin(deltaLat / 2) +
+    Math.cos(lat1) *
+      Math.cos(lat2) *
+      Math.sin(deltaLon / 2) *
+      Math.sin(deltaLon / 2);
+
+  const c =
+    2 *
+    Math.atan2(
+      Math.sqrt(a),
+      Math.sqrt(1 - a),
+    );
+
+  return earthRadius * c;
+}
+
+/* =========================================================
+   NEAREST NODE
+   ========================================================= */
+
+export function getNearestMapNode(
+  latitude: number,
+  longitude: number,
+): MapNode | undefined {
+  if (
+    zambiaMapNodes.length === 0
+  ) {
+    return undefined;
+  }
+
+  let nearest =
+    zambiaMapNodes[0];
+
+  let nearestDistance =
+    Number.POSITIVE_INFINITY;
+
+  for (const node of zambiaMapNodes) {
+    const distance =
+      calculateDistance(
+        latitude,
+        longitude,
+        node.latitude,
+        node.longitude,
+      );
+
+    if (
+      distance < nearestDistance
+    ) {
+      nearest = node;
+      nearestDistance = distance;
+    }
+  }
+
+  return nearest;
+}
