@@ -1479,8 +1479,6 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "please lower the price", bemba: "bwesheniko umutengo" },
   { english: "the price is alright", bemba: "umutengo ilifye bwino" },
   { english: "to be cheap", bemba: "ukucipa" },
-  
-  // VERBS
   { english: "to repeat", bemba: "ukubwekeshapo" },
   { english: "to buy", bemba: "ukushita" },
   { english: "to sell", bemba: "ukushitisha" },
