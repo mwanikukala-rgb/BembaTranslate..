@@ -1,6 +1,11 @@
+/* =========================================================
+   BEMBATRANSLATE
+   OFFLINE NAVIGATION
+   ========================================================= */
+
 import {
   useEffect,
-  useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -10,372 +15,506 @@ import {
   MapPin,
   Navigation as NavigationIcon,
   RefreshCw,
-  Search,
+  Route,
 } from "lucide-react";
 
 import {
+  clearLocationWatch,
   getCurrentLocation,
   watchLocation,
-  clearLocationWatch,
-  type GPSPosition,
+  type GPSLocation,
+  type GPSWatchId,
 } from "./gps";
 
 import {
-  calculateRoute,
-  estimateWalkingTime,
-  formatDistance,
-  getDirectionText,
-} from "./routeEngine";
-
-import {
-  mapNodes,
+  zambiaOfflineMap,
 } from "./mapData";
 
+import {
+  calculateBearing,
+  bearingToDirection,
+  findNearestNode,
+  findRoute,
+  formatDistance,
+  estimateWalkingTime,
+} from "./routeEngine";
+
 import type {
-  Coordinate,
   MapNode,
+  RouteResult,
 } from "./mapTypes";
 
 type NavigationProps = {
   onBack?: () => void;
 };
 
-function Navigation({
+export default function Navigation({
   onBack,
 }: NavigationProps) {
-  const [position, setPosition] =
-    useState<GPSPosition | null>(null);
+  const [
+    location,
+    setLocation,
+  ] =
+    useState<GPSLocation | null>(
+      null,
+    );
 
-  const [destination, setDestination] =
-    useState<MapNode | null>(null);
+  const [
+    destination,
+    setDestination,
+  ] =
+    useState<MapNode | null>(
+      null,
+    );
 
-  const [loading, setLoading] =
+  const [
+    route,
+    setRoute,
+  ] =
+    useState<RouteResult | null>(
+      null,
+    );
+
+  const [
+    loading,
+    setLoading,
+  ] =
     useState(false);
 
-  const [error, setError] =
+  const [
+    tracking,
+    setTracking,
+  ] =
+    useState(false);
+
+  const [
+    error,
+    setError,
+  ] =
     useState("");
 
-  const [search, setSearch] =
-    useState("");
+  const watchIdRef =
+    useRef<GPSWatchId | null>(
+      null,
+    );
 
-  const [tracking, setTracking] =
-    useState(false);
+  /* =======================================================
+     CURRENT LOCATION
+     ======================================================= */
 
-  const [routeStarted, setRouteStarted] =
-    useState(false);
+  const locateUser =
+    async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const current =
+          await getCurrentLocation();
+
+        setLocation(
+          current,
+        );
+
+        setError("");
+      } catch (err) {
+        console.error(
+          "Location error:",
+          err,
+        );
+
+        setError(
+          "Unable to get your location. Please enable GPS/location permission.",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+  /* =======================================================
+     START TRACKING
+     ======================================================= */
+
+  const startTracking =
+    async () => {
+      setError("");
+
+      try {
+        const current =
+          await getCurrentLocation();
+
+        setLocation(
+          current,
+        );
+
+        if (
+          watchIdRef.current !==
+          null
+        ) {
+          await clearLocationWatch(
+            watchIdRef.current,
+          );
+
+          watchIdRef.current =
+            null;
+        }
+
+        const watchId =
+          await watchLocation(
+            (
+              nextLocation,
+            ) => {
+              setLocation(
+                nextLocation,
+              );
+            },
+            (gpsError) => {
+              console.error(
+                "GPS tracking error:",
+                gpsError,
+              );
+
+              setError(
+                "GPS tracking stopped.",
+              );
+            },
+          );
+
+        watchIdRef.current =
+          watchId;
+
+        setTracking(
+          true,
+        );
+      } catch (err) {
+        console.error(
+          "Tracking error:",
+          err,
+        );
+
+        setTracking(
+          false,
+        );
+
+        setError(
+          "Unable to start GPS tracking. Check your location permission.",
+        );
+      }
+    };
+
+  /* =======================================================
+     STOP TRACKING
+     ======================================================= */
+
+  const stopTracking =
+    async () => {
+      if (
+        watchIdRef.current !==
+        null
+      ) {
+        try {
+          await clearLocationWatch(
+            watchIdRef.current,
+          );
+        } catch (err) {
+          console.error(
+            err,
+          );
+        }
+
+        watchIdRef.current =
+          null;
+      }
+
+      setTracking(
+        false,
+      );
+    };
+
+  /* =======================================================
+     CLEANUP
+     ======================================================= */
 
   useEffect(() => {
     return () => {
-      clearLocationWatch();
+      if (
+        watchIdRef.current !==
+        null
+      ) {
+        clearLocationWatch(
+          watchIdRef.current,
+        ).catch(
+          console.error,
+        );
+
+        watchIdRef.current =
+          null;
+      }
     };
   }, []);
 
-  const filteredNodes = useMemo(() => {
-    const query = search
-      .trim()
-      .toLowerCase();
+  /* =======================================================
+     DESTINATION
+     ======================================================= */
 
-    if (!query) {
-      return mapNodes.slice(0, 30);
-    }
-
-    return mapNodes
-      .filter((node: MapNode) =>
-        node.name
-          .toLowerCase()
-          .includes(query)
-      )
-      .slice(0, 30);
-  }, [search]);
-
-  const currentCoordinate: Coordinate | null =
-    position
-      ? {
-          latitude: position.latitude,
-          longitude: position.longitude,
-        }
-      : null;
-
-  const route = useMemo(() => {
-    if (
-      !currentCoordinate ||
-      !destination
-    ) {
-      return null;
-    }
-
-    return calculateRoute(
-      currentCoordinate,
-      destination.coordinate,
-      mapNodes
-    );
-  }, [
-    currentCoordinate,
-    destination,
-  ]);
-
-  const locateMe = async () => {
-    setLoading(true);
-    setError("");
-
-    try {
-      const result =
-        await getCurrentLocation();
-
-      setPosition(result);
-      setTracking(true);
-    } catch (locationError) {
-      const message =
-        locationError instanceof Error
-          ? locationError.message
-          : "Unable to get your location.";
-
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const startTracking = async () => {
-    setError("");
-
-    try {
-      const firstPosition =
-        await getCurrentLocation();
-
-      setPosition(firstPosition);
-      setTracking(true);
-
-      clearLocationWatch();
-
-      watchLocation(
-        (nextPosition: GPSPosition) => {
-          setPosition(nextPosition);
-        },
-        (locationError: string) => {
-          setError(locationError);
-        }
+  const chooseDestination =
+    (
+      node: MapNode,
+    ) => {
+      setDestination(
+        node,
       );
-    } catch (locationError) {
-      const message =
-        locationError instanceof Error
-          ? locationError.message
-          : "GPS is unavailable.";
 
-      setError(message);
-    }
-  };
+      setError("");
 
-  const stopTracking = () => {
-    clearLocationWatch();
-    setTracking(false);
-  };
+      if (!location) {
+        setRoute(
+          null,
+        );
 
-  const selectDestination = (
-    node: MapNode
-  ) => {
-    setDestination(node);
-    setRouteStarted(false);
-    setError("");
-  };
+        setError(
+          "Get your current location first.",
+        );
 
-  const beginRoute = () => {
-    if (!destination) {
-      return;
-    }
+        return;
+      }
 
-    setRouteStarted(true);
+      const nearest =
+        findNearestNode(
+          zambiaOfflineMap,
+          location.latitude,
+          location.longitude,
+        );
 
-    if (!tracking) {
-      void startTracking();
-    }
-  };
+      if (!nearest) {
+        setRoute(
+          null,
+        );
+
+        setError(
+          "No offline map point is available near your location.",
+        );
+
+        return;
+      }
+
+      const newRoute =
+        findRoute(
+          zambiaOfflineMap,
+          nearest.id,
+          node.id,
+        );
+
+      if (!newRoute) {
+        setRoute(
+          null,
+        );
+
+        setError(
+          "No offline route is available between these locations yet.",
+        );
+
+        return;
+      }
+
+      setRoute(
+        newRoute,
+      );
+    };
+
+  /* =======================================================
+     RECALCULATE
+     ======================================================= */
+
+  const recalculateRoute =
+    () => {
+      if (
+        !location ||
+        !destination
+      ) {
+        return;
+      }
+
+      const nearest =
+        findNearestNode(
+          zambiaOfflineMap,
+          location.latitude,
+          location.longitude,
+        );
+
+      if (!nearest) {
+        setRoute(
+          null,
+        );
+
+        setError(
+          "Could not find a nearby offline map point.",
+        );
+
+        return;
+      }
+
+      const newRoute =
+        findRoute(
+          zambiaOfflineMap,
+          nearest.id,
+          destination.id,
+        );
+
+      setRoute(
+        newRoute,
+      );
+
+      if (!newRoute) {
+        setError(
+          "No route found.",
+        );
+      } else {
+        setError("");
+      }
+    };
+
+  /* =======================================================
+     DIRECTION
+     ======================================================= */
+
+  const getDirectionText =
+    (): string => {
+      if (
+        !location ||
+        !route ||
+        route.nodes.length <
+          2
+      ) {
+        return "Select a destination";
+      }
+
+      const nextNode =
+        route.nodes[1];
+
+      const bearing =
+        calculateBearing(
+          location.latitude,
+          location.longitude,
+          nextNode.latitude,
+          nextNode.longitude,
+        );
+
+      return `Head ${bearingToDirection(
+        bearing,
+      )}`;
+    };
+
+  /* =======================================================
+     DESTINATION LIST
+     ======================================================= */
+
+  const availableNodes =
+    zambiaOfflineMap.nodes;
+
+  /* =======================================================
+     RENDER
+     ======================================================= */
 
   return (
     <section className="navigation-page">
+      {/* HEADER */}
 
       <div className="navigation-header">
-
         <button
           type="button"
           className="navigation-back"
           onClick={onBack}
           aria-label="Back"
         >
-          <ArrowLeft size={19} />
+          <ArrowLeft
+            size={19}
+          />
         </button>
 
         <div>
-          <span className="eyebrow">
+          <span>
             OFFLINE NAVIGATION
           </span>
 
           <h1>
             Find your way
           </h1>
-
-          <p>
-            GPS guidance without internet.
-          </p>
         </div>
-
       </div>
 
-      <div className="navigation-status">
+      {/* STATUS */}
 
+      <div className="navigation-status">
         <div className="navigation-status-icon">
-          <LocateFixed size={17} />
+          <LocateFixed
+            size={18}
+          />
         </div>
 
         <div>
           <strong>
             {tracking
               ? "GPS tracking active"
-              : "GPS not started"}
+              : "GPS tracking inactive"}
           </strong>
 
           <span>
-            {position
-              ? `${position.latitude.toFixed(
-                  5
-                )}, ${position.longitude.toFixed(
-                  5
-                )}`
-              : "Tap Locate Me to find your position"}
+            {location
+              ? `Accuracy ±${Math.round(
+                  location.accuracy,
+                )} m`
+              : "Location not available"}
           </span>
         </div>
-
       </div>
 
-      <div className="navigation-map">
-
-        <div className="map-grid" />
-
-        <div className="map-label map-label-top">
-          OFFLINE MAP
-        </div>
-
-        {route && route.nodes.length > 0 && (
-          <div className="route-line">
-            {route.nodes.map(
-              (
-                node: MapNode,
-                index: number
-              ) => (
-                <span
-                  key={node.id}
-                  className="route-node"
-                  style={{
-                    left: `${
-                      20 +
-                      index *
-                        (60 /
-                          Math.max(
-                            route.nodes.length -
-                              1,
-                            1
-                          ))
-                    }%`,
-                    top: `${
-                      65 -
-                      index * 25
-                    }%`,
-                  }}
-                />
-              )
-            )}
-          </div>
-        )}
-
-        {position && (
-          <div className="user-location-marker">
-            <span />
-          </div>
-        )}
-
-        {destination && (
-          <div className="destination-marker">
-            <MapPin size={26} />
-          </div>
-        )}
-
-        <div className="map-center-message">
-
-          {!position ? (
-            <>
-              <LocateFixed size={28} />
-
-              <strong>
-                Your location will appear here
-              </strong>
-
-              <span>
-                GPS works without mobile data.
-              </span>
-            </>
-          ) : (
-            <>
-              <NavigationIcon size={28} />
-
-              <strong>
-                You are here
-              </strong>
-
-              <span>
-                Select a destination below.
-              </span>
-            </>
-          )}
-
-        </div>
-
-      </div>
+      {/* GPS CONTROLS */}
 
       <div className="navigation-controls">
-
         <button
           type="button"
-          className="gps-button"
-          onClick={() => {
-            void locateMe();
-          }}
-          disabled={loading}
+          onClick={
+            locateUser
+          }
+          disabled={
+            loading
+          }
         >
-          {loading ? (
-            <RefreshCw
-              size={17}
-              className="spin"
-            />
-          ) : (
-            <LocateFixed size={17} />
-          )}
+          <LocateFixed
+            size={17}
+          />
 
           {loading
             ? "Locating..."
-            : "Locate Me"}
+            : "My location"}
         </button>
 
-        {tracking ? (
+        {!tracking ? (
           <button
             type="button"
-            className="secondary-gps-button"
-            onClick={stopTracking}
+            onClick={
+              startTracking
+            }
           >
-            Stop GPS
+            <NavigationIcon
+              size={17}
+            />
+
+            Start tracking
           </button>
         ) : (
           <button
             type="button"
-            className="secondary-gps-button"
-            onClick={() => {
-              void startTracking();
-            }}
+            onClick={
+              stopTracking
+            }
           >
-            Start Tracking
+            Stop tracking
           </button>
         )}
-
       </div>
+
+      {/* ERROR */}
 
       {error && (
         <div className="navigation-error">
@@ -383,211 +522,210 @@ function Navigation({
         </div>
       )}
 
-      <div className="destination-section">
+      {/* OFFLINE MAP */}
 
-        <div className="navigation-section-title">
-          <div>
-            <h2>
-              Where do you want to go?
-            </h2>
+      <div className="offline-map">
+        <div className="map-grid" />
 
-            <p>
-              Choose an offline map location.
-            </p>
+        {/* USER LOCATION */}
+
+        {location && (
+          <div className="user-location">
+            <span className="location-pulse" />
+            <span className="location-dot" />
           </div>
-        </div>
+        )}
 
-        <div className="navigation-search">
+        {/* ROUTE */}
 
-          <Search size={17} />
-
-          <input
-            value={search}
-            onChange={(event) => {
-              setSearch(
-                event.target.value
-              );
-            }}
-            placeholder="Search destination..."
-          />
-
-        </div>
-
-        <div className="destination-list">
-
-          {filteredNodes.map(
-            (node: MapNode) => {
-              const selected =
-                destination?.id === node.id;
-
-              return (
-                <button
-                  type="button"
-                  key={node.id}
-                  className={
-                    selected
-                      ? "destination-card selected"
-                      : "destination-card"
-                  }
-                  onClick={() =>
-                    selectDestination(node)
-                  }
-                >
-                  <div className="destination-icon">
-                    <MapPin size={17} />
-                  </div>
-
-                  <div>
-                    <strong>
-                      {node.name}
-                    </strong>
-
-                    <span>
-                      Offline map location
-                    </span>
-                  </div>
-
-                </button>
-              );
-            }
+        {route &&
+          route.nodes.map(
+            (
+              node,
+              index,
+            ) => (
+              <div
+                key={
+                  node.id
+                }
+                className={
+                  index ===
+                  route.nodes.length -
+                    1
+                    ? "route-destination"
+                    : "route-node"
+                }
+                style={{
+                  left: `${20 +
+                    index * 20}%`,
+                  top: `${65 -
+                    index * 13}%`,
+                }}
+              >
+                {index ===
+                  route.nodes.length -
+                    1 && (
+                  <MapPin
+                    size={25}
+                  />
+                )}
+              </div>
+            ),
           )}
 
-          {filteredNodes.length === 0 && (
-            <div className="navigation-empty">
-              No offline location found.
-            </div>
-          )}
+        {!location && (
+          <div className="map-empty">
+            <LocateFixed
+              size={28}
+            />
 
-        </div>
+            <strong>
+              GPS location
+            </strong>
 
+            <span>
+              Tap “My location”
+              to find your
+              position.
+            </span>
+          </div>
+        )}
       </div>
 
-      {destination && (
-        <div className="route-card">
+      {/* ROUTE INFORMATION */}
 
-          <div className="route-card-header">
-
-            <div className="route-card-icon">
-              <NavigationIcon size={18} />
-            </div>
+      {route && (
+        <div className="route-summary">
+          <div>
+            <Route
+              size={18}
+            />
 
             <div>
-              <span>
-                DESTINATION
-              </span>
-
               <strong>
-                {destination.name}
+                {getDirectionText()}
               </strong>
-            </div>
 
+              <span>
+                {formatDistance(
+                  route.distance,
+                )}{" "}
+                ·{" "}
+                {estimateWalkingTime(
+                  route.distance,
+                )}{" "}
+                min walk
+              </span>
+            </div>
           </div>
 
-          {route ? (
-            <>
-
-              <div className="route-summary">
-
-                <div>
-                  <span>
-                    Distance
-                  </span>
-
-                  <strong>
-                    {formatDistance(
-                      route.distance
-                    )}
-                  </strong>
-                </div>
-
-                <div>
-                  <span>
-                    Walking time
-                  </span>
-
-                  <strong>
-                    {estimateWalkingTime(
-                      route.distance
-                    )}{" "}
-                    min
-                  </strong>
-                </div>
-
-              </div>
-
-              {route.nodes.length >=
-                2 && (
-                <div className="direction-card">
-
-                  <NavigationIcon
-                    size={20}
-                  />
-
-                  <div>
-                    <strong>
-                      {getDirectionText(
-                        route.nodes[0]
-                          .coordinate,
-                        route.nodes[
-                          route.nodes.length -
-                            1
-                        ].coordinate
-                      )}
-                    </strong>
-
-                    <span>
-                      Follow the offline
-                      route shown on the
-                      map.
-                    </span>
-                  </div>
-
-                </div>
-              )}
-
-              <button
-                type="button"
-                className="start-route-button"
-                onClick={beginRoute}
-              >
-                <NavigationIcon
-                  size={17}
-                />
-
-                {routeStarted
-                  ? "Navigation Active"
-                  : "Start Navigation"}
-              </button>
-
-            </>
-          ) : (
-            <div className="route-unavailable">
-              Move closer to a mapped
-              location to calculate a route.
-            </div>
-          )}
-
+          <button
+            type="button"
+            onClick={
+              recalculateRoute
+            }
+            aria-label="Recalculate route"
+          >
+            <RefreshCw
+              size={17}
+            />
+          </button>
         </div>
       )}
 
-      <div className="navigation-note">
+      {/* DESTINATIONS */}
 
-        <strong>
-          Offline navigation
-        </strong>
+      <div className="navigation-destinations">
+        <div className="navigation-section-title">
+          <div>
+            <span>
+              OFFLINE PLACES
+            </span>
 
-        <span>
-          GPS can determine your position
-          without internet. The roads and
-          places themselves must be packaged
-          inside the application for offline
-          routing.
-        </span>
+            <h2>
+              Choose a destination
+            </h2>
+          </div>
 
+          <small>
+            {availableNodes.length}
+          </small>
+        </div>
+
+        <div className="navigation-place-list">
+          {availableNodes.map(
+            (node) => (
+              <button
+                key={
+                  node.id
+                }
+                type="button"
+                className={
+                  destination?.id ===
+                  node.id
+                    ? "navigation-place selected"
+                    : "navigation-place"
+                }
+                onClick={() =>
+                  chooseDestination(
+                    node,
+                  )
+                }
+              >
+                <div>
+                  <MapPin
+                    size={17}
+                  />
+
+                  <span>
+                    <strong>
+                      {
+                        node.name
+                      }
+                    </strong>
+
+                    <small>
+                      {node.type ??
+                        "offline place"}
+                    </small>
+                  </span>
+                </div>
+
+                {destination?.id ===
+                  node.id && (
+                  <span className="selected-label">
+                    Selected
+                  </span>
+                )}
+              </button>
+            ),
+          )}
+        </div>
       </div>
 
+      {/* OFFLINE NOTICE */}
+
+      <div className="navigation-offline-notice">
+        <NavigationIcon
+          size={18}
+        />
+
+        <div>
+          <strong>
+            Works offline
+          </strong>
+
+          <span>
+            The map points and
+            route calculations
+            are stored inside
+            BembaTranslate.
+            Internet is not
+            required for these
+            offline routes.
+          </span>
+        </div>
+      </div>
     </section>
   );
 }
-
-export default Navigation;
