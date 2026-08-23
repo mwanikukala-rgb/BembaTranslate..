@@ -1,414 +1,824 @@
+/* =========================================================
+   BEMBATRANSLATE
+   OFFLINE NAVIGATION
+   GPS + OFFLINE WALKING ROUTES
+   ========================================================= */
+
 import {
   useEffect,
-  useRef,
+  useMemo,
   useState,
 } from "react";
 
 import {
   ArrowLeft,
+  Compass,
+  Crosshair,
   LocateFixed,
   MapPin,
   Navigation as NavigationIcon,
   RefreshCw,
   Route,
+  Footprints,
+  AlertCircle,
 } from "lucide-react";
 
 import {
-  clearPositionWatch,
   getCurrentPosition,
   watchPosition,
-  type GPSLocation,
+  clearPositionWatch,
 } from "./gps";
 
 import {
-  zambiaOfflineMap,
-  getNearestMapNode,
+  mapNodes,
+  mapPaths,
 } from "./mapData";
 
-import {
-  calculateBearing,
-  findNearestNode,
-  findRoute,
-  formatDistance,
-  bearingToDirection,
-} from "./routeEngine";
-
 import type {
+  GPSPosition,
   MapNode,
   RouteResult,
 } from "./mapTypes";
+
+import {
+  calculateWalkingRoute,
+  findNearestNode,
+  formatDistance,
+  formatWalkingTime,
+} from "./routeEngine";
+
+import "../styles/global.css";
+
+/* =========================================================
+   PROPS
+   ========================================================= */
 
 type NavigationProps = {
   onBack?: () => void;
 };
 
-function Navigation({
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+function formatAccuracy(
+  accuracy: number,
+): string {
+  if (!Number.isFinite(accuracy)) {
+    return "Unknown";
+  }
+
+  return `${Math.round(accuracy)} m`;
+}
+
+/* =========================================================
+   COMPONENT
+   ========================================================= */
+
+export default function Navigation({
   onBack,
 }: NavigationProps) {
-  const [location, setLocation] =
-    useState<GPSLocation | null>(null);
+  const [position, setPosition] =
+    useState<GPSPosition | null>(null);
 
-  const [destination, setDestination] =
-    useState<MapNode | null>(null);
-
-  const [route, setRoute] =
-    useState<RouteResult | null>(null);
-
-  const [loading, setLoading] =
+  const [gpsLoading, setGpsLoading] =
     useState(false);
 
-  const [error, setError] =
+  const [gpsError, setGpsError] =
     useState("");
 
   const [tracking, setTracking] =
     useState(false);
 
-  const watchIdRef =
-    useRef<number | null>(null);
+  const [destinationId, setDestinationId] =
+    useState("");
 
-  /* ------------------------------------------------------
-     Get current location
-  ------------------------------------------------------ */
+  const [route, setRoute] =
+    useState<RouteResult | null>(null);
+
+  const [routeError, setRouteError] =
+    useState("");
+
+  /* =======================================================
+     DESTINATIONS
+  ======================================================= */
+
+  const destinations = useMemo(() => {
+    return mapNodes.filter(
+      (node) =>
+        node.type === "building" ||
+        node.type === "landmark" ||
+        node.type === "entrance",
+    );
+  }, []);
+
+  /* =======================================================
+     SELECTED DESTINATION
+  ======================================================= */
+
+  const destination = useMemo(() => {
+    if (!destinationId) {
+      return null;
+    }
+
+    return (
+      mapNodes.find(
+        (node) =>
+          node.id === destinationId,
+      ) ?? null
+    );
+  }, [destinationId]);
+
+  /* =======================================================
+     CURRENT MAP NODE
+  ======================================================= */
+
+  const currentNode = useMemo(() => {
+    if (!position) {
+      return null;
+    }
+
+    return findNearestNode(
+      position.latitude,
+      position.longitude,
+      mapNodes,
+    );
+  }, [position]);
+
+  /* =======================================================
+     GET CURRENT LOCATION
+  ======================================================= */
 
   const locateUser = async () => {
-    setLoading(true);
-    setError("");
+    setGpsLoading(true);
+    setGpsError("");
 
     try {
-      const current =
+      const nextPosition =
         await getCurrentPosition();
 
-      setLocation(current);
-    } catch (err) {
-      console.error(err);
+      setPosition(nextPosition);
+    } catch (error) {
+      console.error(
+        "Unable to get current location:",
+        error,
+      );
 
-      setError(
-        "Unable to get your location. Please enable GPS/location permission.",
+      setGpsError(
+        "Unable to get your current location. Please make sure GPS/location is enabled.",
       );
     } finally {
-      setLoading(false);
+      setGpsLoading(false);
     }
   };
 
-  /* ------------------------------------------------------
-     Start live GPS tracking
-  ------------------------------------------------------ */
+  /* =======================================================
+     START GPS TRACKING
+  ======================================================= */
 
-  const startTracking = async () => {
-    setError("");
+  const startTracking = () => {
+    if (tracking) {
+      return;
+    }
 
-    try {
-      const current =
-        await getCurrentPosition();
+    setGpsError("");
+    setTracking(true);
 
-      setLocation(current);
+    const success = (
+      nextPosition: GPSPosition,
+    ) => {
+      setPosition(nextPosition);
+    };
 
-      const watchId =
-        await watchPosition(
-          (
-            nextPosition: GPSLocation,
-          ) => {
-            setLocation(nextPosition);
-          },
-          (gpsError: unknown) => {
-            console.error(
-              "GPS tracking error:",
-              gpsError,
-            );
-
-            setError(
-              "GPS tracking stopped.",
-            );
-          },
-        );
-
-      watchIdRef.current =
-        Number(watchId);
-
-      setTracking(true);
-    } catch (err) {
-      console.error(err);
-
-      setError(
-        "Unable to start GPS tracking. Check your location permission.",
+    const error = (
+      error: GeolocationPositionError,
+    ) => {
+      console.error(
+        "GPS tracking error:",
+        error,
       );
-    }
+
+      setGpsError(
+        "GPS tracking could not continue. Check that location is enabled.",
+      );
+
+      setTracking(false);
+    };
+
+    watchPosition(
+      success,
+      error,
+    );
   };
 
-  /* ------------------------------------------------------
-     Stop GPS tracking
-  ------------------------------------------------------ */
+  /* =======================================================
+     STOP GPS TRACKING
+  ======================================================= */
 
-  const stopTracking = async () => {
-    if (
-      watchIdRef.current !== null
-    ) {
-      try {
-        await clearPositionWatch(
-          watchIdRef.current,
-        );
-      } catch (err) {
-        console.error(err);
-      }
-
-      watchIdRef.current = null;
-    }
-
+  const stopTracking = () => {
+    clearPositionWatch();
     setTracking(false);
   };
 
-  /* ------------------------------------------------------
-     Cleanup
-  ------------------------------------------------------ */
+  /* =======================================================
+     INITIAL LOCATION
+  ======================================================= */
 
   useEffect(() => {
+    locateUser();
+
     return () => {
-      if (
-        watchIdRef.current !== null
-      ) {
-        clearPositionWatch(
-          watchIdRef.current,
-        ).catch(console.error);
-      }
+      clearPositionWatch();
     };
   }, []);
 
-  /* ------------------------------------------------------
-     Select destination
-  ------------------------------------------------------ */
+  /* =======================================================
+     CALCULATE ROUTE
+  ======================================================= */
 
-  const chooseDestination = (
-    node: MapNode,
-  ) => {
-    setDestination(node);
-    setError("");
+  const calculateRoute = () => {
+    setRouteError("");
+    setRoute(null);
 
-    if (!location) {
-      setError(
-        "Get your current location first.",
+    if (!position) {
+      setRouteError(
+        "Your current location is not available yet.",
       );
 
       return;
     }
 
-    const nearest =
-      findNearestNode(
-        zambiaOfflineMap,
-        location.latitude,
-        location.longitude,
-      );
-
-    if (!nearest) {
-      setError(
-        "No offline map point is available near your location.",
+    if (!destination) {
+      setRouteError(
+        "Please select a destination.",
       );
 
       return;
     }
 
-    const newRoute =
-      findRoute(
-        zambiaOfflineMap,
-        nearest.id,
-        node.id,
-      );
-
-    if (!newRoute) {
-      setRoute(null);
-
-      setError(
-        "No offline route is available between these locations yet.",
+    if (!currentNode) {
+      setRouteError(
+        "Your location is outside the available offline map.",
       );
 
       return;
     }
 
-    setRoute(newRoute);
-  };
-
-  /* ------------------------------------------------------
-     Recalculate route
-  ------------------------------------------------------ */
-
-  const recalculateRoute = () => {
     if (
-      !location ||
-      !destination
+      currentNode.id ===
+      destination.id
     ) {
-      return;
-    }
-
-    const nearest =
-      findNearestNode(
-        zambiaOfflineMap,
-        location.latitude,
-        location.longitude,
-      );
-
-    if (!nearest) {
-      setError(
-        "Could not find a nearby offline map point.",
-      );
+      setRoute({
+        nodes: [currentNode],
+        distanceMeters: 0,
+        estimatedWalkingSeconds: 0,
+      });
 
       return;
     }
 
-    const newRoute =
-      findRoute(
-        zambiaOfflineMap,
-        nearest.id,
-        destination.id,
+    const calculatedRoute =
+      calculateWalkingRoute(
+        currentNode,
+        destination,
+        mapNodes,
+        mapPaths,
       );
 
-    setRoute(newRoute);
-
-    if (!newRoute) {
-      setError(
-        "No route found.",
+    if (!calculatedRoute) {
+      setRouteError(
+        "No walking route was found between your location and the selected destination.",
       );
-    } else {
-      setError("");
+
+      return;
     }
+
+    setRoute(
+      calculatedRoute,
+    );
   };
 
-  /* ------------------------------------------------------
-     Navigation instruction
-  ------------------------------------------------------ */
+  /* =======================================================
+     AUTOMATIC ROUTE UPDATE
+  ======================================================= */
 
-  const getDirectionText =
-    (): string => {
-      if (
-        !location ||
-        !route ||
-        route.nodes.length < 2
-      ) {
-        return "Select a destination";
-      }
+  useEffect(() => {
+    if (
+      position &&
+      destination
+    ) {
+      calculateRoute();
+    }
+  }, [
+    position,
+    destination,
+  ]);
 
-      const nextNode =
-        route.nodes[1];
+  /* =======================================================
+     CLEAR ROUTE
+  ======================================================= */
 
-      const bearing =
-        calculateBearing(
-          location.latitude,
-          location.longitude,
-          nextNode.latitude,
-          nextNode.longitude,
-        );
+  const clearRoute = () => {
+    setRoute(null);
+    setRouteError("");
+    setDestinationId("");
+  };
 
-      return `Head ${bearingToDirection(
-        bearing,
-      )}`;
-    };
-
-  /* ------------------------------------------------------
-     Render
-  ------------------------------------------------------ */
+  /* =======================================================
+     RENDER
+  ======================================================= */
 
   return (
     <section className="navigation-page">
 
-      {/* Header */}
+      {/* =================================================
+          HEADER
+      ================================================= */}
 
-      <div className="navigation-header">
+      <header className="navigation-header">
 
         <button
           type="button"
           className="navigation-back"
-          onClick={onBack}
+          onClick={() => {
+            if (onBack) {
+              onBack();
+            }
+          }}
           aria-label="Back"
         >
           <ArrowLeft size={19} />
         </button>
 
-        <div>
-          <span>
-            OFFLINE NAVIGATION
-          </span>
+        <div className="navigation-title">
 
-          <h1>
-            Find your way
-          </h1>
+          <div className="navigation-title-icon">
+            <NavigationIcon
+              size={18}
+            />
+          </div>
+
+          <div>
+            <strong>
+              Offline Navigation
+            </strong>
+
+            <span>
+              GPS • Walking routes
+            </span>
+          </div>
+
         </div>
 
-      </div>
-
-      {/* Status */}
-
-      <div className="navigation-status">
-
-        <div className="navigation-status-icon">
-          <LocateFixed size={18} />
+        <div className="navigation-offline">
+          <span />
+          Offline
         </div>
 
-        <div>
-          <strong>
-            {tracking
-              ? "GPS tracking active"
-              : "GPS tracking inactive"}
-          </strong>
+      </header>
 
-          <span>
-            {location
-              ? `Accuracy ±${Math.round(
-                  location.accuracy,
-                )} m`
-              : "Location not available"}
-          </span>
-        </div>
-
-      </div>
-
-      {/* Offline Map */}
+      {/* =================================================
+          MAP AREA
+      ================================================= */}
 
       <div className="offline-map">
 
         <div className="map-grid" />
 
-        {/* User */}
+        <div className="map-compass">
+          <Compass size={17} />
+          <span>N</span>
+        </div>
 
-        {location && (
-          <div className="user-location">
+        <div className="map-label map-label-top">
+          OFFLINE ZAMBIA MAP
+        </div>
 
-            <span className="location-pulse" />
+        {/* CURRENT LOCATION */}
 
-            <span className="location-dot" />
+        {position && (
+          <div
+            className="user-location-marker"
+            title="Your current location"
+          >
+            <div className="user-location-pulse" />
+
+            <div className="user-location-dot">
+              <LocateFixed
+                size={15}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* ROUTE */}
+
+        {route &&
+          route.nodes.length > 0 && (
+            <div className="route-preview">
+
+              <Route size={16} />
+
+              <span>
+                Route ready
+              </span>
+
+            </div>
+          )}
+
+        {!position && (
+          <div className="map-center-message">
+
+            <MapPin size={27} />
+
+            <strong>
+              Waiting for GPS
+            </strong>
+
+            <span>
+              Your position will appear
+              here when location is available.
+            </span>
 
           </div>
         )}
 
-        {/* Route */}
+        {position && (
+          <div className="map-location-label">
 
-        {route &&
-          route.nodes.map(
-            (
-              node: MapNode,
-              index: number,
-            ) => (
-              <div
-                key={node.id}
-                className={
-                  index ===
-                  route.nodes.length - 1
-                    ? "route-destination"
-                    : "route-node"
-                }
-                style={{
-                  left: `${20 + index * 20}%`,
-                  top: `${
-                    65 - index * 13
-                  }%`,
-                }}
-              >
-                {index ===
-                  route.nodes.length - 1 && (
-                  <MapPin size={25} />
-                )}
+            <Crosshair size={14} />
+
+            <span>
+              You are here
+            </span>
+
+          </div>
+        )}
+
+      </div>
+
+      {/* =================================================
+          CONTENT
+      ================================================= */}
+
+      <div className="navigation-content">
+
+        {/* GPS STATUS */}
+
+        <div className="gps-status-card">
+
+          <div className="gps-status-icon">
+            <LocateFixed size={18} />
+          </div>
+
+          <div className="gps-status-text">
+
+            <strong>
+              {position
+                ? "Location found"
+                : "Finding your location"}
+            </strong>
+
+            <span>
+              {position
+                ? `Accuracy: ${formatAccuracy(
+                    position.accuracy,
+                  )}`
+                : gpsLoading
+                  ? "Requesting GPS location..."
+                  : "Location unavailable"}
+            </span>
+
+          </div>
+
+          <button
+            type="button"
+            className="gps-refresh-button"
+            onClick={locateUser}
+            disabled={gpsLoading}
+            aria-label="Refresh location"
+          >
+            <RefreshCw
+              size={16}
+              className={
+                gpsLoading
+                  ? "spin"
+                  : ""
+              }
+            />
+          </button>
+
+        </div>
+
+        {/* GPS ERROR */}
+
+        {gpsError && (
+          <div className="navigation-error">
+
+            <AlertCircle size={16} />
+
+            <span>
+              {gpsError}
+            </span>
+
+          </div>
+        )}
+
+        {/* TRACKING */}
+
+        <div className="tracking-card">
+
+          <div>
+
+            <strong>
+              Live GPS tracking
+            </strong>
+
+            <span>
+              Follow your movement while
+              walking.
+            </span>
+
+          </div>
+
+          <button
+            type="button"
+            className={
+              tracking
+                ? "tracking-button active"
+                : "tracking-button"
+            }
+            onClick={() => {
+              if (tracking) {
+                stopTracking();
+              } else {
+                startTracking();
+              }
+            }}
+          >
+            {tracking
+              ? "Tracking"
+              : "Start"}
+          </button>
+
+        </div>
+
+        {/* DESTINATION */}
+
+        <div className="navigation-section-title">
+
+          <div>
+            <strong>
+              Where do you want to go?
+            </strong>
+
+            <span>
+              Choose an offline destination
+            </span>
+          </div>
+
+          <Footprints size={18} />
+
+        </div>
+
+        <div className="destination-select">
+
+          <MapPin size={17} />
+
+          <select
+            value={destinationId}
+            onChange={(event) => {
+              setDestinationId(
+                event.target.value,
+              );
+              setRoute(null);
+              setRouteError("");
+            }}
+          >
+            <option value="">
+              Select destination
+            </option>
+
+            {destinations.map(
+              (node) => (
+                <option
+                  key={node.id}
+                  value={node.id}
+                >
+                  {node.name}
+                </option>
+              ),
+            )}
+
+          </select>
+
+        </div>
+
+        {/* DESTINATION INFO */}
+
+        {destination && (
+          <div className="destination-card">
+
+            <div className="destination-icon">
+              <MapPin size={17} />
+            </div>
+
+            <div>
+
+              <strong>
+                {destination.name}
+              </strong>
+
+              <span>
+                Offline map destination
+              </span>
+
+            </div>
+
+          </div>
+        )}
+
+        {/* ROUTE BUTTON */}
+
+        <button
+          type="button"
+          className="calculate-route-button"
+          onClick={calculateRoute}
+          disabled={
+            !position ||
+            !destination ||
+            gpsLoading
+          }
+        >
+          <Route size={18} />
+
+          {position
+            ? "Show walking route"
+            : "Waiting for GPS"}
+        </button>
+
+        {/* ROUTE ERROR */}
+
+        {routeError && (
+          <div className="navigation-error">
+
+            <AlertCircle size={16} />
+
+            <span>
+              {routeError}
+            </span>
+
+          </div>
+        )}
+
+        {/* ROUTE RESULT */}
+
+        {route && (
+          <div className="route-result-card">
+
+            <div className="route-result-header">
+
+              <div>
+                <span>
+                  WALKING ROUTE
+                </span>
+
+                <strong>
+                  {destination?.name ??
+                    "Destination"}
+                </strong>
               </div>
-            ),
-          )}
 
-        {!location && (
-          <div className="map-empty">
+              <button
+                type="button"
+                onClick={clearRoute}
+                className="route-clear-button"
+              >
+                Clear
+              </button>
 
-            <Locate
+            </div>
+
+            <div className="route-summary">
+
+              <div>
+
+                <Route size={16} />
+
+                <strong>
+                  {formatDistance(
+                    route.distanceMeters,
+                  )}
+                </strong>
+
+                <span>
+                  Distance
+                </span>
+
+              </div>
+
+              <div>
+
+                <Footprints size={16} />
+
+                <strong>
+                  {formatWalkingTime(
+                    route.estimatedWalkingSeconds,
+                  )}
+                </strong>
+
+                <span>
+                  Walking
+                </span>
+
+              </div>
+
+            </div>
+
+            {/* ROUTE STEPS */}
+
+            <div className="route-steps">
+
+              <div className="route-steps-title">
+                <strong>
+                  Follow this route
+                </strong>
+
+                <span>
+                  {route.nodes.length} points
+                </span>
+              </div>
+
+              {route.nodes.map(
+                (
+                  node: MapNode,
+                  index: number,
+                ) => (
+                  <div
+                    key={`${node.id}-${index}`}
+                    className="route-step"
+                  >
+
+                    <div className="route-step-number">
+                      {index + 1}
+                    </div>
+
+                    <div className="route-step-line">
+                      <strong>
+                        {index === 0
+                          ? "Start here"
+                          : index ===
+                              route.nodes
+                                .length -
+                                1
+                            ? "You have arrived"
+                            : node.name}
+                      </strong>
+
+                      <span>
+                        {node.name}
+                      </span>
+                    </div>
+
+                  </div>
+                ),
+              )}
+
+            </div>
+
+          </div>
+        )}
+
+        {/* OFFLINE INFORMATION */}
+
+        <div className="navigation-info">
+
+          <div className="navigation-info-icon">
+            <NavigationIcon
+              size={16}
+            />
+          </div>
+
+          <div>
+
+            <strong>
+              Designed for offline use
+            </strong>
+
+            <span>
+              GPS can determine your
+              position without mobile
+              internet. The walking route
+              is calculated from map data
+              stored inside the application.
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+  );
+}
