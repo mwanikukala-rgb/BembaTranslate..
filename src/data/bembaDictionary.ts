@@ -1134,8 +1134,6 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "I'm thirsty", bemba: "ndi ne cilaka" },
   { english: "I'm hungry", bemba: "ndi ne nsala" },
   { english: "I'm cold", bemba: "ndi ne mpepo" },
-  
-  // VERBS
   { english: "to feel/to hear/to taste/listen", bemba: "Ukuumfwa" },
   { english: "to eat", bemba: "U kulya" },
   { english: "to want", bemba: "Ukufwaya" },
