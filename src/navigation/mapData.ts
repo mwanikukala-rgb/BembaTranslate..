@@ -4,138 +4,102 @@
    ========================================================= */
 
 import type {
-  Coordinate,
   MapData,
-  MapEdge,
   MapNode,
+  MapEdge,
+  Coordinate,
 } from "./mapTypes";
 
-/* =========================================================
-   NODE CREATOR
-   ========================================================= */
+/*
+ * Small offline foundation.
+ *
+ * These coordinates are packaged inside the application.
+ * No internet connection is required.
+ *
+ * More detailed campus/building/road data can be added
+ * later without changing the routing engine.
+ */
 
-function createNode(
-  id: string,
-  name: string,
-  latitude: number,
-  longitude: number,
-  type: MapNode["type"],
-  description?: string,
-): MapNode {
-  const coordinate: Coordinate = {
-    latitude,
-    longitude,
-  };
+export const zambiaMapNodes: MapNode[] = [
+  {
+    id: "lusaka-center",
+    name: "Lusaka Centre",
+    latitude: -15.4167,
+    longitude: 28.2833,
+    type: "landmark",
+  },
 
-  return {
-    id,
-    name,
-    latitude,
-    longitude,
-    coordinate,
-    type,
-    description,
-  };
-}
+  {
+    id: "cbu",
+    name: "Copperbelt University",
+    latitude: -12.8106,
+    longitude: 28.2132,
+    type: "campus",
+  },
 
-/* =========================================================
-   OFFLINE MAP NODES
-   ========================================================= */
+  {
+    id: "ndola-center",
+    name: "Ndola Centre",
+    latitude: -12.9680,
+    longitude: 28.6337,
+    type: "landmark",
+  },
 
-export const mapNodes: MapNode[] = [
-  createNode(
-    "lusaka-center",
-    "Lusaka Centre",
-    -15.4167,
-    28.2833,
-    "landmark",
-    "Central Lusaka.",
-  ),
-
-  createNode(
-    "cbu",
-    "Copperbelt University",
-    -12.8106,
-    28.2132,
-    "campus",
-    "Copperbelt University campus.",
-  ),
-
-  createNode(
-    "ndola-center",
-    "Ndola Centre",
-    -12.9680,
-    28.6337,
-    "landmark",
-    "Ndola city centre.",
-  ),
-
-  createNode(
-    "kitwe-center",
-    "Kitwe Centre",
-    -12.8024,
-    28.2132,
-    "landmark",
-    "Kitwe city centre.",
-  ),
+  {
+    id: "kitwe-center",
+    name: "Kitwe Centre",
+    latitude: -12.8024,
+    longitude: 28.2132,
+    type: "landmark",
+  },
 ];
 
 /* =========================================================
-   OFFLINE MAP EDGES
+   MAP CONNECTIONS
    ========================================================= */
 
-export const mapEdges: MapEdge[] = [
+export const zambiaMapEdges: MapEdge[] = [
   {
     from: "lusaka-center",
     to: "cbu",
     distance: 330000,
-    bidirectional: true,
   },
 
   {
     from: "cbu",
     to: "ndola-center",
     distance: 11000,
-    bidirectional: true,
   },
 
   {
     from: "ndola-center",
     to: "kitwe-center",
     distance: 60000,
-    bidirectional: true,
   },
 
   {
     from: "cbu",
     to: "kitwe-center",
     distance: 1000,
-    bidirectional: true,
   },
 ];
 
 /* =========================================================
-   OFFLINE MAP
+   COMPLETE OFFLINE MAP
    ========================================================= */
 
-export const offlineMap: MapData = {
+export const zambiaOfflineMap: MapData = {
   name: "Zambia Offline Map",
-  nodes: mapNodes,
-  edges: mapEdges,
+  nodes: zambiaMapNodes,
+  edges: zambiaMapEdges,
 };
 
-/* =========================================================
-   COMPATIBILITY EXPORTS
-   ========================================================= */
-
-export const zambiaMapNodes =
-  mapNodes;
-
-export const zambiaMapEdges =
-  mapEdges;
-
-export const zambiaOfflineMap =
-  offlineMap;
+/*
+ * Compatibility alias.
+ *
+ * Navigation.tsx can use mapNodes directly.
+ */
+export const mapNodes = zambiaMapNodes;
 
 /* =========================================================
    FIND NODE
@@ -144,13 +108,13 @@ export const zambiaOfflineMap =
 export function getMapNode(
   id: string,
 ): MapNode | undefined {
-  return mapNodes.find(
+  return zambiaMapNodes.find(
     (node) => node.id === id,
   );
 }
 
 /* =========================================================
-   HAVERSINE DISTANCE
+   DISTANCE
    ========================================================= */
 
 export function calculateDistance(
@@ -196,23 +160,24 @@ export function calculateDistance(
 }
 
 /* =========================================================
-   FIND NEAREST NODE
+   NEAREST NODE
    ========================================================= */
 
 export function getNearestMapNode(
   latitude: number,
   longitude: number,
 ): MapNode | undefined {
-  if (mapNodes.length === 0) {
+  if (zambiaMapNodes.length === 0) {
     return undefined;
   }
 
-  let nearest = mapNodes[0];
+  let nearest =
+    zambiaMapNodes[0];
 
   let nearestDistance =
     Number.POSITIVE_INFINITY;
 
-  for (const node of mapNodes) {
+  for (const node of zambiaMapNodes) {
     const distance =
       calculateDistance(
         latitude,
@@ -221,14 +186,24 @@ export function getNearestMapNode(
         node.longitude,
       );
 
-    if (
-      distance <
-      nearestDistance
-    ) {
+    if (distance < nearestDistance) {
       nearest = node;
       nearestDistance = distance;
     }
   }
 
   return nearest;
+}
+
+/* =========================================================
+   COORDINATE HELPER
+   ========================================================= */
+
+export function getNodeCoordinate(
+  node: MapNode,
+): Coordinate {
+  return {
+    latitude: node.latitude,
+    longitude: node.longitude,
+  };
 }
