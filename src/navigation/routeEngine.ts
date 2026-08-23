@@ -1,93 +1,65 @@
 /* =========================================================
    BEMBATRANSLATE
    OFFLINE ROUTE ENGINE
-   Dijkstra shortest-path routing
    ========================================================= */
 
 import type {
   Coordinate,
   MapData,
-  MapEdge,
   MapNode,
   RouteResult,
   RouteStep,
 } from "./mapTypes";
 
 /* =========================================================
-   DISTANCE
+   DISTANCE BETWEEN COORDINATES
    ========================================================= */
 
 function coordinateDistance(
-  a: Coordinate,
-  b: Coordinate,
+  first: Coordinate,
+  second: Coordinate,
 ): number {
   const earthRadius = 6371000;
 
-  const lat1 =
-    (a.latitude * Math.PI) / 180;
+  const latitude1 =
+    (first.latitude * Math.PI) / 180;
 
-  const lat2 =
-    (b.latitude * Math.PI) / 180;
+  const latitude2 =
+    (second.latitude * Math.PI) / 180;
 
-  const deltaLat =
-    ((b.latitude - a.latitude) *
+  const deltaLatitude =
+    ((second.latitude -
+      first.latitude) *
       Math.PI) /
     180;
 
-  const deltaLon =
-    ((b.longitude - a.longitude) *
+  const deltaLongitude =
+    ((second.longitude -
+      first.longitude) *
       Math.PI) /
     180;
 
-  const value =
-    Math.sin(deltaLat / 2) *
-      Math.sin(deltaLat / 2) +
-    Math.cos(lat1) *
-      Math.cos(lat2) *
-      Math.sin(deltaLon / 2) *
-      Math.sin(deltaLon / 2);
+  const a =
+    Math.sin(deltaLatitude / 2) *
+      Math.sin(deltaLatitude / 2) +
+    Math.cos(latitude1) *
+      Math.cos(latitude2) *
+      Math.sin(deltaLongitude / 2) *
+      Math.sin(deltaLongitude / 2);
 
-  const safeValue = Math.min(
-    1,
-    Math.max(0, value),
+  const safeA = Math.max(
+    0,
+    Math.min(1, a),
   );
 
   const c =
     2 *
     Math.atan2(
-      Math.sqrt(safeValue),
-      Math.sqrt(1 - safeValue),
+      Math.sqrt(safeA),
+      Math.sqrt(1 - safeA),
     );
 
   return earthRadius * c;
-}
-
-/* =========================================================
-   CONNECTED EDGES
-   ========================================================= */
-
-function getConnectedEdges(
-  nodeId: string,
-  edges: MapEdge[],
-): MapEdge[] {
-  return edges.filter(
-    (edge) =>
-      edge.from === nodeId ||
-      edge.to === nodeId,
-  );
-}
-
-/* =========================================================
-   OPPOSITE NODE
-   ========================================================= */
-
-function getOtherNode(
-  edge: MapEdge,
-  nodeId: string,
-): string {
-  return edge.from === nodeId
-    ? edge.to
-    : edge.from;
 }
 
 /* =========================================================
@@ -100,27 +72,27 @@ export function calculateBearing(
   latitude2: number,
   longitude2: number,
 ): number {
-  const lat1 =
+  const firstLatitude =
     (latitude1 * Math.PI) / 180;
 
-  const lat2 =
+  const secondLatitude =
     (latitude2 * Math.PI) / 180;
 
-  const deltaLongitude =
+  const longitudeDifference =
     ((longitude2 - longitude1) *
       Math.PI) /
     180;
 
   const y =
-    Math.sin(deltaLongitude) *
-    Math.cos(lat2);
+    Math.sin(longitudeDifference) *
+    Math.cos(secondLatitude);
 
   const x =
-    Math.cos(lat1) *
-      Math.sin(lat2) -
-    Math.sin(lat1) *
-      Math.cos(lat2) *
-      Math.cos(deltaLongitude);
+    Math.cos(firstLatitude) *
+      Math.sin(secondLatitude) -
+    Math.sin(firstLatitude) *
+      Math.cos(secondLatitude) *
+      Math.cos(longitudeDifference);
 
   const bearing =
     (Math.atan2(y, x) * 180) /
@@ -132,7 +104,7 @@ export function calculateBearing(
 }
 
 /* =========================================================
-   DIRECTION
+   BEARING → DIRECTION
    ========================================================= */
 
 export function bearingToDirection(
@@ -157,6 +129,61 @@ export function bearingToDirection(
 }
 
 /* =========================================================
+   DIRECTION TEXT
+   ========================================================= */
+
+export function getDirectionText(
+  direction: string,
+): string {
+  const value =
+    direction.toLowerCase();
+
+  switch (value) {
+    case "north":
+      return "Walk north";
+
+    case "north-east":
+      return "Walk north-east";
+
+    case "east":
+      return "Walk east";
+
+    case "south-east":
+      return "Walk south-east";
+
+    case "south":
+      return "Walk south";
+
+    case "south-west":
+      return "Walk south-west";
+
+    case "west":
+      return "Walk west";
+
+    case "north-west":
+      return "Walk north-west";
+
+    default:
+      return `Continue ${direction}`;
+  }
+}
+
+/* =========================================================
+   WALKING TIME
+   ========================================================= */
+
+export function estimateWalkingTime(
+  distance: number,
+): number {
+  const walkingSpeed =
+    1.4;
+
+  return Math.ceil(
+    distance / walkingSpeed,
+  );
+}
+
+/* =========================================================
    FORMAT DISTANCE
    ========================================================= */
 
@@ -175,7 +202,7 @@ export function formatDistance(
 }
 
 /* =========================================================
-   FIND SHORTEST ROUTE
+   FIND ROUTE
    ========================================================= */
 
 export function findRoute(
@@ -183,49 +210,34 @@ export function findRoute(
   startId: string,
   destinationId: string,
 ): RouteResult | null {
-  const startNode =
+  const start =
     map.nodes.find(
       (node) =>
         node.id === startId,
     );
 
-  const destinationNode =
+  const destination =
     map.nodes.find(
       (node) =>
-        node.id ===
-        destinationId,
+        node.id === destinationId,
     );
 
-  if (
-    !startNode ||
-    !destinationNode
-  ) {
+  if (!start || !destination) {
     return null;
   }
-
-  /* -------------------------------------------------------
-     Same destination
-  ------------------------------------------------------- */
 
   if (
     startId === destinationId
   ) {
     return {
-      nodes: [startNode],
+      nodes: [start],
       steps: [],
       distance: 0,
     };
   }
 
-  /* -------------------------------------------------------
-     Dijkstra state
-  ------------------------------------------------------- */
-
   const distances =
-    new Map<
-      string,
-      number
-    >();
+    new Map<string, number>();
 
   const previous =
     new Map<
@@ -257,10 +269,6 @@ export function findRoute(
     0,
   );
 
-  /* -------------------------------------------------------
-     Main Dijkstra loop
-  ------------------------------------------------------- */
-
   while (
     unvisited.size > 0
   ) {
@@ -268,27 +276,21 @@ export function findRoute(
       | string
       | null = null;
 
-    let currentDistance =
+    let shortest =
       Number.POSITIVE_INFINITY;
 
     for (
-      const nodeId of unvisited
+      const id of unvisited
     ) {
       const distance =
-        distances.get(
-          nodeId,
-        ) ??
+        distances.get(id) ??
         Number.POSITIVE_INFINITY;
 
       if (
-        distance <
-        currentDistance
+        distance < shortest
       ) {
-        currentDistance =
-          distance;
-
-        currentId =
-          nodeId;
+        shortest = distance;
+        currentId = id;
       }
     }
 
@@ -309,36 +311,35 @@ export function findRoute(
       break;
     }
 
-    const connectedEdges =
-      getConnectedEdges(
-        currentId,
-        map.edges,
+    const edges =
+      map.edges.filter(
+        (edge) =>
+          edge.from ===
+            currentId ||
+          edge.to === currentId,
       );
 
-    for (
-      const edge of connectedEdges
-    ) {
-      const neighbourId =
-        getOtherNode(
-          edge,
-          currentId,
-        );
+    for (const edge of edges) {
+      const neighbour =
+        edge.from === currentId
+          ? edge.to
+          : edge.from;
 
       if (
         !unvisited.has(
-          neighbourId,
+          neighbour,
         )
       ) {
         continue;
       }
 
       const newDistance =
-        currentDistance +
+        shortest +
         edge.distance;
 
       const oldDistance =
         distances.get(
-          neighbourId,
+          neighbour,
         ) ??
         Number.POSITIVE_INFINITY;
 
@@ -347,43 +348,38 @@ export function findRoute(
         oldDistance
       ) {
         distances.set(
-          neighbourId,
+          neighbour,
           newDistance,
         );
 
         previous.set(
-          neighbourId,
+          neighbour,
           currentId,
         );
       }
     }
   }
 
-  /* -------------------------------------------------------
-     Check destination
-  ------------------------------------------------------- */
-
-  const destinationDistance =
+  const finalDistance =
     distances.get(
       destinationId,
     );
 
   if (
-    destinationDistance ===
+    finalDistance ===
       undefined ||
     !Number.isFinite(
-      destinationDistance,
+      finalDistance,
     )
   ) {
     return null;
   }
 
   /* -------------------------------------------------------
-     Rebuild route IDs
+     Rebuild route
   ------------------------------------------------------- */
 
-  const routeIds: string[] =
-    [];
+  const ids: string[] = [];
 
   let current:
     | string
@@ -393,9 +389,7 @@ export function findRoute(
   while (
     current !== null
   ) {
-    routeIds.unshift(
-      current,
-    );
+    ids.unshift(current);
 
     current =
       previous.get(
@@ -404,24 +398,19 @@ export function findRoute(
   }
 
   if (
-    routeIds.length === 0 ||
-    routeIds[0] !== startId
+    ids.length === 0 ||
+    ids[0] !== startId
   ) {
     return null;
   }
 
-  /* -------------------------------------------------------
-     Convert IDs to nodes
-  ------------------------------------------------------- */
-
-  const routeNodes: MapNode[] =
-    routeIds
-      .map(
-        (id) =>
-          map.nodes.find(
-            (node) =>
-              node.id === id,
-          ),
+  const nodes: MapNode[] =
+    ids
+      .map((id) =>
+        map.nodes.find(
+          (node) =>
+            node.id === id,
+        ),
       )
       .filter(
         (
@@ -430,30 +419,19 @@ export function findRoute(
           node !== undefined,
       );
 
-  if (
-    routeNodes.length === 0
-  ) {
-    return null;
-  }
-
-  /* -------------------------------------------------------
-     Build route steps
-  ------------------------------------------------------- */
-
   const steps: RouteStep[] =
     [];
 
   for (
     let index = 0;
-    index <
-    routeNodes.length - 1;
+    index < nodes.length - 1;
     index += 1
   ) {
     const from =
-      routeNodes[index];
+      nodes[index];
 
     const to =
-      routeNodes[index + 1];
+      nodes[index + 1];
 
     const edge =
       map.edges.find(
@@ -470,7 +448,7 @@ export function findRoute(
           ),
       );
 
-    const stepDistance =
+    const distance =
       edge?.distance ??
       coordinateDistance(
         from.coordinate,
@@ -488,8 +466,7 @@ export function findRoute(
     steps.push({
       from,
       to,
-      distance:
-        stepDistance,
+      distance,
       bearing,
       direction:
         bearingToDirection(
@@ -499,15 +476,31 @@ export function findRoute(
   }
 
   return {
-    nodes: routeNodes,
+    nodes,
     steps,
     distance:
-      destinationDistance,
+      finalDistance,
   };
 }
 
 /* =========================================================
-   FIND NEAREST NODE
+   CURRENT ROUTE API
+   ========================================================= */
+
+export function calculateRoute(
+  map: MapData,
+  startId: string,
+  destinationId: string,
+): RouteResult | null {
+  return findRoute(
+    map,
+    startId,
+    destinationId,
+  );
+}
+
+/* =========================================================
+   NEAREST NODE
    ========================================================= */
 
 export function findNearestNode(
@@ -515,17 +508,14 @@ export function findNearestNode(
   latitude: number,
   longitude: number,
 ): MapNode | null {
-  if (
-    map.nodes.length === 0
-  ) {
+  if (map.nodes.length === 0) {
     return null;
   }
 
-  const current: Coordinate =
-    {
-      latitude,
-      longitude,
-    };
+  const current: Coordinate = {
+    latitude,
+    longitude,
+  };
 
   let nearest =
     map.nodes[0];
@@ -533,9 +523,7 @@ export function findNearestNode(
   let nearestDistance =
     Number.POSITIVE_INFINITY;
 
-  for (
-    const node of map.nodes
-  ) {
+  for (const node of map.nodes) {
     const distance =
       coordinateDistance(
         current,
@@ -546,11 +534,8 @@ export function findNearestNode(
       distance <
       nearestDistance
     ) {
-      nearest =
-        node;
-
-      nearestDistance =
-        distance;
+      nearest = node;
+      nearestDistance = distance;
     }
   }
 
