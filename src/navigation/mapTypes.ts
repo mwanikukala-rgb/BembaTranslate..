@@ -1,28 +1,39 @@
-export type MapNodeType =
-  | "path"
-  | "place"
-  | "landmark"
-  | "road"
-  | "building";
+/* =========================================================
+   BEMBATRANSLATE
+   OFFLINE NAVIGATION TYPES
+   ========================================================= */
+
+export type Coordinate = {
+  latitude: number;
+  longitude: number;
+};
 
 export type MapNode = {
   id: string;
+  name: string;
   latitude: number;
   longitude: number;
-  name?: string;
-  type: MapNodeType;
 };
 
-export type MapPath = {
-  id: string;
+export type MapEdge = {
   from: string;
   to: string;
-  distance?: number;
-  walking?: boolean;
+  distance: number;
+};
+
+export type MapData = {
+  nodes: MapNode[];
+  edges: MapEdge[];
+};
+
+export type RouteStep = {
+  from: string;
+  to: string;
+  distance: number;
 };
 
 export type RouteResult = {
   nodes: MapNode[];
-  distanceMeters: number;
-  estimatedWalkingSeconds: number;
+  steps: RouteStep[];
+  totalDistance: number;
 };
