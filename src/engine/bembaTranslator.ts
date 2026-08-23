@@ -8,64 +8,149 @@ export type BembaEntry = {
 /*
  * ============================================================
  * BEMBATRANSLATE
- * HUMAN-LIKE OFFLINE ENGLISH → BEMBA ENGINE
+ * COMPLETE OFFLINE ENGLISH → BEMBA TRANSLATION ENGINE
  * ============================================================
  *
- * Completely offline.
+ * IMPORTANT:
  *
- * Translation priority:
+ * The local dictionary is the PRIMARY translation source.
  *
- * 1. Important everyday phrases
- * 2. Exact dictionary phrase
- * 3. Normalized dictionary phrase
- * 4. Common English variations
- * 5. Sentence patterns
- * 6. Verb-root conjugation
- * 7. Possessives
- * 8. Longest phrase matching
- * 9. Conservative fuzzy matching
+ * The engine uses:
  *
- * The dictionary remains the source of truth.
+ * 1. Exact dictionary phrases
+ * 2. Normalized dictionary phrases
+ * 3. Longest dictionary phrase matching
+ * 4. Dictionary word matching
+ * 5. English aliases
+ * 6. Common sentence patterns
+ * 7. Bemba verb roots
+ * 8. Possessives
+ * 9. Numbers
+ * 10. Conservative fuzzy matching
  *
+ * No:
+ * - Internet
+ * - API
+ * - Cloud
+ * - AI service
+ *
+ * Everything works offline.
  * ============================================================
  */
+
 
 /* ============================================================
    DICTIONARY
 ============================================================ */
 
 const dictionary =
-  bembaDictionary as BembaEntry[];
+  (bembaDictionary as BembaEntry[]) ?? [];
+
 
 /* ============================================================
    NORMALIZATION
 ============================================================ */
 
+/**
+ * Creates a comparison-safe version of text.
+ *
+ * This means:
+ *
+ * "How are you?"
+ * "how are you"
+ * "HOW ARE YOU"
+ *
+ * all become:
+ *
+ * "how are you"
+ */
 function normalize(text: string): string {
   return String(text ?? "")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim()
-    .replace(/[“”‘’"'`.,!?;:()[\]{}]/g, "")
-    .replace(/\s+/g, " ");
+    .replace(/[“”‘’"'`.,!?;:()[\]{}]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-function cleanTranslation(text: string): string {
+
+/**
+ * Keeps the actual Bemba translation readable.
+ */
+function cleanTranslation(
+  text: string
+): string {
   return String(text ?? "")
     .replace(/\s+/g, " ")
     .trim();
 }
 
+
 /* ============================================================
-   DICTIONARY INDEX
+   DICTIONARY INDEXES
 ============================================================ */
 
+/**
+ * Primary translation.
+ *
+ * English:
+ * "money"
+ *
+ * Bemba:
+ * "indalama"
+ */
 const dictionaryLookup =
   new Map<string, string>();
 
+
+/**
+ * ALL translations for an English entry.
+ *
+ * Example:
+ *
+ * "run"
+ * →
+ * [
+ *   "ukwenda",
+ *   "ukutuka"
+ * ]
+ */
 const dictionaryAlternatives =
   new Map<string, string[]>();
+
+
+/**
+ * Original dictionary entries indexed by normalized English.
+ *
+ * Useful for preserving the complete source data.
+ */
+const dictionaryEntriesByEnglish =
+  new Map<string, BembaEntry[]>();
+
+
+/**
+ * Set of all individual English words.
+ *
+ * This makes word lookup much more reliable.
+ */
+const dictionaryWords =
+  new Set<string>();
+
+
+/**
+ * Maximum dictionary phrase length.
+ *
+ * This is calculated from the actual dictionary rather than
+ * assuming that phrases contain only a few words.
+ */
+let maximumPhraseWords = 1;
+
+
+/* ============================================================
+   BUILD DICTIONARY INDEX
+============================================================ */
 
 for (const entry of dictionary) {
   if (!entry) continue;
@@ -80,12 +165,26 @@ for (const entry of dictionary) {
     continue;
   }
 
+
+  /*
+   * ----------------------------------------------------------
+   * PRIMARY TRANSLATION
+   * ----------------------------------------------------------
+   */
+
   if (!dictionaryLookup.has(english)) {
     dictionaryLookup.set(
       english,
       bemba
     );
   }
+
+
+  /*
+   * ----------------------------------------------------------
+   * ALTERNATIVE TRANSLATIONS
+   * ----------------------------------------------------------
+   */
 
   const alternatives =
     dictionaryAlternatives.get(
@@ -100,7 +199,61 @@ for (const entry of dictionary) {
     english,
     alternatives
   );
+
+
+  /*
+   * ----------------------------------------------------------
+   * ORIGINAL ENTRIES
+   * ----------------------------------------------------------
+   */
+
+  const originalEntries =
+    dictionaryEntriesByEnglish.get(
+      english
+    ) ?? [];
+
+  originalEntries.push({
+    english: entry.english,
+    bemba: entry.bemba,
+  });
+
+  dictionaryEntriesByEnglish.set(
+    english,
+    originalEntries
+  );
+
+
+  /*
+   * ----------------------------------------------------------
+   * INDIVIDUAL WORD INDEX
+   * ----------------------------------------------------------
+   */
+
+  const words =
+    english.split(" ");
+
+  for (const word of words) {
+    if (word) {
+      dictionaryWords.add(word);
+    }
+  }
+
+
+  /*
+   * ----------------------------------------------------------
+   * PHRASE LENGTH
+   * ----------------------------------------------------------
+   */
+
+  if (
+    words.length >
+    maximumPhraseWords
+  ) {
+    maximumPhraseWords =
+      words.length;
+  }
 }
+
 
 /* ============================================================
    CONTRACTIONS
@@ -180,31 +333,39 @@ const contractionMap: Record<
   "shouldnt": "should not",
 };
 
+
+/* ============================================================
+   EXPAND CONTRACTIONS
+============================================================ */
+
 function expandContractions(
   text: string
 ): string {
-  let result = text;
+  let result = String(text ?? "");
 
-  for (const [from, to] of Object.entries(
-    contractionMap
-  )) {
+  for (
+    const [from, to]
+    of Object.entries(contractionMap)
+  ) {
     const escaped =
       from.replace(
         /[.*+?^${}()|[\]\\]/g,
         "\\$&"
       );
 
-    result = result.replace(
-      new RegExp(
-        `\\b${escaped}\\b`,
-        "gi"
-      ),
-      to
-    );
+    result =
+      result.replace(
+        new RegExp(
+          `\\b${escaped}\\b`,
+          "gi"
+        ),
+        to
+      );
   }
 
   return result;
 }
+
 
 /* ============================================================
    TOKENIZATION
@@ -227,62 +388,54 @@ function tokenize(
     .filter(Boolean);
 }
 
+
 /* ============================================================
-   ENGLISH WORD VARIATIONS
+   ENGLISH ALIASES
 ============================================================ */
 
 const englishAliases: Record<
   string,
   string
 > = {
-  /* health */
+
   ill: "sick",
   unwell: "sick",
 
-  /* buying */
   purchase: "buy",
   purchases: "buy",
   purchased: "buy",
   buying: "buy",
   buys: "buy",
 
-  /* selling */
   sold: "sell",
   selling: "sell",
   sells: "sell",
 
-  /* wanting */
   wanted: "want",
   wants: "want",
   wanting: "want",
 
-  /* working */
   worked: "work",
   working: "work",
   works: "work",
 
-  /* visiting */
   visited: "visit",
   visiting: "visit",
   visits: "visit",
 
-  /* waiting */
   waited: "wait",
   waiting: "wait",
   waits: "wait",
 
-  /* walking */
   walked: "walk",
   walking: "walk",
   walks: "walk",
 
-  /* travelling */
   travelled: "travel",
   traveled: "travel",
   travelling: "travel",
   traveling: "travel",
 
-  /* speaking */
   talked: "talk",
   talking: "talk",
   talks: "talk",
@@ -291,200 +444,111 @@ const englishAliases: Record<
   speaking: "speak",
   speaks: "speak",
 
-  /* teaching */
   taught: "teach",
   teaching: "teach",
   teaches: "teach",
 
-  /* writing */
   wrote: "write",
   writing: "write",
   writes: "write",
 
-  /* washing */
   washed: "wash",
   washing: "wash",
   washes: "wash",
 
-  /* looking */
   looked: "look",
   looking: "look",
   looks: "look",
 
-  /* remembering */
   remembered: "remember",
   remembering: "remember",
   remembers: "remember",
 
-  /* helping */
   helped: "help",
   helping: "help",
   helps: "help",
 
-  /* learning */
   learned: "learn",
   learnt: "learn",
   learning: "learn",
   learns: "learn",
 
-  /* sitting */
   sat: "sit",
   sitting: "sit",
   sits: "sit",
 
-  /* staying */
   stayed: "stay",
   staying: "stay",
   stays: "stay",
 
-  /* going */
   went: "go",
   going: "go",
   goes: "go",
 
-  /* coming */
   came: "come",
   coming: "come",
   comes: "come",
 
-  /* talking */
   saying: "speak",
   said: "speak",
 
-  /* sleeping */
   slept: "sleep",
   sleeping: "sleep",
   sleeps: "sleep",
 
-  /* eating */
   ate: "eat",
   eating: "eat",
   eats: "eat",
 
-  /* drinking */
   drank: "drink",
   drinking: "drink",
   drinks: "drink",
 
-  /* common adjective variation */
   anger: "angry",
 };
 
-/* ============================================================
-   IMPORTANT EVERYDAY PHRASES
-============================================================ */
-
-const importantPhrases =
-  new Map<string, string>([
-    [
-      "how are you",
-      "Mulishani?",
-    ],
-
-    [
-      "good morning",
-      "Mwashibukeni!",
-    ],
-
-    [
-      "good afternoon",
-      "Kasuba mukwai",
-    ],
-
-    [
-      "good evening",
-      "Chungulo mukwai",
-    ],
-
-    [
-      "good night",
-      "Sendameenipo",
-    ],
-
-    [
-      "goodbye",
-      "Shalenipo",
-    ],
-
-    [
-      "thank you",
-      "Natotela",
-    ],
-
-    [
-      "thanks",
-      "Natotela",
-    ],
-
-    [
-      "thanks a lot",
-      "Natotela saana",
-    ],
-
-    [
-      "a lot",
-      "Saana",
-    ],
-
-    [
-      "yes",
-      "Ee",
-    ],
-
-    [
-      "no",
-      "Awe",
-    ],
-
-    [
-      "where are you",
-      "Ulikwisa?",
-    ],
-
-    [
-      "where are they",
-      "Balikwisa?",
-    ],
-
-    [
-      "i want money",
-      "Ndefwaya indalama",
-    ],
-
-    [
-      "i am angry",
-      "Nimfulwa",
-    ],
-
-    [
-      "i'm angry",
-      "Nimfulwa",
-    ],
-
-    [
-      "i am sick",
-      "Ndelwala",
-    ],
-
-    [
-      "i'm sick",
-      "Ndelwala",
-    ],
-  ]);
 
 /* ============================================================
-   LOOKUP
+   LOOKUP EXACT DICTIONARY
 ============================================================ */
 
-function lookupEnglish(
-  word: string
+function lookupDictionary(
+  text: string
 ): string | undefined {
+
   const normalized =
-    normalize(word);
+    normalize(text);
 
   if (!normalized) {
     return undefined;
   }
+
+  return dictionaryLookup.get(
+    normalized
+  );
+}
+
+
+/* ============================================================
+   LOOKUP WITH ALIAS
+============================================================ */
+
+function lookupEnglish(
+  text: string
+): string | undefined {
+
+  const normalized =
+    normalize(text);
+
+  if (!normalized) {
+    return undefined;
+  }
+
+
+  /*
+   * FIRST:
+   * Actual dictionary.
+   */
 
   const direct =
     dictionaryLookup.get(
@@ -495,8 +559,16 @@ function lookupEnglish(
     return direct;
   }
 
+
+  /*
+   * SECOND:
+   * Alias.
+   */
+
   const alias =
-    englishAliases[normalized];
+    englishAliases[
+      normalized
+    ];
 
   if (alias) {
     return dictionaryLookup.get(
@@ -504,16 +576,42 @@ function lookupEnglish(
     );
   }
 
+
   return undefined;
 }
 
+
 /* ============================================================
-   VERB ROOT CLEANING
+   ALL DICTIONARY TRANSLATIONS
+============================================================ */
+
+function lookupAllEnglish(
+  text: string
+): string[] {
+
+  const normalized =
+    normalize(text);
+
+  if (!normalized) {
+    return [];
+  }
+
+  return (
+    dictionaryAlternatives.get(
+      normalized
+    ) ?? []
+  );
+}
+
+
+/* ============================================================
+   ROOT CLEANING
 ============================================================ */
 
 function cleanRoot(
   root: string
 ): string {
+
   return root
     .replace(
       /^[-–—]/,
@@ -522,62 +620,72 @@ function cleanRoot(
     .trim();
 }
 
+
 /* ============================================================
-   GET VERB ROOT
+   VERB ROOT
 ============================================================ */
 
 function getVerbRoot(
   englishWord: string
 ): string | undefined {
-  const translation =
-    lookupEnglish(
+
+  const translations =
+    lookupAllEnglish(
       englishWord
     );
 
-  if (!translation) {
+  if (!translations.length) {
     return undefined;
   }
+
 
   /*
-   * Entries such as:
-   *
-   * -landa/-sosa
-   *
-   * use the first root as the
-   * primary form.
+   * Look through ALL available
+   * translations rather than only
+   * the first one.
    */
 
-  const first =
-    translation
-      .split("/")
-      .map((item) =>
-        item.trim()
-      )
-      .find(Boolean);
-
-  if (!first) {
-    return undefined;
-  }
-
-  if (
-    first.startsWith("-") ||
-    first.startsWith("–") ||
-    first.startsWith("—")
+  for (
+    const translation
+    of translations
   ) {
-    return cleanRoot(first);
+
+    const parts =
+      translation
+        .split("/")
+        .map(
+          item => item.trim()
+        )
+        .filter(Boolean);
+
+    for (
+      const part
+      of parts
+    ) {
+
+      if (
+        part.startsWith("-") ||
+        part.startsWith("–") ||
+        part.startsWith("—")
+      ) {
+        return cleanRoot(part);
+      }
+    }
   }
 
   return undefined;
 }
 
+
 /* ============================================================
-   SUBJECT CONJUGATION
+   PRESENT VERB CONJUGATION
 ============================================================ */
 
 function conjugatePresent(
   subject: string,
   verb: string
 ): string | undefined {
+
   const root =
     getVerbRoot(verb);
 
@@ -586,6 +694,7 @@ function conjugatePresent(
   }
 
   switch (subject) {
+
     case "i":
       return `Nde${root}`;
 
@@ -610,6 +719,7 @@ function conjugatePresent(
   }
 }
 
+
 /* ============================================================
    OBJECT TRANSLATION
 ============================================================ */
@@ -617,6 +727,7 @@ function conjugatePresent(
 function translateObject(
   text: string
 ): string | undefined {
+
   const normalized =
     normalize(text);
 
@@ -624,18 +735,25 @@ function translateObject(
     return undefined;
   }
 
+
   /*
-   * First try complete object phrase.
+   * Complete phrase first.
    */
 
-  const direct =
+  const complete =
     lookupEnglish(
       normalized
     );
 
-  if (direct) {
-    return direct;
+  if (complete) {
+    return complete;
   }
+
+
+  /*
+   * Then translate the object
+   * using longest dictionary phrases.
+   */
 
   const words =
     tokenize(normalized);
@@ -644,24 +762,21 @@ function translateObject(
     return undefined;
   }
 
-  const translated: string[] =
-    [];
-
-  for (const word of words) {
-    const translation =
-      lookupEnglish(word);
-
-    if (!translation) {
-      return undefined;
-    }
-
-    translated.push(
-      translation
+  const result =
+    translateTokens(
+      words
     );
+
+  if (
+    result.translated &&
+    result.unknown.length === 0
+  ) {
+    return result.translated;
   }
 
-  return translated.join(" ");
+  return undefined;
 }
+
 
 /* ============================================================
    POSSESSIVES
@@ -671,6 +786,7 @@ const possessiveMap: Record<
   string,
   string
 > = {
+
   my: "yandi",
   your: "yobe",
   his: "akwe",
@@ -679,9 +795,11 @@ const possessiveMap: Record<
   their: "babo",
 };
 
+
 function translatePossessive(
   text: string
 ): string | undefined {
+
   const normalized =
     normalize(
       expandContractions(text)
@@ -713,21 +831,127 @@ function translatePossessive(
   return `${noun} ${owner}`;
 }
 
+
 /* ============================================================
-   DIRECT SENTENCE PATTERNS
+   IMPORTANT EVERYDAY PHRASES
+============================================================ */
+
+/**
+ * These are ONLY high-confidence phrases.
+ *
+ * They do NOT replace the dictionary.
+ */
+
+const importantPhrases =
+  new Map<string, string>([
+
+    [
+      "how are you",
+      "Mulishani?"
+    ],
+
+    [
+      "good morning",
+      "Mwashibukeni!"
+    ],
+
+    [
+      "good afternoon",
+      "Kasuba mukwai"
+    ],
+
+    [
+      "good evening",
+      "Chungulo mukwai"
+    ],
+
+    [
+      "good night",
+      "Sendameenipo"
+    ],
+
+    [
+      "goodbye",
+      "Shalenipo"
+    ],
+
+    [
+      "thank you",
+      "Natotela"
+    ],
+
+    [
+      "thanks",
+      "Natotela"
+    ],
+
+    [
+      "thanks a lot",
+      "Natotela saana"
+    ],
+
+    [
+      "a lot",
+      "Saana"
+    ],
+
+    [
+      "yes",
+      "Ee"
+    ],
+
+    [
+      "no",
+      "Awe"
+    ],
+
+    [
+      "where are you",
+      "Ulikwisa?"
+    ],
+
+    [
+      "where are they",
+      "Balikwisa?"
+    ],
+
+    [
+      "i want money",
+      "Ndefwaya indalama"
+    ],
+
+    [
+      "i am angry",
+      "Nimfulwa"
+    ],
+
+    [
+      "i'm angry",
+      "Nimfulwa"
+    ],
+
+    [
+      "i am sick",
+      "Ndelwala"
+    ],
+
+    [
+      "i'm sick",
+      "Ndelwala"
+    ],
+  ]);
+
+
+/* ============================================================
+   DIRECT HIGH-CONFIDENCE SENTENCES
 ============================================================ */
 
 const directPatterns: Array<{
   pattern: RegExp;
   result:
     | string
-    | ((
-        match: RegExpMatchArray
-      ) => string);
+    | ((match: RegExpMatchArray) => string);
 }> = [
-  /* --------------------------------------------
-     I
-  -------------------------------------------- */
 
   {
     pattern: /^i am sick$/,
@@ -909,13 +1133,14 @@ const directPatterns: Array<{
     result: "Ndesa",
   },
 
-  /* --------------------------------------------
-     I WANT
-  -------------------------------------------- */
+  /*
+   * I WANT
+   */
 
   {
     pattern: /^i want (.+)$/,
     result: (match) => {
+
       const object =
         translateObject(
           match[1]
@@ -927,9 +1152,14 @@ const directPatterns: Array<{
     },
   },
 
+  /*
+   * I NEED
+   */
+
   {
     pattern: /^i need (.+)$/,
     result: (match) => {
+
       const object =
         translateObject(
           match[1]
@@ -942,432 +1172,9 @@ const directPatterns: Array<{
   },
 ];
 
-/* ============================================================
-   GENERAL SENTENCE ENGINE
-============================================================ */
-
-function translateSentencePattern(
-  text: string
-): string | undefined {
-  const normalized =
-    normalize(
-      expandContractions(text)
-    );
-
-  /*
-   * Important phrase.
-   */
-
-  const important =
-    importantPhrases.get(
-      normalized
-    );
-
-  if (important) {
-    return important;
-  }
-
-  /*
-   * Explicit high-confidence patterns.
-   */
-
-  for (const item of directPatterns) {
-    const match =
-      normalized.match(
-        item.pattern
-      );
-
-    if (!match) {
-      continue;
-    }
-
-    if (
-      typeof item.result ===
-      "string"
-    ) {
-      return item.result;
-    }
-
-    const result =
-      item.result(match);
-
-    if (result) {
-      return result;
-    }
-  }
-
-  /*
-   * --------------------------------------------
-   * I + VERB
-   * --------------------------------------------
-   */
-
-  const iVerb =
-    normalized.match(
-      /^i\s+(.+)$/
-    );
-
-  if (iVerb) {
-    let rest =
-      iVerb[1];
-
-    rest =
-      rest
-        .replace(
-          /^(am|do|does|will|can|must)\s+/,
-          ""
-        )
-        .trim();
-
-    /*
-     * Try first word as verb.
-     */
-
-    const verbWords =
-      rest.split(" ");
-
-    const verb =
-      verbWords[0];
-
-    const conjugated =
-      conjugatePresent(
-        "i",
-        verb
-      );
-
-    if (conjugated) {
-      const objectWords =
-        verbWords.slice(1);
-
-      if (objectWords.length) {
-        const object =
-          translateObject(
-            objectWords.join(" ")
-          );
-
-        if (object) {
-          return `${conjugated} ${object}`;
-        }
-      }
-
-      return conjugated;
-    }
-  }
-
-  /*
-   * --------------------------------------------
-   * YOU + VERB
-   * --------------------------------------------
-   */
-
-  const youVerb =
-    normalized.match(
-      /^you\s+(.+)$/
-    );
-
-  if (youVerb) {
-    let rest =
-      youVerb[1];
-
-    rest =
-      rest
-        .replace(
-          /^(are|do|does|will|can|must)\s+/,
-          ""
-        )
-        .trim();
-
-    const verbWords =
-      rest.split(" ");
-
-    const verb =
-      verbWords[0];
-
-    const conjugated =
-      conjugatePresent(
-        "you",
-        verb
-      );
-
-    if (conjugated) {
-      const objectWords =
-        verbWords.slice(1);
-
-      if (objectWords.length) {
-        const object =
-          translateObject(
-            objectWords.join(" ")
-          );
-
-        if (object) {
-          return `${conjugated} ${object}`;
-        }
-      }
-
-      return conjugated;
-    }
-  }
-
-  /*
-   * --------------------------------------------
-   * HE / SHE + VERB
-   * --------------------------------------------
-   */
-
-  const thirdPerson =
-    normalized.match(
-      /^(he|she)\s+(.+)$/
-    );
-
-  if (thirdPerson) {
-    const subject =
-      thirdPerson[1];
-
-    let rest =
-      thirdPerson[2];
-
-    rest =
-      rest
-        .replace(
-          /^(is|does|will|can|must)\s+/,
-          ""
-        )
-        .trim();
-
-    const verbWords =
-      rest.split(" ");
-
-    const verb =
-      verbWords[0];
-
-    const conjugated =
-      conjugatePresent(
-        subject,
-        verb
-      );
-
-    if (conjugated) {
-      const objectWords =
-        verbWords.slice(1);
-
-      if (objectWords.length) {
-        const object =
-          translateObject(
-            objectWords.join(" ")
-          );
-
-        if (object) {
-          return `${conjugated} ${object}`;
-        }
-      }
-
-      return conjugated;
-    }
-  }
-
-  /*
-   * --------------------------------------------
-   * WE + VERB
-   * --------------------------------------------
-   */
-
-  const weVerb =
-    normalized.match(
-      /^we\s+(.+)$/
-    );
-
-  if (weVerb) {
-    let rest =
-      weVerb[1];
-
-    rest =
-      rest
-        .replace(
-          /^(are|do|does|will|can|must)\s+/,
-          ""
-        )
-        .trim();
-
-    const verbWords =
-      rest.split(" ");
-
-    const verb =
-      verbWords[0];
-
-    const conjugated =
-      conjugatePresent(
-        "we",
-        verb
-      );
-
-    if (conjugated) {
-      const objectWords =
-        verbWords.slice(1);
-
-      if (objectWords.length) {
-        const object =
-          translateObject(
-            objectWords.join(" ")
-          );
-
-        if (object) {
-          return `${conjugated} ${object}`;
-        }
-      }
-
-      return conjugated;
-    }
-  }
-
-  /*
-   * --------------------------------------------
-   * THEY + VERB
-   * --------------------------------------------
-   */
-
-  const theyVerb =
-    normalized.match(
-      /^they\s+(.+)$/
-    );
-
-  if (theyVerb) {
-    let rest =
-      theyVerb[1];
-
-    rest =
-      rest
-        .replace(
-          /^(are|do|does|will|can|must)\s+/,
-          ""
-        )
-        .trim();
-
-    const verbWords =
-      rest.split(" ");
-
-    const verb =
-      verbWords[0];
-
-    const conjugated =
-      conjugatePresent(
-        "they",
-        verb
-      );
-
-    if (conjugated) {
-      const objectWords =
-        verbWords.slice(1);
-
-      if (objectWords.length) {
-        const object =
-          translateObject(
-            objectWords.join(" ")
-          );
-
-        if (object) {
-          return `${conjugated} ${object}`;
-        }
-      }
-
-      return conjugated;
-    }
-  }
-
-  /*
-   * --------------------------------------------
-   * I AM + ADJECTIVE / CONDITION
-   * --------------------------------------------
-   */
-
-  const iAm =
-    normalized.match(
-      /^i am (.+)$/
-    );
-
-  if (iAm) {
-    const value =
-      iAm[1];
-
-    const root =
-      getVerbRoot(value);
-
-    if (root) {
-      return `Nde${root}`;
-    }
-
-    const translation =
-      lookupEnglish(value);
-
-    if (translation) {
-      return `Ndi ${translation}`;
-    }
-  }
-
-  /*
-   * --------------------------------------------
-   * YOU ARE + ADJECTIVE
-   * --------------------------------------------
-   */
-
-  const youAre =
-    normalized.match(
-      /^you are (.+)$/
-    );
-
-  if (youAre) {
-    const value =
-      youAre[1];
-
-    const root =
-      getVerbRoot(value);
-
-    if (root) {
-      return `Ule${root}`;
-    }
-
-    const translation =
-      lookupEnglish(value);
-
-    if (translation) {
-      return `Uli ${translation}`;
-    }
-  }
-
-  /*
-   * --------------------------------------------
-   * HE / SHE IS
-   * --------------------------------------------
-   */
-
-  const heSheIs =
-    normalized.match(
-      /^(he|she) is (.+)$/
-    );
-
-  if (heSheIs) {
-    const value =
-      heSheIs[2];
-
-    const root =
-      getVerbRoot(value);
-
-    if (root) {
-      return `Ale${root}`;
-    }
-
-    const translation =
-      lookupEnglish(value);
-
-    if (translation) {
-      return `Ali ${translation}`;
-    }
-  }
-
-  return undefined;
-}
 
 /* ============================================================
-   LONGEST PHRASE MATCH
+   LONGEST DICTIONARY PHRASE
 ============================================================ */
 
 function findLongestMatch(
@@ -1379,26 +1186,28 @@ function findLongestMatch(
       length: number;
     }
   | undefined {
+
   const remaining =
     words.length -
     startIndex;
 
-  /*
-   * Maximum phrase length prevents
-   * excessive work on very long input.
-   */
-
   const maxLength =
     Math.min(
       remaining,
-      12
+      maximumPhraseWords
     );
+
+
+  /*
+   * ALWAYS try longest phrases first.
+   */
 
   for (
     let length = maxLength;
     length >= 1;
     length--
   ) {
+
     const phrase =
       words
         .slice(
@@ -1413,6 +1222,7 @@ function findLongestMatch(
       );
 
     if (translation) {
+
       return {
         translation,
         length,
@@ -1423,6 +1233,145 @@ function findLongestMatch(
   return undefined;
 }
 
+
+/* ============================================================
+   TOKEN TRANSLATION RESULT
+============================================================ */
+
+type TokenTranslationResult = {
+  translated: string;
+  unknown: string[];
+};
+
+
+/* ============================================================
+   TRANSLATE TOKENS
+============================================================ */
+
+function translateTokens(
+  words: string[]
+): TokenTranslationResult {
+
+  const output: string[] = [];
+
+  const unknown: string[] = [];
+
+  let index = 0;
+
+
+  while (
+    index < words.length
+  ) {
+
+    /*
+     * --------------------------------------------------------
+     * LONGEST PHRASE
+     * --------------------------------------------------------
+     */
+
+    const phrase =
+      findLongestMatch(
+        words,
+        index
+      );
+
+    if (phrase) {
+
+      output.push(
+        phrase.translation
+      );
+
+      index +=
+        phrase.length;
+
+      continue;
+    }
+
+
+    /*
+     * --------------------------------------------------------
+     * SINGLE WORD
+     * --------------------------------------------------------
+     */
+
+    const word =
+      words[index];
+
+    const direct =
+      lookupEnglish(
+        word
+      );
+
+    if (direct) {
+
+      output.push(
+        direct
+      );
+
+      index++;
+
+      continue;
+    }
+
+
+    /*
+     * --------------------------------------------------------
+     * ALIAS
+     * --------------------------------------------------------
+     */
+
+    const alias =
+      englishAliases[
+        word
+      ];
+
+    if (alias) {
+
+      const aliasTranslation =
+        lookupEnglish(
+          alias
+        );
+
+      if (aliasTranslation) {
+
+        output.push(
+          aliasTranslation
+        );
+
+        index++;
+
+        continue;
+      }
+    }
+
+
+    /*
+     * --------------------------------------------------------
+     * UNKNOWN
+     *
+     * IMPORTANT:
+     *
+     * We DO NOT immediately return "".
+     *
+     * This is one of the major fixes.
+     * --------------------------------------------------------
+     */
+
+    unknown.push(word);
+
+    index++;
+  }
+
+
+  return {
+    translated:
+      output.join(" "),
+
+    unknown,
+  };
+}
+
+
 /* ============================================================
    LEVENSHTEIN
 ============================================================ */
@@ -1431,6 +1380,7 @@ function levenshtein(
   a: string,
   b: string
 ): number {
+
   const previous: number[] =
     new Array(
       b.length + 1
@@ -1441,6 +1391,7 @@ function levenshtein(
       b.length + 1
     );
 
+
   for (
     let j = 0;
     j <= b.length;
@@ -1449,18 +1400,22 @@ function levenshtein(
     previous[j] = j;
   }
 
+
   for (
     let i = 1;
     i <= a.length;
     i++
   ) {
+
     current[0] = i;
+
 
     for (
       let j = 1;
       j <= b.length;
       j++
     ) {
+
       const cost =
         a[i - 1] === b[j - 1]
           ? 0
@@ -1468,12 +1423,17 @@ function levenshtein(
 
       current[j] =
         Math.min(
+
           current[j - 1] + 1,
+
           previous[j] + 1,
+
           previous[j - 1] +
             cost
+
         );
     }
+
 
     for (
       let j = 0;
@@ -1485,22 +1445,28 @@ function levenshtein(
     }
   }
 
-  return previous[b.length];
+
+  return previous[
+    b.length
+  ];
 }
+
 
 /* ============================================================
    FUZZY LOOKUP
 ============================================================ */
 
+/**
+ * Fuzzy matching is deliberately conservative.
+ *
+ * It is NOT allowed to override an exact dictionary result.
+ */
 function fuzzyLookup(
   word: string
 ): string | undefined {
+
   const normalized =
     normalize(word);
-
-  /*
-   * Do not fuzzy-match tiny words.
-   */
 
   if (
     !normalized ||
@@ -1509,8 +1475,9 @@ function fuzzyLookup(
     return undefined;
   }
 
+
   /*
-   * Exact alias first.
+   * Alias first.
    */
 
   const alias =
@@ -1519,6 +1486,7 @@ function fuzzyLookup(
     ];
 
   if (alias) {
+
     const aliasResult =
       dictionaryLookup.get(
         normalize(alias)
@@ -1529,6 +1497,7 @@ function fuzzyLookup(
     }
   }
 
+
   let best:
     | string
     | undefined;
@@ -1536,22 +1505,28 @@ function fuzzyLookup(
   let bestDistance =
     Number.POSITIVE_INFINITY;
 
-  for (const [
-    english,
-    translation,
-  ] of dictionaryLookup) {
+
+  for (
+    const [
+      english,
+      translation
+    ]
+    of dictionaryLookup
+  ) {
+
     /*
-     * Only individual English
-     * words are fuzzy matched.
+     * Only individual words.
      */
 
-    if (english.includes(" ")) {
+    if (
+      english.includes(" ")
+    ) {
       continue;
     }
 
+
     /*
-     * Do not compare wildly different
-     * word lengths.
+     * Length restriction.
      */
 
     if (
@@ -1563,21 +1538,25 @@ function fuzzyLookup(
       continue;
     }
 
+
     const distance =
       levenshtein(
         normalized,
         english
       );
 
+
     const allowed =
       normalized.length >= 8
         ? 2
         : 1;
 
+
     if (
       distance <= allowed &&
       distance < bestDistance
     ) {
+
       bestDistance =
         distance;
 
@@ -1586,33 +1565,32 @@ function fuzzyLookup(
     }
   }
 
+
   return best;
 }
 
+
 /* ============================================================
-   WORD TRANSLATION
+   WORD TRANSLATION WITH FUZZY SUPPORT
 ============================================================ */
 
-function translateByWords(
-  text: string
-): string {
-  const words =
-    tokenize(text);
+function translateTokensWithFuzzy(
+  words: string[]
+): TokenTranslationResult {
 
-  if (!words.length) {
-    return "";
-  }
+  const output: string[] = [];
 
-  const output: string[] =
-    [];
+  const unknown: string[] = [];
 
   let index = 0;
+
 
   while (
     index < words.length
   ) {
+
     /*
-     * Longest phrase first.
+     * Longest phrase.
      */
 
     const phrase =
@@ -1622,6 +1600,7 @@ function translateByWords(
       );
 
     if (phrase) {
+
       output.push(
         phrase.translation
       );
@@ -1632,50 +1611,586 @@ function translateByWords(
       continue;
     }
 
-    /*
-     * Individual dictionary word.
-     */
 
     const word =
       words[index];
 
+
+    /*
+     * Exact word.
+     */
+
     const direct =
-      lookupEnglish(word);
+      lookupEnglish(
+        word
+      );
 
     if (direct) {
-      output.push(direct);
+
+      output.push(
+        direct
+      );
 
       index++;
 
       continue;
     }
 
+
     /*
-     * Conservative fuzzy matching.
+     * Fuzzy word.
      */
 
     const fuzzy =
-      fuzzyLookup(word);
+      fuzzyLookup(
+        word
+      );
 
     if (fuzzy) {
-      output.push(fuzzy);
+
+      output.push(
+        fuzzy
+      );
 
       index++;
 
       continue;
     }
 
+
     /*
-     * One unknown word means
-     * we don't trust the complete
-     * sentence.
+     * Keep track of unknown word.
      */
 
-    return "";
+    unknown.push(word);
+
+    index++;
   }
 
-  return output.join(" ");
+
+  return {
+    translated:
+      output.join(" "),
+
+    unknown,
+  };
 }
+
+
+/* ============================================================
+   SENTENCE ENGINE
+============================================================ */
+
+function translateSentencePattern(
+  text: string
+): string | undefined {
+
+  const normalized =
+    normalize(
+      expandContractions(text)
+    );
+
+
+  /*
+   * IMPORTANT PHRASES
+   */
+
+  const important =
+    importantPhrases.get(
+      normalized
+    );
+
+  if (important) {
+    return important;
+  }
+
+
+  /*
+   * DIRECT PATTERNS
+   */
+
+  for (
+    const item
+    of directPatterns
+  ) {
+
+    const match =
+      normalized.match(
+        item.pattern
+      );
+
+    if (!match) {
+      continue;
+    }
+
+
+    if (
+      typeof item.result ===
+      "string"
+    ) {
+      return item.result;
+    }
+
+
+    const result =
+      item.result(match);
+
+    if (result) {
+      return result;
+    }
+  }
+
+
+  /*
+   * ==========================================================
+   * I + VERB
+   * ==========================================================
+   */
+
+  const iMatch =
+    normalized.match(
+      /^i\s+(.+)$/
+    );
+
+  if (iMatch) {
+
+    let rest =
+      iMatch[1];
+
+    rest =
+      rest
+        .replace(
+          /^(am|do|does|will|can|must)\s+/,
+          ""
+        )
+        .trim();
+
+
+    const words =
+      rest.split(" ");
+
+    const verb =
+      words[0];
+
+
+    const conjugated =
+      conjugatePresent(
+        "i",
+        verb
+      );
+
+    if (conjugated) {
+
+      const objectWords =
+        words.slice(1);
+
+      if (
+        objectWords.length
+      ) {
+
+        const object =
+          translateObject(
+            objectWords.join(" ")
+          );
+
+        if (object) {
+
+          return (
+            `${conjugated} ${object}`
+          );
+        }
+      }
+
+
+      return conjugated;
+    }
+  }
+
+
+  /*
+   * ==========================================================
+   * YOU + VERB
+   * ==========================================================
+   */
+
+  const youMatch =
+    normalized.match(
+      /^you\s+(.+)$/
+    );
+
+  if (youMatch) {
+
+    let rest =
+      youMatch[1];
+
+    rest =
+      rest
+        .replace(
+          /^(are|do|does|will|can|must)\s+/,
+          ""
+        )
+        .trim();
+
+
+    const words =
+      rest.split(" ");
+
+    const verb =
+      words[0];
+
+
+    const conjugated =
+      conjugatePresent(
+        "you",
+        verb
+      );
+
+    if (conjugated) {
+
+      const objectWords =
+        words.slice(1);
+
+      if (
+        objectWords.length
+      ) {
+
+        const object =
+          translateObject(
+            objectWords.join(" ")
+          );
+
+        if (object) {
+
+          return (
+            `${conjugated} ${object}`
+          );
+        }
+      }
+
+
+      return conjugated;
+    }
+  }
+
+
+  /*
+   * ==========================================================
+   * HE / SHE + VERB
+   * ==========================================================
+   */
+
+  const thirdPerson =
+    normalized.match(
+      /^(he|she)\s+(.+)$/
+    );
+
+  if (thirdPerson) {
+
+    const subject =
+      thirdPerson[1];
+
+    let rest =
+      thirdPerson[2];
+
+    rest =
+      rest
+        .replace(
+          /^(is|does|will|can|must)\s+/,
+          ""
+        )
+        .trim();
+
+
+    const words =
+      rest.split(" ");
+
+    const verb =
+      words[0];
+
+
+    const conjugated =
+      conjugatePresent(
+        subject,
+        verb
+      );
+
+    if (conjugated) {
+
+      const objectWords =
+        words.slice(1);
+
+      if (
+        objectWords.length
+      ) {
+
+        const object =
+          translateObject(
+            objectWords.join(" ")
+          );
+
+        if (object) {
+
+          return (
+            `${conjugated} ${object}`
+          );
+        }
+      }
+
+
+      return conjugated;
+    }
+  }
+
+
+  /*
+   * ==========================================================
+   * WE + VERB
+   * ==========================================================
+   */
+
+  const weMatch =
+    normalized.match(
+      /^we\s+(.+)$/
+    );
+
+  if (weMatch) {
+
+    let rest =
+      weMatch[1];
+
+    rest =
+      rest
+        .replace(
+          /^(are|do|does|will|can|must)\s+/,
+          ""
+        )
+        .trim();
+
+
+    const words =
+      rest.split(" ");
+
+    const verb =
+      words[0];
+
+
+    const conjugated =
+      conjugatePresent(
+        "we",
+        verb
+      );
+
+    if (conjugated) {
+
+      const objectWords =
+        words.slice(1);
+
+      if (
+        objectWords.length
+      ) {
+
+        const object =
+          translateObject(
+            objectWords.join(" ")
+          );
+
+        if (object) {
+
+          return (
+            `${conjugated} ${object}`
+          );
+        }
+      }
+
+
+      return conjugated;
+    }
+  }
+
+
+  /*
+   * ==========================================================
+   * THEY + VERB
+   * ==========================================================
+   */
+
+  const theyMatch =
+    normalized.match(
+      /^they\s+(.+)$/
+    );
+
+  if (theyMatch) {
+
+    let rest =
+      theyMatch[1];
+
+    rest =
+      rest
+        .replace(
+          /^(are|do|does|will|can|must)\s+/,
+          ""
+        )
+        .trim();
+
+
+    const words =
+      rest.split(" ");
+
+    const verb =
+      words[0];
+
+
+    const conjugated =
+      conjugatePresent(
+        "they",
+        verb
+      );
+
+    if (conjugated) {
+
+      const objectWords =
+        words.slice(1);
+
+      if (
+        objectWords.length
+      ) {
+
+        const object =
+          translateObject(
+            objectWords.join(" ")
+          );
+
+        if (object) {
+
+          return (
+            `${conjugated} ${object}`
+          );
+        }
+      }
+
+
+      return conjugated;
+    }
+  }
+
+
+  /*
+   * ==========================================================
+   * I AM + VALUE
+   * ==========================================================
+   */
+
+  const iAm =
+    normalized.match(
+      /^i am (.+)$/
+    );
+
+  if (iAm) {
+
+    const value =
+      iAm[1];
+
+
+    const root =
+      getVerbRoot(
+        value
+      );
+
+    if (root) {
+      return `Nde${root}`;
+    }
+
+
+    const translation =
+      lookupEnglish(
+        value
+      );
+
+    if (translation) {
+      return `Ndi ${translation}`;
+    }
+  }
+
+
+  /*
+   * ==========================================================
+   * YOU ARE + VALUE
+   * ==========================================================
+   */
+
+  const youAre =
+    normalized.match(
+      /^you are (.+)$/
+    );
+
+  if (youAre) {
+
+    const value =
+      youAre[1];
+
+
+    const root =
+      getVerbRoot(
+        value
+      );
+
+    if (root) {
+      return `Ule${root}`;
+    }
+
+
+    const translation =
+      lookupEnglish(
+        value
+      );
+
+    if (translation) {
+      return `Uli ${translation}`;
+    }
+  }
+
+
+  /*
+   * ==========================================================
+   * HE / SHE IS + VALUE
+   * ==========================================================
+   */
+
+  const heSheIs =
+    normalized.match(
+      /^(he|she) is (.+)$/
+    );
+
+  if (heSheIs) {
+
+    const value =
+      heSheIs[2];
+
+
+    const root =
+      getVerbRoot(
+        value
+      );
+
+    if (root) {
+      return `Ale${root}`;
+    }
+
+
+    const translation =
+      lookupEnglish(
+        value
+      );
+
+    if (translation) {
+      return `Ali ${translation}`;
+    }
+  }
+
+
+  return undefined;
+}
+
 
 /* ============================================================
    NUMBERS
@@ -1685,6 +2200,7 @@ const numberWords: Record<
   string,
   string
 > = {
+
   one: "-mo",
   two: "-bili",
   three: "-tatu",
@@ -1700,13 +2216,16 @@ const numberWords: Record<
   thirteen: "ikumi na -tatu",
 };
 
+
 function translateNumber(
   text: string
 ): string | undefined {
+
   return numberWords[
     normalize(text)
   ];
 }
+
 
 /* ============================================================
    MASTER TRANSLATION
@@ -1715,6 +2234,7 @@ function translateNumber(
 export function translateEnglishToBemba(
   text: string
 ): string {
+
   const original =
     String(text ?? "").trim();
 
@@ -1722,20 +2242,26 @@ export function translateEnglishToBemba(
     return "";
   }
 
+
+  const expanded =
+    expandContractions(
+      original
+    );
+
+
   const normalized =
     normalize(
-      expandContractions(
-        original
-      )
+      expanded
     );
 
   if (!normalized) {
     return "";
   }
 
+
   /*
    * ==========================================================
-   * 1. IMPORTANT PHRASES
+   * 1. HIGH-CONFIDENCE PHRASE
    * ==========================================================
    */
 
@@ -1748,9 +2274,15 @@ export function translateEnglishToBemba(
     return important;
   }
 
+
   /*
    * ==========================================================
    * 2. EXACT DICTIONARY
+   * ==========================================================
+   *
+   * THIS IS THE MOST IMPORTANT PART.
+   *
+   * Your large dictionary gets first-class treatment.
    * ==========================================================
    */
 
@@ -1762,6 +2294,7 @@ export function translateEnglishToBemba(
   if (exact) {
     return exact;
   }
+
 
   /*
    * ==========================================================
@@ -1778,6 +2311,7 @@ export function translateEnglishToBemba(
     return number;
   }
 
+
   /*
    * ==========================================================
    * 4. POSSESSIVE
@@ -1793,9 +2327,10 @@ export function translateEnglishToBemba(
     return possessive;
   }
 
+
   /*
    * ==========================================================
-   * 5. SENTENCE UNDERSTANDING
+   * 5. SENTENCE PATTERNS
    * ==========================================================
    */
 
@@ -1808,42 +2343,95 @@ export function translateEnglishToBemba(
     return sentence;
   }
 
+
   /*
    * ==========================================================
-   * 6. LONGEST PHRASE / WORD MATCH
+   * 6. COMPLETE DICTIONARY TOKEN MATCH
    * ==========================================================
    */
 
   const words =
-    translateByWords(
+    tokenize(
       normalized
     );
 
-  if (words) {
-    return words;
+
+  if (!words.length) {
+    return "";
   }
+
+
+  const tokenResult =
+    translateTokensWithFuzzy(
+      words
+    );
+
 
   /*
    * ==========================================================
-   * 7. NOTHING RELIABLE FOUND
+   * 7. IF EVERYTHING WAS TRANSLATED
+   * ==========================================================
+   */
+
+  if (
+    tokenResult.translated &&
+    tokenResult.unknown.length === 0
+  ) {
+
+    return tokenResult.translated;
+  }
+
+
+  /*
+   * ==========================================================
+   * 8. PARTIAL DICTIONARY RESULT
+   * ==========================================================
+   *
+   * IMPORTANT:
+   *
+   * We don't throw away known dictionary data simply
+   * because one word isn't available.
+   *
+   * However, we only return the partial result if there
+   * is meaningful translated content.
+   * ==========================================================
+   */
+
+  if (
+    tokenResult.translated &&
+    tokenResult.translated.length > 1
+  ) {
+
+    return tokenResult.translated;
+  }
+
+
+  /*
+   * ==========================================================
+   * 9. NOTHING RELIABLE
    * ==========================================================
    */
 
   return "";
 }
 
+
 /* ============================================================
-   SAFE APPLICATION FUNCTION
+   SAFE TRANSLATION
 ============================================================ */
 
 export function translateWithFallback(
   text: string
 ): string {
+
   try {
+
     return translateEnglishToBemba(
       text
     );
+
   } catch (error) {
+
     console.error(
       "[BembaTranslate] Offline translation error:",
       error
@@ -1853,19 +2441,22 @@ export function translateWithFallback(
   }
 }
 
+
 /* ============================================================
-   TRANSLATION CHECK
+   CHECK TRANSLATION
 ============================================================ */
 
 export function hasBembaTranslation(
   text: string
 ): boolean {
+
   return Boolean(
     translateEnglishToBemba(
       text
     )
   );
 }
+
 
 /* ============================================================
    GET TRANSLATION
@@ -1874,6 +2465,7 @@ export function hasBembaTranslation(
 export function getBembaTranslation(
   text: string
 ): string | undefined {
+
   const result =
     translateEnglishToBemba(
       text
@@ -1882,13 +2474,15 @@ export function getBembaTranslation(
   return result || undefined;
 }
 
+
 /* ============================================================
-   ALL KNOWN TRANSLATIONS
+   GET ALL TRANSLATIONS
 ============================================================ */
 
 export function getBembaTranslations(
   text: string
 ): string[] {
+
   const normalized =
     normalize(
       expandContractions(
@@ -1900,6 +2494,7 @@ export function getBembaTranslations(
     return [];
   }
 
+
   return (
     dictionaryAlternatives.get(
       normalized
@@ -1907,13 +2502,72 @@ export function getBembaTranslations(
   );
 }
 
+
+/* ============================================================
+   GET ORIGINAL DICTIONARY ENTRIES
+============================================================ */
+
+export function getDictionaryEntries(
+  text: string
+): BembaEntry[] {
+
+  const normalized =
+    normalize(text);
+
+  if (!normalized) {
+    return [];
+  }
+
+
+  return (
+    dictionaryEntriesByEnglish.get(
+      normalized
+    ) ?? []
+  ).map(entry => ({
+    english:
+      entry.english,
+
+    bemba:
+      entry.bemba,
+  }));
+}
+
+
 /* ============================================================
    DICTIONARY SIZE
 ============================================================ */
 
+/**
+ * Number of raw entries in bembaDictionary.ts.
+ */
 export function getDictionarySize(): number {
+  return dictionary.length;
+}
+
+
+/**
+ * Number of unique normalized English entries.
+ */
+export function getUniqueDictionarySize(): number {
   return dictionaryLookup.size;
 }
+
+
+/**
+ * Number of unique English words.
+ */
+export function getDictionaryWordCount(): number {
+  return dictionaryWords.size;
+}
+
+
+/**
+ * Maximum phrase length found in the dictionary.
+ */
+export function getMaximumPhraseLength(): number {
+  return maximumPhraseWords;
+}
+
 
 /* ============================================================
    SEARCH DICTIONARY
@@ -1923,6 +2577,7 @@ export function searchBembaDictionary(
   query: string,
   limit = 50
 ): BembaEntry[] {
+
   const normalized =
     normalize(query);
 
@@ -1930,10 +2585,22 @@ export function searchBembaDictionary(
     return [];
   }
 
-  const results: BembaEntry[] =
-    [];
 
-  for (const entry of dictionary) {
+  const results: BembaEntry[] = [];
+
+  const seen =
+    new Set<string>();
+
+
+  /*
+   * Search the COMPLETE dictionary.
+   */
+
+  for (
+    const entry
+    of dictionary
+  ) {
+
     const english =
       normalize(
         entry.english
@@ -1944,6 +2611,7 @@ export function searchBembaDictionary(
         entry.bemba
       );
 
+
     if (
       english.includes(
         normalized
@@ -1952,41 +2620,120 @@ export function searchBembaDictionary(
         normalized
       )
     ) {
-      results.push({
-        english:
-          entry.english,
-        bemba:
-          entry.bemba,
-      });
+
+      const key =
+        `${entry.english}::${entry.bemba}`;
+
+      if (!seen.has(key)) {
+
+        seen.add(key);
+
+        results.push({
+          english:
+            entry.english,
+
+          bemba:
+            entry.bemba,
+        });
+      }
     }
 
+
     if (
-      results.length >=
-      limit
+      results.length >= limit
     ) {
       break;
     }
   }
 
+
   return results;
 }
+
+
+/* ============================================================
+   FIND EXACT DICTIONARY ENTRY
+============================================================ */
+
+export function findExactDictionaryEntry(
+  text: string
+): BembaEntry | undefined {
+
+  const normalized =
+    normalize(text);
+
+  if (!normalized) {
+    return undefined;
+  }
+
+
+  const entries =
+    dictionaryEntriesByEnglish.get(
+      normalized
+    );
+
+
+  if (
+    !entries ||
+    !entries.length
+  ) {
+    return undefined;
+  }
+
+
+  return {
+    english:
+      entries[0].english,
+
+    bemba:
+      entries[0].bemba,
+  };
+}
+
 
 /* ============================================================
    DEBUG INFORMATION
 ============================================================ */
 
 export function getTranslatorInfo() {
+
+  let duplicateEnglishEntries =
+    0;
+
+  for (
+    const alternatives
+    of dictionaryAlternatives.values()
+  ) {
+
+    if (
+      alternatives.length > 1
+    ) {
+      duplicateEnglishEntries++;
+    }
+  }
+
+
   return {
-    mode: "offline",
+
+    mode:
+      "offline",
 
     source:
-      "local Bemba dictionary",
+      "complete local Bemba dictionary",
 
-    dictionaryEntries:
+    rawDictionaryEntries:
       dictionary.length,
 
-    indexedEntries:
+    uniqueEnglishEntries:
       dictionaryLookup.size,
+
+    uniqueEnglishWords:
+      dictionaryWords.size,
+
+    duplicateEnglishEntries,
+
+    maximumPhraseWords:
+      maximumPhraseWords,
 
     sentencePatterns:
       directPatterns.length,
@@ -2005,5 +2752,96 @@ export function getTranslatorInfo() {
 
     cloudRequired:
       false,
+  };
+}
+
+
+/* ============================================================
+   DICTIONARY HEALTH CHECK
+============================================================ */
+
+/**
+ * Useful for testing whether the complete dictionary is
+ * actually being loaded by the application.
+ */
+export function getDictionaryHealth() {
+
+  let validEntries = 0;
+  let emptyEntries = 0;
+  let duplicateEntries = 0;
+
+
+  const seen =
+    new Set<string>();
+
+
+  for (
+    const entry
+    of dictionary
+  ) {
+
+    const english =
+      normalize(
+        entry?.english ?? ""
+      );
+
+    const bemba =
+      cleanTranslation(
+        entry?.bemba ?? ""
+      );
+
+
+    if (
+      !english ||
+      !bemba
+    ) {
+
+      emptyEntries++;
+
+      continue;
+    }
+
+
+    validEntries++;
+
+
+    const key =
+      `${english}::${bemba}`;
+
+
+    if (
+      seen.has(key)
+    ) {
+
+      duplicateEntries++;
+
+    } else {
+
+      seen.add(key);
+    }
+  }
+
+
+  return {
+
+    rawEntries:
+      dictionary.length,
+
+    validEntries,
+
+    emptyEntries,
+
+    duplicateEntries,
+
+    indexedEnglishEntries:
+      dictionaryLookup.size,
+
+    indexedWords:
+      dictionaryWords.size,
+
+    maximumPhraseWords,
+
+    healthy:
+      validEntries > 0,
   };
 }
