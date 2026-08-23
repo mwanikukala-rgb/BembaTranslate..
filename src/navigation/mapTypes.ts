@@ -8,13 +8,6 @@ export type Coordinate = {
   longitude: number;
 };
 
-export type MapNodeType =
-  | "landmark"
-  | "building"
-  | "road"
-  | "entrance"
-  | "campus";
-
 export type MapNode = {
   id: string;
   name: string;
@@ -22,31 +15,27 @@ export type MapNode = {
   latitude: number;
   longitude: number;
 
-  coordinate: Coordinate;
+  type?: string;
 
-  type?: MapNodeType;
-  description?: string;
+  coordinate?: Coordinate;
 };
 
 export type MapEdge = {
   from: string;
   to: string;
   distance: number;
-  bidirectional?: boolean;
 };
 
 export type MapData = {
-  name: string;
+  name?: string;
   nodes: MapNode[];
   edges: MapEdge[];
 };
 
 export type RouteStep = {
-  from: MapNode;
-  to: MapNode;
+  from: string;
+  to: string;
   distance: number;
-  bearing?: number;
-  direction?: string;
 };
 
 export type RouteResult = {
