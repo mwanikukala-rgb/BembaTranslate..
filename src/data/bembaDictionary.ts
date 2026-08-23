@@ -24,53 +24,50 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
 
   { english: "yes", bemba: "ee" },
   { english: "no", bemba: "awe" },
-  { english: "how are you", bemba: "Uli shani?" },
-  { english: "how are you informal", bemba: "Uli shani?" },
-  { english: "how are you formal", bemba: "Muli shani?" },
-  { english: "how are you plural", bemba: "Muli shani?" },
+  { english: "hello", bemba: "Mwapola" },
+  { english: "hi", bemba: "Mwapola" },
+  { english: "hello formal", bemba: "Mwapola" },
+  { english: "hello informal", bemba: "Mwapoleni" },
   { english: "goodbye", bemba: "Shaleenipo" },
   { english: "bye", bemba: "Kafikenipo" },
   { english: "farewell", bemba: "Kafikenipo" },
   { english: "stay well", bemba: "Shalenipo" },
+  { english: "welcome", bemba: "Mwaiseni" },
+
+  { english: "how are you", bemba: "Uli shani?" },
+  { english: "how are you informal", bemba: "Uli shani?" },
+  { english: "how are you formal", bemba: "Muli shani?" },
+  { english: "how are you plural", bemba: "Muli shani?" },
+  { english: "how are you doing", bemba: "Uli shani?" },
+
+  { english: "I am fine", bemba: "Ndi bwino" },
+  { english: "I am well", bemba: "Ndi bwino" },
+  { english: "I am good", bemba: "Ndi bwino" },
+  { english: "we are fine", bemba: "Tuli bwino" },
 
   { english: "my name is", bemba: "Ishina lyandi ni..." },
-  { english: "person", bemba: "umuntu" },
-  { english: "friend", bemba: "umunandi" },
-  { english: "child", bemba: "umwana" },
-  { english: "the Bemba language", bemba: "iciBemba" },
-
-  { english: "and", bemba: "na" },
-  { english: "with", bemba: "na" },
-  { english: "like", bemba: "nga" },
-  { english: "as", bemba: "nga" },
-
-  { english: "good", bemba: "suma" },
-  { english: "all", bemba: "onse" },
-  { english: "morning", bemba: "uluceelo" },
+  { english: "what is your name", bemba: "Ishina lyenu ni li?" },
+  { english: "where are you", bemba: "Uli kwisa?" },
+  { english: "where are you formal", bemba: "Muli kwisa?" },
 
   { english: "thank you", bemba: "Natotela" },
+  { english: "thanks", bemba: "Natotela" },
   { english: "a lot", bemba: "Saana" },
   { english: "thanks a lot", bemba: "Natotela saana" },
+  { english: "thank you very much", bemba: "Natotela saana" },
+
+  { english: "please", bemba: "mukwai" },
+  { english: "sorry", bemba: "ndoloka" },
+  { english: "excuse me", bemba: "mukwai" },
+  { english: "congratulations", bemba: "Mwapokolola" },
 
   // =========================================================
   // GREETINGS
   // =========================================================
 
-  { english: "hello", bemba: "Mwapola" },
-  { english: "hi", bemba: "Mwapola" },
-  { english: "hello formal", bemba: "Mwapola" },
-  { english: "hello informal", bemba: "Mwapoleni" },
-
-  { english: "response to hello", bemba: "Endita mukwai" },
-  { english: "how are you response", bemba: "Bwino" },
-  { english: "response to how are you", bemba: "Bwino" },
-
   { english: "good morning", bemba: "Mwashibukeni!" },
   { english: "response to good morning", bemba: "Eya mukwai" },
   { english: "response to good morning formal", bemba: "Endita mukwai" },
-
-  { english: "what is the news", bemba: "Kuli ci?" },
-  { english: "all is well", bemba: "Kwatalala" },
 
   { english: "good afternoon", bemba: "Kasuba mukwai" },
   { english: "good afternoon response", bemba: "Endita mukwai" },
@@ -86,27 +83,27 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "sleep well formal", bemba: "Mulale umutende" },
   { english: "sleep well formal alternative", bemba: "Mulale bwino" },
 
-  { english: "welcome", bemba: "Mwaiseni" },
-  { english: "welcome response", bemba: "Endita mukwai" },
+  { english: "response to hello", bemba: "Endita mukwai" },
+  { english: "how are you response", bemba: "Bwino" },
+  { english: "response to how are you", bemba: "Bwino" },
+
+  { english: "what is the news", bemba: "Kuli ci?" },
+  { english: "all is well", bemba: "Kwatalala" },
 
   { english: "fare well informal", bemba: "Wende umutende" },
   { english: "fare well formal", bemba: "Mwende umutende" },
 
-  { english: "condolence greeting", bemba: "Mwalosheni mukwai" },
-  { english: "condolence greeting alternative", bemba: "Mwaculeni mukwai" },
+  // =========================================================
+  // COMMON SENTENCES
+  // =========================================================
 
-  { english: "are you eating well", bemba: "Mwalileni" },
-  { english: "are you eating well alternative", bemba: "Mwalyeni bwino" },
-  { english: "provided you eat well", bemba: "Kulila mulelya" },
+  { english: "I want money", bemba: "Ndefwaya indalama" },
+  { english: "I want food", bemba: "Ndefwaya ifyakulya" },
+  { english: "I want water", bemba: "Ndefwaya amenshi" },
+  { english: "I need help", bemba: "Ndefwaya ubwafwilisho" },
 
-  { english: "greetings to one at work", bemba: "Mwabombeni" },
-  { english: "greeting to returning hunter", bemba: "Mwabambeni" },
-  { english: "greeting to returning hunter alternative", bemba: "Mabingo" },
-  { english: "greeting to returning hunter alternative 2", bemba: "Icibamfi" },
-  { english: "greeting to returning army after victory", bemba: "Mwasalipeni" },
-  { english: "greeting after killing dangerous animal", bemba: "Mwasalipeni" },
-  { english: "greeting after escaping danger", bemba: "Mwapusukeni" },
-  { english: "greeting to a chief when leaving", bemba: "Lwapakata Mukwai" },
+  { english: "yes please", bemba: "ee mukwai" },
+  { english: "no thank you", bemba: "awe natotela" },
 
   // =========================================================
   // HELP
@@ -119,26 +116,8 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "help me plural formal", bemba: "ngafweniko" },
 
   // =========================================================
-  // COMMON SENTENCES
+  // ACTIONS
   // =========================================================
-
-  { english: "how are you doing", bemba: "Uli shani?" },
-  { english: "I am fine", bemba: "Ndi bwino" },
-  { english: "I am well", bemba: "Ndi bwino" },
-  { english: "I am good", bemba: "Ndi bwino" },
-  { english: "we are fine", bemba: "Tuli bwino" },
-  { english: "thank you very much", bemba: "Natotela saana" },
-  { english: "thanks", bemba: "Natotela" },
-
-  { english: "what is your name", bemba: "Ishina lyenu ni li?" },
-  { english: "my name is", bemba: "Ishina lyandi ni..." },
-  { english: "where are you", bemba: "Uli kwisa?" },
-  { english: "where are you formal", bemba: "Muli kwisa?" },
-
-  { english: "I want money", bemba: "Ndefwaya indalama" },
-  { english: "I want food", bemba: "Ndefwaya ifyakulya" },
-  { english: "I want water", bemba: "Ndefwaya amenshi" },
-  { english: "I need help", bemba: "Ndefwaya ubwafwilisho" },
 
   { english: "come", bemba: "isa" },
   { english: "come here", bemba: "Isa kuno" },
@@ -148,6 +127,7 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "listen", bemba: "Umfwa" },
   { english: "look", bemba: "Moneni" },
   { english: "speak", bemba: "Landa" },
+  { english: "say", bemba: "Landa" },
 
   // =========================================================
   // NUMBERS
@@ -170,7 +150,7 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "thirty", bemba: "ama kumi yatatu" },
   { english: "one hundred", bemba: "mwanda" },
   { english: "five hundred", bemba: "imyaanda îsaano" },
-  { english: "one thousand", bemba: "kana, ikana" },
+  { english: "one thousand", bemba: "ikana" },
   { english: "twelve thousand", bemba: "ama kana ikumi na yabili" },
 
   // =========================================================
@@ -273,8 +253,6 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "husband", bemba: "Mulume" },
   { english: "my husband", bemba: "Mulume wandi" },
   { english: "your husband", bemba: "Mulume obe" },
-  { english: "her husband", bemba: "Mwina mwakwe" },
-
   { english: "wife", bemba: "Mukashi" },
   { english: "wife formal", bemba: "Bakashi" },
   { english: "my wife", bemba: "Mukashi wandi" },
@@ -329,11 +307,17 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "few", bemba: "fiinini" },
   { english: "bad", bemba: "biipi" },
   { english: "beautiful", bemba: "wasekesha" },
+  { english: "good", bemba: "suma" },
+  { english: "all", bemba: "onse" },
 
   // =========================================================
   // CONJUNCTIONS
   // =========================================================
 
+  { english: "and", bemba: "na" },
+  { english: "with", bemba: "na" },
+  { english: "like", bemba: "nga" },
+  { english: "as", bemba: "nga" },
   { english: "because", bemba: "pantu" },
   { english: "but", bemba: "lelo" },
   { english: "or", bemba: "nangu" },
@@ -412,14 +396,6 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "we do not", bemba: "tatu-" },
 
   // =========================================================
-  // GRAMMAR
-  // =========================================================
-
-  { english: "passive", bemba: "-w-" },
-  { english: "neutral voice", bemba: "-ik-" },
-  { english: "neutral voice e o", bemba: "-ek-" },
-
-  // =========================================================
   // TIME
   // =========================================================
 
@@ -430,165 +406,4 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "morning", bemba: "uluceelo" },
   { english: "afternoon", bemba: "kasuba" },
   { english: "evening", bemba: "chungulo" },
-  { english: "night", bemba: "ubushiku" },
-  { english: "day", bemba: "ubushiku" },
-
-  // =========================================================
-  // PLACES / EVERYDAY WORDS
-  // =========================================================
-
-  { english: "home", bemba: "ng'anda" },
-  { english: "house", bemba: "ng'anda" },
-  { english: "school", bemba: "sukulu" },
-  { english: "church", bemba: "cengelo" },
-  { english: "market", bemba: "mu marketi" },
-  { english: "shop", bemba: "duka" },
-  { english: "road", bemba: "ndila" },
-  { english: "water", bemba: "amenshi" },
-  { english: "food", bemba: "ifyakulya" },
-  { english: "money", bemba: "indalama" },
-  { english: "work noun", bemba: "incito" },
-  { english: "job", bemba: "incito" },
-  { english: "car", bemba: "imotoka" },
-  { english: "phone", bemba: "simu" },
-  { english: "book", bemba: "ifyebo" },
-
-  // =========================================================
-  // PEOPLE
-  // =========================================================
-
-  { english: "man", bemba: "umwaume" },
-  { english: "woman", bemba: "umukashi" },
-  { english: "boy", bemba: "umwana mwaume" },
-  { english: "girl", bemba: "umwana mukashana" },
-  { english: "baby", bemba: "kafwafwa" },
-  { english: "people", bemba: "abantu" },
-  { english: "child", bemba: "umwana" },
-  { english: "children", bemba: "abana" },
-
-  // =========================================================
-  // SIMPLE RESPONSES
-  // =========================================================
-
-  { english: "yes please", bemba: "ee mukwai" },
-  { english: "no thank you", bemba: "awe natotela" },
-  { english: "please", bemba: "mukwai" },
-  { english: "sorry", bemba: "ndoloka" },
-  { english: "excuse me", bemba: "mukwai" },
-  { english: "congratulations", bemba: "Mwapokolola" },
-
-  // =========================================================
-  // QUESTIONS
-  // =========================================================
-
-  { english: "what", bemba: "ci" },
-  { english: "who", bemba: "nani" },
-  { english: "where", bemba: "kwisa" },
-  { english: "when", bemba: "lilali" },
-  { english: "why", bemba: "cinshi" },
-  { english: "how", bemba: "shani" },
-  { english: "which", bemba: "ci" },
-  { english: "whose", bemba: "wa nani" },
-  { english: "how much", bemba: "shing'anga" },
-  { english: "how many", bemba: "shinga" },
-
-  // =========================================================
-  // ANIMALS
-  // =========================================================
-
-  { english: "animal", bemba: "inyama" },
-  { english: "dog", bemba: "imbwa" },
-  { english: "cat", bemba: "pusi" },
-  { english: "cow", bemba: "inkombe" },
-  { english: "goat", bemba: "imbushi" },
-  { english: "sheep", bemba: "mpanga" },
-  { english: "pig", bemba: "nguluwe" },
-  { english: "chicken", bemba: "inkoko" },
-  { english: "rooster", bemba: "inkoko ya mwaume" },
-  { english: "hen", bemba: "inkoko ya mukashana" },
-  { english: "duck", bemba: "ipapashi" },
-  { english: "fish", bemba: "isabi" },
-  { english: "bird", bemba: "akakonko" },
-  { english: "snake", bemba: "umusoka" },
-  { english: "lion", bemba: "intangalala" },
-  { english: "leopard", bemba: "inkalamo" },
-  { english: "elephant", bemba: "nsofu" },
-  { english: "elephant single tusk", bemba: "chipembe" },
-  { english: "elephant tuskless", bemba: "tondo" },
-  { english: "elephant male tusker", bemba: "nkungulu" },
-  { english: "elephant female", bemba: "ninansofu" },
-  { english: "rhinoceros", bemba: "chipembere" },
-  { english: "hippopotamus", bemba: "mfubu" },
-  { english: "buffalo", bemba: "mboo" },
-  { english: "sable", bemba: "nkanshilie" },
-  { english: "roan", bemba: "mperembe" },
-  { english: "waterbuck", bemba: "chuswe" },
-  { english: "puku", bemba: "puku" },
-  { english: "zebra", bemba: "mpundwe" },
-  { english: "giraffe", bemba: "insala" },
-  { english: "monkey", bemba: "nkoko" },
-  { english: "baboon", bemba: "mbeba" },
-  { english: "rabbit", bemba: "kalulu" },
-  { english: "rat", bemba: "kanseshe" },
-  { english: "mouse", bemba: "kanseshe" },
-  { english: "frog", bemba: "ikolwe" },
-  { english: "tortoise", bemba: "nkamba" },
-  { english: "crocodile", bemba: "ng'andu" },
-
-  // =========================================================
-  // FOOD
-  // =========================================================
-
-  { english: "meal", bemba: "ifyakulya" },
-  { english: "food", bemba: "ifyakulya" },
-  { english: "water", bemba: "amenshi" },
-  { english: "maize", bemba: "amabele" },
-  { english: "maize meal", bemba: "ubunga" },
-  { english: "meal nshima", bemba: "ubunga" },
-  { english: "nshima", bemba: "ubunga" },
-  { english: "beans", bemba: "ifisashi" },
-  { english: "vegetables", bemba: "imifitshi" },
-  { english: "meat", bemba: "inyama" },
-  { english: "fish", bemba: "isabi" },
-  { english: "salt", bemba: "umunyu" },
-  { english: "sugar", bemba: "isukali" },
-  { english: "milk", bemba: "amenshi ya mabala" },
-  { english: "egg", bemba: "ilifyalilo" },
-  { english: "fruit", bemba: "ifisabo" },
-  { english: "banana", bemba: "icimbe" },
-  { english: "orange", bemba: "icungwa" },
-  { english: "lemon", bemba: "icungwa cimpundu" },
-
-  // =========================================================
-  // BODY
-  // =========================================================
-
-  { english: "body", bemba: "umubili" },
-  { english: "head", bemba: "umutwe" },
-  { english: "hair", bemba: "imisisi" },
-  { english: "eye", bemba: "isho" },
-  { english: "eyes", bemba: "amenso" },
-  { english: "ear", bemba: "ukutwi" },
-  { english: "ears", bemba: "amatu" },
-  { english: "nose", bemba: "impuno" },
-  { english: "mouth", bemba: "akanwa" },
-  { english: "tooth", bemba: "ilino" },
-  { english: "teeth", bemba: "ameno" },
-  { english: "tongue", bemba: "ululimi" },
-  { english: "neck", bemba: "umukoshi" },
-  { english: "hand", bemba: "ukuboko" },
-  { english: "hands", bemba: "amaboko" },
-  { english: "finger", bemba: "akanyele" },
-  { english: "leg", bemba: "ukuse" },
-  { english: "foot", bemba: "ukutula" },
-  { english: "heart", bemba: "umutima" },
-  { english: "blood", bemba: "umulopa" },
-
-  // =========================================================
-  // CLOTHING
-  // =========================================================
-
-  { english: "clothes", bemba: "impamba" },
-  { english: "shirt", bemba: "icampampa" },
-  { english: "trousers", bemba: "amapantalo" },
-  { english: "shoes", bemba: "ink
+ 
