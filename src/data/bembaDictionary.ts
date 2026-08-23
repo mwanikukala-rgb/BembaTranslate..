@@ -987,5 +987,178 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "he or she doesn't have now", bemba: "Tabakwete" },
   { english: "they don't have now", bemba: "Tabakwete" },
   { english: "we don't have now", bemba: "Tatukwete" },
+    // =========================================================
+  // HOME / FAMILY EXPRESSIONS
+  // =========================================================
+
+  { english: "in their home", bemba: "Mu mwabo" },
+  { english: "in our home", bemba: "Mu mwesu" },
+  { english: "at my house", bemba: "Pa mwandi" },
+  { english: "at my home", bemba: "Pa mwandi" },
+
+  // =========================================================
+  // "TO HAVE" - COMMON EXPRESSIONS
+  // =========================================================
+
+  { english: "I don't have", bemba: "Nshakwata" },
+  { english: "I don't have now", bemba: "Nshikwete" },
+  { english: "I am not married male", bemba: "Nshaupa" },
+  { english: "I am not married female", bemba: "Nshaupwa" },
+
+  // =========================================================
+  // VERB "TO BE" [-LI] - PRESENT TENSE
+  // =========================================================
+
+  // Affirmative
+
+  { english: "I am in Kitwe", bemba: "Ine ndi mu Kitwe" },
+  { english: "you are in Lusaka", bemba: "Imwe muli ku Lusaka" },
+  { english: "they are in Zambia", bemba: "Aba bali mu Zambia" },
+  { english: "we are in the Insaka", bemba: "Ifwe tuli mu nsaka" },
+
+  // Negative
+
+  { english: "I am not in Ndola", bemba: "Ine nshili mu Ndola" },
+  { english: "you are not in Kitwe", bemba: "Imwe tamuli mu Kitwe" },
+  { english: "they are not in Zambia", bemba: "Aba tabali mu Zambia" },
+  { english: "we are not in the classroom", bemba: "Ifwe tatuli mu kalasi" },
+
+  // =========================================================
+  // VERB "TO HAVE" [UKUKWATA] - PRESENT / TEMPORARY POSSESSION
+  // =========================================================
+
+  { english: "I have now", bemba: "Nimkwata" },
+  { english: "you have now", bemba: "Namukwata" },
+  { english: "he or she has now", bemba: "Nabakwata" },
+  { english: "they have now", bemba: "Nabakwata" },
+  { english: "we have now", bemba: "Natukwata" },
+
+  // Negative
+
+  { english: "I don't have now", bemba: "Nshikwete" },
+  { english: "you don't have now", bemba: "Tamukwete" },
+  { english: "he or she doesn't have now", bemba: "Tabakwete" },
+  { english: "they don't have now", bemba: "Tabakwete" },
+  { english: "we don't have now", bemba: "Tatukwete" },
+    // =========================================================
+  // VERB "TO HAVE" [UKUKWATA] - PRESENT
+  // PERMANENT POSSESSION
+  // =========================================================
+
+  // Affirmative
+
+  { english: "we have two children", bemba: "Twakwata abaana babili" },
+  { english: "you have three children", bemba: "Mwakwata abaana batatu" },
+  { english: "they have four children", bemba: "Bakwata abaana bane" },
+  { english: "I have two children", bemba: "Nakwata abaana babili" },
+
+  // Negative
+
+  { english: "we don't have two children", bemba: "Tatwakwata abaana babili" },
+  { english: "you don't have three children", bemba: "Tamwakwata abaana batatu" },
+  { english: "they don't have four children", bemba: "Tabakwata abaana bane" },
+
+  { english: "we don't have four children", bemba: "Tatwakwata abaana bane" },
+  { english: "you don't have two children", bemba: "Tamwakwata abaana babili" },
+  { english: "they don't have two children", bemba: "Tabakwata abaana babili" },
+
+  // =========================================================
+  // VERB "TO HAVE" [UKUKWATA] - SIMPLE PAST
+  // =========================================================
+
+  // Affirmative
+
+  { english: "I had", bemba: "Nakwete" },
+  { english: "we had", bemba: "Twakwete" },
+  { english: "you had", bemba: "Mwakwete" },
+  { english: "they had", bemba: "Bakwete" },
+
+  // Negative
+
+  { english: "I didn't have", bemba: "Nshakwete" },
+  { english: "we didn't have", bemba: "Tatwakwete" },
+  { english: "you didn't have", bemba: "Tamwakwete" },
+  { english: "they didn't have", bemba: "Tabakwete" },
+
+  // =========================================================
+  // "TO HAVE" - PRESENT / TEMPORARY POSSESSION EXAMPLES
+  // =========================================================
+
+  { english: "they have sisters now", bemba: "Nabakwata bankashi" },
+  { english: "you have children now", bemba: "Namukwata abaana" },
+  { english: "they have children now", bemba: "Nabakwata abaana" },
+
+  // Negative
+
+  { english: "we don't have brothers now", bemba: "Tatukwete bandume" },
+  { english: "you don't have uncles now", bemba: "Tamukwete bayama" },
+  { english: "they don't have sisters now", bemba: "Tabakwete abeepwa" },
+    // =========================================================
+  // "TO HAVE" [UKUKWATA] - PRESENT EXAMPLES
+  // =========================================================
+
+  { english: "they have children", bemba: "Bakwata abaana" },
+  { english: "they don't have nephews or nieces", bemba: "Tabakwata abeshikulu" },
+  { english: "we have children now", bemba: "Natukwata abaana" },
+  { english: "we don't have grandchildren now", bemba: "Tatukwete abeshikulu" },
+
+  // =========================================================
+  // "TO HAVE" [UKUKWATA] - SIMPLE FUTURE
+  // =========================================================
+
+  { english: "I will have", bemba: "Nkakwata" },
+  { english: "we will have", bemba: "Tukakwata" },
+  { english: "you will have", bemba: "Mukakwata" },
+  { english: "they will have", bemba: "Bakakwata" },
+
+  { english: "I won't have", bemba: "Nshakakwate" },
+  { english: "we won't have", bemba: "Tatwakakwate" },
+  { english: "you won't have", bemba: "Tamwakakwate" },
+  { english: "they won't have", bemba: "Tabakakwate" },
+
+  // =========================================================
+  // POSSESSIVE ADJECTIVES
+  // =========================================================
+
+  { english: "my or mine", bemba: "-andi" },
+  { english: "your or yours informal", bemba: "-obe" },
+  { english: "his or her informal", bemba: "-akwe" },
+  { english: "our or ours", bemba: "-esu" },
+  { english: "your or yours formal or plural", bemba: "-enu" },
+  { english: "his, hers or theirs", bemba: "-abo" },
+
+  // =========================================================
+  // POSSESSIVE ADJECTIVE EXAMPLES
+  // =========================================================
+
+  { english: "my child", bemba: "Umwaana wandi" },
+  { english: "your sister informal", bemba: "Nkashi yobe" },
+  { english: "your brother informal", bemba: "Ndume yobe" },
+  { english: "your children informal", bemba: "Abaana bobe" },
+  { english: "your sister formal or plural", bemba: "Nkashi yenu" },
+  { english: "his or her brother informal", bemba: "Ndume yakhe" },
+  { english: "his or her brothers", bemba: "Ba Ndume yakhe" },
+
+  // =========================================================
+  // LOCATIVES
+  // =========================================================
+
+  { english: "in", bemba: "Mu" },
+  { english: "to", bemba: "Ku" },
+  { english: "at or on", bemba: "Pa" },
+  { english: "in John's", bemba: "Mwa John" },
+  { english: "at or to Musa's", bemba: "Kwa Musa" },
+  { english: "at or on Mulenga's", bemba: "Pa Mulenga" },
+
+  // =========================================================
+  // LOCATIVE EXAMPLES
+  // =========================================================
+
+  { english: "in the hut", bemba: "Mu nsaka" },
+  { english: "to Lusaka", bemba: "Ku Lusaka" },
+  { english: "at or on the table", bemba: "Pa tebulo" },
+  { english: "in John's", bemba: "Mwa John" },
+  { english: "at or to Musa's", bemba: "Kwa Musa" },
+  { english: "at or on Mulenga's", bemba: "Pa Mulenga" },
   ];
 
