@@ -3145,6 +3145,751 @@ export function runTranslatorSelfTest() {
         ),
     })
   );
+ /* ============================================================
+   BEMBATRANSLATE — HUMAN-LIKE BEMBA ENGINE V3
+   ============================================================
+
+   PURPOSE
+   -------
+   V3 adds sentence-level understanding on top of the existing
+   dictionary/V2 engine.
+
+   IMPORTANT
+   ---------
+   This engine DOES NOT replace your dictionary.
+
+   Recommended pipeline:
+
+      USER INPUT
+          ↓
+      V3 Human Engine
+          ↓
+      V3 understands sentence?
+       ↙              ↘
+     YES               NO
+      ↓                 ↓
+   V3 result          V2 result
+                         ↓
+                    Dictionary
+
+   Design goals:
+   - Natural sentence patterns
+   - Pronouns
+   - Tense
+   - Negation
+   - Questions
+   - Because/reason clauses
+   - Objects
+   - Time expressions
+   - Common conversational phrases
+   - Conservative output
+   - No dangerous fuzzy translation
+   - Existing dictionary remains source of truth
+   ============================================================ */
+
+import { bembaDictionary } from "../data/bembaDictionary";
+
+/* ============================================================
+   TYPES
+   ============================================================ */
+
+export interface BembaV3Result {
+  translation: string;
+  confidence: number;
+  understood: boolean;
+  usedV3: boolean;
+  fallback: boolean;
+  reason?: string;
+  structure?: SentenceStructure;
+}
+
+interface SentenceStructure {
+  subject?: string;
+  auxiliary?: string;
+  verb?: string;
+  object?: string;
+  tense?: Tense;
+  negative?: boolean;
+  question?: boolean;
+  reason?: string;
+  time?: string;
+}
+
+type Tense =
+  | "present"
+  | "past"
+  | "future"
+  | "present_progressive"
+  | "unknown";
+
+interface Pattern {
+  test: RegExp;
+  build: (match: RegExpMatchArray) => string | null;
+  confidence: number;
+}
+
+/* ============================================================
+   NORMALIZATION
+   ============================================================ */
+
+function normalizeInput(input: string): string {
+  return input
+    .trim()
+    .toLowerCase()
+    .replace(/[“”"]/g, "")
+    .replace(/[‘’']/g, "")
+    .replace(/[!?.,;:]+/g, " ")
+    .replace(/\s+/g, " ");
+}
+
+/* ============================================================
+   BASIC ENGLISH → BEMBA VOCABULARY
+   ------------------------------------------------------------
+   Keep this conservative.
+
+   Your full bembaDictionary remains the main source of truth.
+   ============================================================ */
+
+const WORDS: Record<string, string> = {
+  /* pronouns */
+
+  i: "ine",
+  me: "ine",
+  my: "uwandi",
+  mine: "uwandi",
+
+  you: "imwe",
+  your: "wenu",
+  yours: "wenu",
+
+  he: "mwene",
+  him: "mwene",
+  his: "wakwe",
+
+  she: "mwene",
+  her: "wakwe",
+
+  we: "ifwe",
+  us: "ifwe",
+  our: "wesu",
+
+  they: "bena",
+  them: "bena",
+  their: "wabo",
+
+  /* common nouns */
+
+  banana: "inkonde",
+  bananas: "amakonde",
+
+  nshima: "ubwali",
+
+  water: "amenshi",
+
+  food: "ifilyo",
+
+  house: "inzu",
+  home: "kuŋanda",
+
+  person: "umuntu",
+  people: "abantu",
+
+  child: "umwana",
+  children: "abana",
+
+  mother: "bama",
+  father: "tata",
+
+  friend: "munensu",
+
+  money: "indalama",
+
+  school: "shikulu",
+
+  market: "mu nṣhita",
+
+  /* adjectives */
+
+  good: "bwino",
+  well: "bwino",
+  bad: "bubi",
+  sick: "mulwele",
+  tired: "ukutala",
+
+  happy: "sangwa",
+
+  big: "kulu",
+  small: "fiinci",
+
+  hot: "kutalala",
+  cold: "kutalala",
+
+  sweet: "munowa",
+
+  hungry: "nsala",
+
+  thirsty: "mpilibwe",
+
+  /* time */
+
+  today: "lelo",
+  yesterday: "mailo",
+  tomorrow: "mailo",
+
+  now: "lelo",
+  later: "panuma",
+
+  morning: "mwalashi",
+  evening: "akumbi",
+
+  /* connectors */
+
+  because: "pantu",
+  and: "na",
+  but: "lelo",
+  or: "nangu",
+
+  if: "nga",
+
+  /* common verbs */
+
+  eat: "lya",
+  eats: "lya",
+  eating: "lya",
+  ate: "lya",
+
+  drink: "nwa",
+  drinks: "nwa",
+  drinking: "nwa",
+  drank: "nwa",
+
+  go: "ya",
+  goes: "ya",
+  going: "ya",
+  went: "ya",
+
+  come: "isa",
+  comes: "isa",
+  coming: "isa",
+  came: "isa",
+
+  see: "mona",
+  sees: "mona",
+  seeing: "mona",
+  saw: "mona",
+
+  know: "ishiba",
+  knows: "ishiba",
+  knew: "ishiba",
+
+  want: "fwaya",
+  wants: "fwaya",
+  wanted: "fwaya",
+
+  like: "temwa",
+  likes: "temwa",
+  liked: "temwa",
+
+  love: "temwa",
+  loves: "temwa",
+
+  have: "ba",
+  has: "ba",
+  had: "ba",
+
+  feel: "umfwa",
+  feels: "umfwa",
+  feeling: "umfwa",
+  felt: "umfwa",
+
+  work: "bomba",
+  works: "bomba",
+  working: "bomba",
+  worked: "bomba",
+
+  sleep: "lala",
+  sleeps: "lala",
+  sleeping: "lala",
+  slept: "lala",
+
+  speak: "landa",
+  speaks: "landa",
+  speaking: "landa",
+  spoke: "landa",
+
+  eat: "lya",
+
+  understand: "umfwa",
+  understands: "umfwa",
+
+  wait: "lindila",
+  waits: "lindila",
+
+  help: "afwa",
+  helps: "afwa",
+
+  give: "pa",
+  gives: "pa",
+  gave: "pa",
+
+  take: "tola",
+  takes: "tola",
+  took: "tola",
+
+  see: "mona",
+
+  /* question words */
+
+  what: "nshi",
+  who: "nani",
+  where: "kwisa",
+  when: "nini",
+  why: "nshi ico",
+  how: "shani",
+
+  /* common adverbs */
+
+  very: "sana",
+  really: "nakweba",
+  also: "na",
+};
+
+/* ============================================================
+   VERB HELPERS
+   ============================================================ */
+
+function cleanVerb(word: string): string {
+  return WORDS[word] || word;
+}
+
+function isPastVerb(word: string): boolean {
+  return [
+    "ate",
+    "drank",
+    "went",
+    "came",
+    "saw",
+    "knew",
+    "wanted",
+    "liked",
+    "loved",
+    "worked",
+    "slept",
+    "spoke",
+    "felt",
+    "gave",
+    "took",
+  ].includes(word);
+}
+
+function isFutureMarker(text: string): boolean {
+  return (
+    text.includes("will ") ||
+    text.includes("going to ") ||
+    text.startsWith("i will") ||
+    text.startsWith("you will") ||
+    text.startsWith("he will") ||
+    text.startsWith("she will") ||
+    text.startsWith("we will") ||
+    text.startsWith("they will")
+  );
+}
+
+/* ============================================================
+   SUBJECT HELPERS
+   ============================================================ */
+
+function subjectToBemba(subject: string): string {
+  const value = subject.trim().toLowerCase();
+
+  switch (value) {
+    case "i":
+    case "me":
+      return "ine";
+
+    case "you":
+      return "imwe";
+
+    case "he":
+    case "she":
+      return "mwene";
+
+    case "we":
+      return "ifwe";
+
+    case "they":
+      return "bena";
+
+    default:
+      return WORDS[value] || value;
+  }
+}
+
+/* ============================================================
+   OBJECT TRANSLATION
+   ============================================================ */
+
+function translateObject(object: string): string {
+  const normalized = normalizeInput(object);
+
+  if (!normalized) return "";
+
+  /*
+   Exact dictionary phrase lookup.
+   */
+
+  const dictionaryResult = lookupDictionary(normalized);
+
+  if (dictionaryResult) {
+    return dictionaryResult;
+  }
+
+  /*
+   Known single word.
+   */
+
+  if (WORDS[normalized]) {
+    return WORDS[normalized];
+  }
+
+  /*
+   Try word-by-word only for simple objects.
+   */
+
+  const words = normalized.split(" ");
+
+  if (words.length <= 4) {
+    const translated = words.map((word) => {
+      return WORDS[word] || word;
+    });
+
+    return translated.join(" ");
+  }
+
+  return "";
+}
+
+/* ============================================================
+   DICTIONARY LOOKUP
+   ------------------------------------------------------------
+   Handles several possible dictionary structures so the engine
+   can coexist with your existing dictionary.
+   ============================================================ */
+
+function lookupDictionary(input: string): string | null {
+  const dictionary: any = bembaDictionary as any;
+
+  if (!dictionary) {
+    return null;
+  }
+
+  /*
+   Case 1:
+   {
+      hello: "mulishani"
+   }
+   */
+
+  if (
+    typeof dictionary === "object" &&
+    !Array.isArray(dictionary) &&
+    typeof dictionary[input] === "string"
+  ) {
+    return dictionary[input];
+  }
+
+  /*
+   Case 2:
+   {
+      hello: {
+        bemba: "mulishani"
+      }
+   }
+   */
+
+  if (
+    typeof dictionary === "object" &&
+    dictionary[input] &&
+    typeof dictionary[input] === "object"
+  ) {
+    const item = dictionary[input];
+
+    if (typeof item.bemba === "string") {
+      return item.bemba;
+    }
+
+    if (typeof item.translation === "string") {
+      return item.translation;
+    }
+
+    if (typeof item.meaning === "string") {
+      return item.meaning;
+    }
+  }
+
+  /*
+   Case 3:
+   Array-based dictionary.
+   */
+
+  if (Array.isArray(dictionary)) {
+    const found = dictionary.find((item: any) => {
+      if (!item) return false;
+
+      const english = String(
+        item.english ||
+          item.en ||
+          item.word ||
+          item.source ||
+          ""
+      )
+        .toLowerCase()
+        .trim();
+
+      return english === input;
+    });
+
+    if (found) {
+      return (
+        found.bemba ||
+        found.translation ||
+        found.target ||
+        null
+      );
+    }
+  }
+
+  return null;
+}
+
+/* ============================================================
+   SUBJECT + VERB CONJUGATION
+   ------------------------------------------------------------
+
+   These are intentionally conservative.
+
+   We use common Bemba forms rather than attempting to generate
+   every possible grammatical construction automatically.
+   ============================================================ */
+
+function conjugatePresent(
+  subject: string,
+  verb: string
+): string | null {
+  const s = subject.toLowerCase();
+
+  switch (s) {
+    case "i":
+      switch (verb) {
+        case "eat":
+        case "eating":
+        case "eat":
+        case "lya":
+          return "ndelya";
+
+        case "drink":
+        case "nwa":
+          return "ndinwa";
+
+        case "go":
+        case "ya":
+          return "ndeya";
+
+        case "come":
+        case "isa":
+          return "ndesa";
+
+        case "feel":
+        case "umfwa":
+          return "ndumfwa";
+
+        case "know":
+        case "ishiba":
+          return "nshishiba";
+
+        case "want":
+        case "fwaya":
+          return "ndefwaya";
+
+        case "like":
+        case "temwa":
+        case "love":
+          return "ndetemwa";
+
+        case "work":
+        case "bomba":
+          return "ndebomba";
+
+        case "sleep":
+        case "lala":
+          return "ndelala";
+
+        case "speak":
+        case "landa":
+          return "ndelanda";
+
+        case "understand":
+          return "ndeumfwa";
+
+        default:
+          return null;
+      }
+
+    case "you":
+      switch (verb) {
+        case "eat":
+        case "eating":
+        case "lya":
+          return "mulyalya";
+
+        case "drink":
+        case "nwa":
+          return "munwa";
+
+        case "go":
+        case "ya":
+          return "mwaya";
+
+        case "come":
+        case "isa":
+          return "mwisa";
+
+        case "feel":
+        case "umfwa":
+          return "mumfwa";
+
+        case "know":
+        case "ishiba":
+          return "mwaishiba";
+
+        case "want":
+        case "fwaya":
+          return "mwafwaya";
+
+        case "like":
+        case "temwa":
+          return "mwatemwa";
+
+        default:
+          return null;
+      }
+
+    case "he":
+    case "she":
+      switch (verb) {
+        case "eat":
+        case "eating":
+        case "lya":
+          return "alya";
+
+        case "drink":
+        case "nwa":
+          return "anwa";
+
+        case "go":
+        case "ya":
+          return "aya";
+
+        case "come":
+        case "isa":
+          return "aisa";
+
+        case "feel":
+        case "umfwa":
+          return "aumfwa";
+
+        case "know":
+        case "ishiba":
+          return "aishiba";
+
+        case "want":
+        case "fwaya":
+          return "afwaya";
+
+        case "like":
+        case "temwa":
+          return "atemwa";
+
+        default:
+          return null;
+      }
+
+    case "we":
+      switch (verb) {
+        case "eat":
+        case "eating":
+        case "lya":
+          return "tulya";
+
+        case "drink":
+        case "nwa":
+          return "tunwa";
+
+        case "go":
+        case "ya":
+          return "tuya";
+
+        case "come":
+        case "isa":
+          return "tulaisa";
+
+        case "feel":
+        case "umfwa":
+          return "tumfwa";
+
+        case "know":
+        case "ishiba":
+          return "twaishiba";
+
+        case "want":
+        case "fwaya":
+          return "tufwaya";
+
+        case "like":
+        case "temwa":
+          return "tutemwa";
+
+        default:
+          return null;
+      }
+
+    case "they":
+      switch (verb) {
+        case "eat":
+        case "eating":
+        case "lya":
+          return "balya";
+
+        case "drink":
+        case "nwa":
+          return "banwa";
+
+        case "go":
+        case "ya":
+          return "baya";
+
+        case "come":
+        case "isa":
+          return "baisa";
+
+        case "feel":
+        case "umfwa":
+          return "baumfwa";
+
+        case "know":
+        case "ishiba":
+          return "baishiba";
+
+        case "want":
+        case "fwaya":
+          return "bafwaya";
+
+        case "like":
+        case "temwa":
+          return "batemwa";
+
+        default:
+         
 }
 
 /*
