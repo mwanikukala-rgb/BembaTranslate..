@@ -2555,4 +2555,147 @@ input:focus-visible {
   }
 }
   }
+}
 
+
+/* =========================================================
+   BEMBATRANSLATE — REAL MAP INTEGRATION
+   Added to the original global.css.
+   Existing app styling remains the source of truth.
+   ========================================================= */
+
+.offline-map-card.real-map-card {
+  position: relative;
+  width: calc(100% - 32px);
+  height: 220px;
+  min-height: 220px;
+  margin: 16px 16px 0;
+  padding: 0;
+  overflow: hidden;
+  background: #082f26;
+  border-radius: 20px;
+}
+
+.real-map-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.real-map-container .maplibregl-map,
+.real-map-container .maplibregl-canvas-container,
+.real-map-container .maplibregl-canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.real-map-container .maplibregl-ctrl-group {
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px;
+  background: rgba(7,28,22,.90);
+  box-shadow: 0 6px 18px rgba(0,0,0,.22);
+}
+
+.real-map-container .maplibregl-ctrl button {
+  width: 32px;
+  height: 32px;
+  background-color: transparent;
+}
+
+.real-map-container .maplibregl-ctrl-attrib {
+  font-size: 8px;
+  border-radius: 6px 0 0 0;
+  background: rgba(7,28,22,.72);
+}
+
+.real-map-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 20px;
+  color: var(--on-dark);
+  background: #082f26;
+  text-align: center;
+  pointer-events: none;
+}
+
+.real-map-loading svg {
+  color: var(--gold);
+}
+
+.real-map-loading strong {
+  color: #edf6f1;
+  font-size: 13px;
+}
+
+.real-map-loading span {
+  color: #8eafa2;
+  font-size: 11px;
+}
+
+.real-map-user-marker {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.real-map-user-pulse {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: rgba(61,191,128,.18);
+}
+
+.real-map-user-dot {
+  position: absolute;
+  inset: 5px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #35b879;
+  box-shadow: 0 0 0 4px rgba(53,184,121,.24);
+}
+
+.real-map-destination-marker {
+  width: 32px;
+  height: 40px;
+}
+
+.real-map-destination-pin {
+  position: absolute;
+  left: 2px;
+  top: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  background: var(--gold);
+  box-shadow: 0 4px 12px rgba(0,0,0,.28);
+  transform: rotate(-45deg);
+}
+
+.real-map-destination-pin span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0b2a21;
+}
+
+@media (max-width: 420px) {
+  .offline-map-card.real-map-card {
+    width: calc(100% - 24px);
+    margin-left: 12px;
+    margin-right: 12px;
+    height: 220px;
+    min-height: 220px;
+  }
+}
