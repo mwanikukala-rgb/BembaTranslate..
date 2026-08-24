@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import maplibregl, { type GeoJSONSource, type Map as MapLibreMap, type Marker } from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
+import type { GeoJSONSource, Map as MapLibreMap, Marker } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { ArrowLeft, LocateFixed, MapPin, Navigation as NavigationIcon, RefreshCw, Route } from "lucide-react";
 import { clearLocationWatch, getCurrentLocation, watchLocation, type GPSLocation, type GPSWatchId } from "./gps";
