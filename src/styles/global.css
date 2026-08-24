@@ -1473,7 +1473,7 @@ input:focus-visible {
   }
 }
 /* =========================================================
-   FIXED BOTTOM NAVIGATION
+   BOTTOM NAVIGATION — EVEN ICON SPACING
    ========================================================= */
 
 .bottom-navigation {
@@ -1496,9 +1496,11 @@ input:focus-visible {
 
   align-items: stretch;
 
+  column-gap: 4px;
+
   padding:
     6px
-    6px
+    8px
     calc(6px + var(--safe-bottom));
 
   background:
@@ -1515,6 +1517,7 @@ input:focus-visible {
 }
 
 .bottom-navigation button {
+  width: 100%;
   min-width: 0;
   min-height: 54px;
 
@@ -1528,7 +1531,7 @@ input:focus-visible {
 
   padding:
     4px
-    2px;
+    1px;
 
   color: var(--on-dark-soft);
 
@@ -1549,17 +1552,6 @@ input:focus-visible {
     transform 0.1s ease;
 }
 
-.bottom-navigation button.active {
-  color: var(--gold-light);
-
-  background:
-    rgba(212, 175, 90, 0.08);
-}
-
-.bottom-navigation button:active {
-  transform: scale(0.96);
-}
-
 .bottom-navigation .nav-icon {
   width: 27px;
   height: 27px;
@@ -1573,24 +1565,19 @@ input:focus-visible {
   border-radius: 8px;
 }
 
-.bottom-navigation button.active .nav-icon {
-  color: var(--gold);
-
-  background:
-    rgba(212, 175, 90, 0.10);
-}
-
 /* =========================================================
-   SMALL PHONE ADJUSTMENT
+   SMALL PHONE
    ========================================================= */
 
 @media (max-width: 360px) {
   .bottom-navigation {
     min-height: 64px;
 
+    column-gap: 2px;
+
     padding:
       4px
-      3px
+      4px
       calc(4px + var(--safe-bottom));
   }
 
@@ -1607,54 +1594,5 @@ input:focus-visible {
     height: 25px;
 
     flex-basis: 25px;
-  }
-
-  .navigation-page {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
-  .coordinate-grid {
-    gap: 6px;
-  }
-
-  .coordinate-grid > div {
-    padding: 8px;
-  }
-}
-
-/* =========================================================
-   TABLET / LARGE SCREEN
-   ========================================================= */
-
-@media (min-width: 700px) {
-  .bottom-navigation {
-    left: 50%;
-
-    right: auto;
-
-    width: min(620px, calc(100% - 24px));
-
-    transform: translateX(-50%);
-
-    border:
-      1px solid rgba(212, 175, 90, 0.16);
-
-    border-bottom: 0;
-
-    border-radius:
-      14px
-      14px
-      0
-      0;
-  }
-
-  .navigation-page {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-
-  .offline-map-card {
-    min-height: 380px;
   }
 }
