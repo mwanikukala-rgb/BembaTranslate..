@@ -75,9 +75,6 @@ body,
 html {
   background: var(--green-950);
 
-  /*
-     Important for phones with a cutout/status bar.
-  */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
@@ -144,10 +141,6 @@ input:focus-visible {
 
   overflow: hidden;
 
-  /*
-     Do NOT allow application content to sit under
-     Android's system status bar.
-  */
   padding-top: var(--safe-top);
 }
 
@@ -190,15 +183,13 @@ input:focus-visible {
   width: 100%;
   height: 100%;
 
-  /*
-     The top padding is deliberately kept here as well.
-     This protects the header on Android WebView/PWA builds
-     where safe-area behavior differs between devices.
-  */
   padding-top: 0;
 
+  /*
+     Space reserved for fixed bottom navigation.
+  */
   padding-bottom:
-    calc(82px + var(--safe-bottom));
+    calc(86px + var(--safe-bottom));
 
   overflow-y: auto;
   overflow-x: hidden;
@@ -1430,6 +1421,11 @@ input:focus-visible {
 
   line-height: 1.4;
 }
+
+/* =========================================================
+   LAUNCH
+   ========================================================= */
+
 .launch-kicker {
   color: var(--gold);
 
@@ -1468,12 +1464,8 @@ input:focus-visible {
   margin-bottom: 18px;
 }
 
-.0
-      0;
-  }
-}
 /* =========================================================
-   BOTTOM NAVIGATION — EVEN ICON SPACING
+   FIXED BOTTOM NAVIGATION
    ========================================================= */
 
 .bottom-navigation {
@@ -1487,7 +1479,7 @@ input:focus-visible {
 
   width: 100%;
 
-  min-height: 68px;
+  min-height: 72px;
 
   display: grid;
 
@@ -1496,11 +1488,9 @@ input:focus-visible {
 
   align-items: stretch;
 
-  column-gap: 4px;
-
   padding:
     6px
-    8px
+    6px
     calc(6px + var(--safe-bottom));
 
   background:
@@ -1516,10 +1506,14 @@ input:focus-visible {
   -webkit-backdrop-filter: blur(14px);
 }
 
+/* =========================================================
+   NAVIGATION BUTTONS
+   ========================================================= */
+
 .bottom-navigation button {
-  width: 100%;
   min-width: 0;
-  min-height: 54px;
+
+  min-height: 58px;
 
   display: flex;
   flex-direction: column;
@@ -1527,19 +1521,23 @@ input:focus-visible {
   align-items: center;
   justify-content: center;
 
-  gap: 3px;
+  /*
+     Deliberate spacing between icon and label.
+  */
+  gap: 6px;
 
   padding:
-    4px
-    1px;
+    5px
+    2px;
 
   color: var(--on-dark-soft);
 
   background: transparent;
 
-  border-radius: 9px;
+  border-radius: 10px;
 
   font-size: 0.48rem;
+
   font-weight: 700;
 
   line-height: 1.1;
@@ -1551,6 +1549,25 @@ input:focus-visible {
     color 0.15s ease,
     transform 0.1s ease;
 }
+
+/* =========================================================
+   ACTIVE NAVIGATION
+   ========================================================= */
+
+.bottom-navigation button.active {
+  color: var(--gold-light);
+
+  background:
+    rgba(212, 175, 90, 0.08);
+}
+
+.bottom-navigation button:active {
+  transform: scale(0.96);
+}
+
+/* =========================================================
+   NAVIGATION ICON
+   ========================================================= */
 
 .bottom-navigation .nav-icon {
   width: 27px;
@@ -1565,28 +1582,37 @@ input:focus-visible {
   border-radius: 8px;
 }
 
+.bottom-navigation button.active .nav-icon {
+  color: var(--gold);
+
+  background:
+    rgba(212, 175, 90, 0.10);
+}
+
 /* =========================================================
    SMALL PHONE
    ========================================================= */
 
 @media (max-width: 360px) {
   .bottom-navigation {
-    min-height: 64px;
-
-    column-gap: 2px;
+    min-height: 68px;
 
     padding:
       4px
-      4px
+      3px
       calc(4px + var(--safe-bottom));
   }
 
   .bottom-navigation button {
-    min-height: 52px;
+    min-height: 54px;
+
+    gap: 5px;
 
     font-size: 0.43rem;
 
-    gap: 2px;
+    padding:
+      4px
+      2px;
   }
 
   .bottom-navigation .nav-icon {
@@ -1594,5 +1620,54 @@ input:focus-visible {
     height: 25px;
 
     flex-basis: 25px;
+  }
+
+  .navigation-page {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .coordinate-grid {
+    gap: 6px;
+  }
+
+  .coordinate-grid > div {
+    padding: 8px;
+  }
+}
+
+/* =========================================================
+   TABLET / LARGE SCREEN
+   ========================================================= */
+
+@media (min-width: 700px) {
+  .bottom-navigation {
+    left: 50%;
+
+    right: auto;
+
+    width: min(620px, calc(100% - 24px));
+
+    transform: translateX(-50%);
+
+    border:
+      1px solid rgba(212, 175, 90, 0.16);
+
+    border-bottom: 0;
+
+    border-radius:
+      14px
+      14px
+      0
+      0;
+  }
+
+  .navigation-page {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .offline-map-card {
+    min-height: 380px;
   }
 }
