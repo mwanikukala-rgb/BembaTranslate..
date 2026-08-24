@@ -2,16 +2,265 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#101411" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+
+    <meta
+      name="theme-color"
+      content="#071c16"
+    />
+
     <meta
       name="description"
       content="BembaTranslate — fast offline English to Bemba translation and natural Bemba speech."
     />
+
+    <meta
+      name="mobile-web-app-capable"
+      content="yes"
+    />
+
+    <meta
+      name="apple-mobile-web-app-capable"
+      content="yes"
+    />
+
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+
     <title>BembaTranslate</title>
   </head>
+
   <body>
-    <div id="root"></div>
+
+    <div id="root">
+
+      <!-- =====================================================
+           INITIAL LAUNCH SCREEN
+           React will replace this when the application loads.
+           ===================================================== -->
+
+      <div
+        id="launch-screen"
+        style="
+          position: fixed;
+          inset: 0;
+          z-index: 99999;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          padding:
+            24px
+            24px
+            calc(24px + env(safe-area-inset-bottom, 0px));
+
+          background:
+            radial-gradient(
+              circle at 50% 30%,
+              rgba(212, 175, 90, 0.10),
+              transparent 32%
+            ),
+            linear-gradient(
+              160deg,
+              #071c16 0%,
+              #0b2a21 55%,
+              #051510 100%
+            );
+
+          color: #f7f4eb;
+
+          font-family:
+            Inter,
+            -apple-system,
+            BlinkMacSystemFont,
+            'Segoe UI',
+            Roboto,
+            Helvetica,
+            Arial,
+            sans-serif;
+
+          -webkit-font-smoothing: antialiased;
+          text-rendering: optimizeLegibility;
+        "
+      >
+
+        <div
+          style="
+            width: 100%;
+            max-width: 360px;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            text-align: center;
+          "
+        >
+
+          <!-- Logo -->
+          <div
+            style="
+              width: 76px;
+              height: 76px;
+
+              display: flex;
+              align-items: center;
+              justify-content: center;
+
+              margin-bottom: 22px;
+
+              color: #ead28b;
+
+              background:
+                linear-gradient(
+                  145deg,
+                  rgba(212, 175, 90, 0.16),
+                  rgba(212, 175, 90, 0.05)
+                );
+
+              border:
+                1px solid rgba(212, 175, 90, 0.30);
+
+              border-radius: 22px;
+
+              box-shadow:
+                0 14px 40px rgba(0, 0, 0, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            "
+          >
+            <span
+              style="
+                font-size: 34px;
+                font-weight: 800;
+                letter-spacing: -2px;
+              "
+            >
+              B
+            </span>
+          </div>
+
+          <!-- Brand -->
+          <div
+            style="
+              color: #d4af5a;
+
+              font-size: 0.72rem;
+              font-weight: 800;
+
+              letter-spacing: 3px;
+
+              margin-bottom: 9px;
+            "
+          >
+            BEMBATRANSLATE
+          </div>
+
+          <h1
+            style="
+              margin: 0;
+
+              color: #f7f4eb;
+
+              font-size: 1.65rem;
+              font-weight: 800;
+
+              line-height: 1.1;
+
+              letter-spacing: -0.5px;
+            "
+          >
+            Speak Bemba
+          </h1>
+
+          <p
+            style="
+              margin:
+                9px
+                0
+                28px;
+
+              color: #c5cbc4;
+
+              font-size: 0.78rem;
+
+              line-height: 1.5;
+            "
+          >
+            Fast, private and offline.
+          </p>
+
+          <!-- Loading indicator -->
+          <div
+            style="
+              width: 30px;
+              height: 30px;
+
+              border:
+                3px solid rgba(212, 175, 90, 0.18);
+
+              border-top-color: #d4af5a;
+
+              border-radius: 50%;
+
+              animation:
+                bembaLaunchSpin 0.85s linear infinite;
+            "
+          ></div>
+
+          <div
+            style="
+              margin-top: 13px;
+
+              color: rgba(245, 240, 228, 0.58);
+
+              font-size: 0.62rem;
+              font-weight: 600;
+
+              letter-spacing: 0.3px;
+            "
+          >
+            Loading your offline dictionary…
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <style>
+      @keyframes bembaLaunchSpin {
+        from {
+          transform: rotate(0deg);
+        }
+
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+
+        width: 100%;
+        min-height: 100%;
+
+        background: #071c16;
+      }
+
+      body {
+        overflow: hidden;
+      }
+    </style>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
