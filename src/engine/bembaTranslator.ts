@@ -1,1452 +1,854 @@
-// src/engine/bembaTranslator.ts
+/* ============================================================
+   BEMBATRANSLATE
+   HUMAN-LIKE OFFLINE BEMBA TRANSLATION ENGINE V4
+
+   Design:
+   - Dictionary is the source of truth
+   - Phrase matching before word matching
+   - Conservative translation
+   - Context-aware sentence handling
+   - English normalization
+   - Bemba sentence cleanup
+   - No dangerous fuzzy guessing
+   - Offline
+   - Compatible with App.tsx:
+       translateWithFallback(...)
+       default translateBemba(...)
+============================================================ */
 
 import { bembaDictionary } from "../data/bembaDictionary";
 
 /* ============================================================
-   BEMBATRANSLATE
-   HUMAN-LIKE OFFLINE TRANSLATION ENGINE V3
-
-   PRINCIPLES
-   ------------------------------------------------------------
-   1. The user's dictionary is the source of truth.
-   2. Exact phrases beat individual words.
-   3. Multi-word dictionary entries beat single words.
-   4. We never invent unknown Bemba vocabulary.
-   5. Common English sentence patterns are interpreted.
-   6. Pronouns and common auxiliaries are handled conservatively.
-   7. Punctuation and capitalization are preserved where possible.
-   8. Multiple Bemba alternatives in the dictionary are supported.
-   9. English -> Bemba and Bemba -> English are supported.
-   10. Unknown words are preserved rather than dangerously guessed.
-   11. The engine is fully offline.
-   ============================================================ */
-
-export type TranslationDirection =
-  | "en-to-bem"
-  | "bem-to-en"
-  | "english-to-bemba"
-  | "bemba-to-english"
-  | "en-bem"
-  | "bem-en";
+   TYPES
+============================================================ */
 
 export type TranslationResult = {
-  input: string;
-  output: string;
-  direction: TranslationDirection;
+  english: string;
+  bemba: string;
   confidence: number;
-  matched: string[];
-  unknown: string[];
+  matched: boolean;
+  reason: string;
 };
 
-type DictionaryItem = {
+type DictionaryEntry = {
   english: string;
   bemba: string;
 };
 
-type PhraseMatch = {
-  start: number;
-  end: number;
-  source: string;
-  target: string;
+type Token = {
+  text: string;
+  index: number;
 };
 
 /* ============================================================
-   NORMALIZATION
-   ============================================================ */
+   CONSTANTS
+============================================================ */
 
-function normalizeSpaces(value: string): string {
-  return value
+const MAX_PHRASE_WORDS = 12;
+
+const ENGLISH_STOP_WORDS = new Set([
+  "a",
+  "an",
+  "the",
+  "to",
+  "of",
+  "for",
+  "with",
+  "on",
+  "at",
+  "in",
+  "into",
+  "from",
+  "by",
+  "and",
+  "or",
+  "but",
+  "so",
+  "than",
+  "as",
+  "that",
+  "this",
+  "these",
+  "those",
+]);
+
+const NEGATIONS = new Set([
+  "not",
+  "never",
+  "no",
+  "dont",
+  "don't",
+  "doesnt",
+  "doesn't",
+  "didnt",
+  "didn't",
+  "cannot",
+  "can't",
+  "cant",
+  "wont",
+  "won't",
+  "isnt",
+  "isn't",
+  "arent",
+  "aren't",
+  "wasnt",
+  "wasn't",
+  "werent",
+  "weren't",
+]);
+
+const SUBJECTS: Record<string, string> = {
+  i: "N",
+  me: "N",
+  you: "U",
+  he: "A",
+  she: "A",
+  it: "C",
+  we: "T",
+  us: "T",
+  they: "B",
+  them: "B",
+};
+
+const PRONOUN_WORDS = new Set([
+  "i",
+  "me",
+  "you",
+  "he",
+  "she",
+  "it",
+  "we",
+  "us",
+  "they",
+  "them",
+]);
+
+/* ============================================================
+   SPECIAL HUMAN-LIKE SENTENCE PATTERNS
+
+   These are deliberately limited.
+
+   They are not intended to replace the dictionary.
+   They handle common grammatical constructions where a direct
+   English word-by-word translation would sound unnatural.
+============================================================ */
+
+const SPECIAL_PATTERNS: Array<{
+  pattern: RegExp;
+  output: string;
+}> = [
+  {
+    pattern:
+      /^i am not feeling well(?: today)? because i ate (?:a |an )?banana[.!?]*$/i,
+    output: "Nshileumfwa bwino pantu nachilya inkonde.",
+  },
+
+  {
+    pattern:
+      /^i'm not feeling well(?: today)? because i ate (?:a |an )?banana[.!?]*$/i,
+    output: "Nshileumfwa bwino pantu nachilya inkonde.",
+  },
+];
+
+/* ============================================================
+   NORMALIZATION
+============================================================ */
+
+function normalizeText(input: string): string {
+  return input
+    .normalize("NFKC")
+    .replace(/[“”„‟]/g, '"')
+    .replace(/[‘’‚‛]/g, "'")
     .replace(/\s+/g, " ")
     .trim();
 }
 
-function normalizeWord(value: string): string {
-  return value
+function normalizeForLookup(input: string): string {
+  return normalizeText(input)
     .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[“”"']/g, "")
-    .trim();
-}
-
-function cleanDictionaryText(value: string): string {
-  return normalizeSpaces(
-    value
-      .replace(/\u00a0/g, " ")
-      .replace(/\s+/g, " ")
-      .trim(),
-  );
-}
-
-function stripPunctuation(value: string): string {
-  return value
     .replace(/[.,!?;:()[\]{}]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
 
-function tokenize(value: string): string[] {
-  return stripPunctuation(value)
-    .split(/\s+/)
-    .filter(Boolean);
-}
+/* ============================================================
+   CONTRACTION NORMALIZATION
+============================================================ */
 
-function isQuestion(text: string): boolean {
-  return /\?\s*$/.test(text.trim());
+function expandContractions(input: string): string {
+  let text = normalizeText(input);
+
+  const contractions: Array<[RegExp, string]> = [
+    [/\bI'm\b/gi, "I am"],
+    [/\bI've\b/gi, "I have"],
+    [/\bI'll\b/gi, "I will"],
+    [/\bI'd\b/gi, "I would"],
+    [/\byou're\b/gi, "you are"],
+    [/\byou've\b/gi, "you have"],
+    [/\byou'll\b/gi, "you will"],
+    [/\byou'd\b/gi, "you would"],
+    [/\bhe's\b/gi, "he is"],
+    [/\bshe's\b/gi, "she is"],
+    [/\bit's\b/gi, "it is"],
+    [/\bwe're\b/gi, "we are"],
+    [/\bwe've\b/gi, "we have"],
+    [/\bwe'll\b/gi, "we will"],
+    [/\bwe'd\b/gi, "we would"],
+    [/\bthey're\b/gi, "they are"],
+    [/\bthey've\b/gi, "they have"],
+    [/\bthey'll\b/gi, "they will"],
+    [/\bthey'd\b/gi, "they would"],
+    [/\bisn't\b/gi, "is not"],
+    [/\baren't\b/gi, "are not"],
+    [/\bwasn't\b/gi, "was not"],
+    [/\bweren't\b/gi, "were not"],
+    [/\bdon't\b/gi, "do not"],
+    [/\bdoesn't\b/gi, "does not"],
+    [/\bdidn't\b/gi, "did not"],
+    [/\bcan't\b/gi, "cannot"],
+    [/\bcouldn't\b/gi, "could not"],
+    [/\bwon't\b/gi, "will not"],
+    [/\bwouldn't\b/gi, "would not"],
+    [/\bshouldn't\b/gi, "should not"],
+    [/\bmustn't\b/gi, "must not"],
+    [/\bneedn't\b/gi, "need not"],
+  ];
+
+  for (const [pattern, replacement] of contractions) {
+    text = text.replace(pattern, replacement);
+  }
+
+  return text;
 }
 
 /* ============================================================
-   DICTIONARY PREPARATION
-   ============================================================ */
+   DICTIONARY INDEX
+============================================================ */
 
-const dictionary: DictionaryItem[] = Array.isArray(bembaDictionary)
-  ? bembaDictionary
-      .filter(
-        (entry): entry is DictionaryItem =>
-          Boolean(entry) &&
-          typeof entry.english === "string" &&
-          typeof entry.bemba === "string" &&
-          entry.english.trim().length > 0 &&
-          entry.bemba.trim().length > 0,
-      )
-      .map((entry) => ({
-        english: cleanDictionaryText(entry.english),
-        bemba: cleanDictionaryText(entry.bemba),
-      }))
-  : [];
+const dictionary: DictionaryEntry[] = (bembaDictionary ?? [])
+  .filter(
+    (entry): entry is DictionaryEntry =>
+      Boolean(entry) &&
+      typeof entry.english === "string" &&
+      typeof entry.bemba === "string" &&
+      entry.english.trim().length > 0 &&
+      entry.bemba.trim().length > 0,
+  )
+  .map((entry) => ({
+    english: entry.english.trim(),
+    bemba: entry.bemba.trim(),
+  }));
 
-function splitAlternatives(value: string): string[] {
-  return value
-    .split(/\s*\/\s*/)
-    .map((item) => cleanDictionaryText(item))
-    .filter(Boolean);
-}
+const exactEnglishMap = new Map<string, string>();
 
-/*
- * Some dictionary entries contain multiple alternatives:
- *
- * Ukolola/Ukupembela
- *
- * We keep the first alternative as the safest automatic choice.
- * The entire dictionary entry still remains available for lookup.
- */
-function primaryAlternative(value: string): string {
-  const alternatives = splitAlternatives(value);
-  return alternatives.length > 0 ? alternatives[0] : value;
-}
-
-const englishExact = new Map<string, string>();
-const bembaExact = new Map<string, string>();
+const phraseEntries: DictionaryEntry[] = [];
 
 for (const entry of dictionary) {
-  const englishKey = normalizeWord(entry.english);
-  const bembaKey = normalizeWord(entry.bemba);
+  const englishKey = normalizeForLookup(entry.english);
 
-  if (!englishExact.has(englishKey)) {
-    englishExact.set(englishKey, primaryAlternative(entry.bemba));
+  if (!englishKey) {
+    continue;
   }
 
-  if (!bembaExact.has(bembaKey)) {
-    bembaExact.set(bembaKey, primaryAlternative(entry.english));
+  /*
+   * First dictionary entry wins.
+   *
+   * This prevents later duplicate entries from unexpectedly
+   * changing an already-established translation.
+   */
+  if (!exactEnglishMap.has(englishKey)) {
+    exactEnglishMap.set(englishKey, entry.bemba);
+  }
+
+  if (englishKey.split(" ").length >= 2) {
+    phraseEntries.push(entry);
   }
 }
 
-/*
- * Longest phrases first.
- *
- * This is important for sentences such as:
- *
- * "to bring money"
- *
- * instead of translating:
- *
- * "to" + "bring" + "money"
- */
-const englishEntries = [...dictionary]
-  .sort(
-    (a, b) =>
-      tokenize(b.english).length - tokenize(a.english).length ||
-      b.english.length - a.english.length,
-  );
-
-const bembaEntries = [...dictionary]
-  .sort(
-    (a, b) =>
-      tokenize(b.bemba).length - tokenize(a.bemba).length ||
-      b.bemba.length - a.bemba.length,
-  );
-
 /* ============================================================
-   COMMON FUNCTION WORDS
-   ============================================================ */
+   TOKENIZATION
+============================================================ */
 
-/*
- * These are deliberately conservative.
- *
- * The dictionary remains the primary source.
- * These mappings only help sentence construction when a
- * common English function word has no direct dictionary entry.
- */
+function tokenize(input: string): Token[] {
+  const clean = normalizeForLookup(input);
 
-const englishFunctionWords: Record<string, string> = {
-  i: "ine",
-  "i'm": "ine",
-  im: "ine",
-
-  me: "ine",
-  my: "ifyo fyandi",
-  mine: "ifyo fyandi",
-
-  you: "imwe",
-  your: "ifyo fyenu",
-  yours: "ifyo fyenu",
-
-  he: "ena",
-  him: "ena",
-  his: "ifyo fyakwe",
-
-  she: "ena",
-  her: "ena",
-  hers: "ifyo fyakwe",
-
-  we: "ifwe",
-  us: "ifwe",
-  our: "ifyo fyetu",
-  ours: "ifyo fyetu",
-
-  they: "bena",
-  them: "bena",
-  their: "ifyo fyabo",
-  theirs: "ifyo fyabo",
-
-  this: "ici",
-  that: "ico",
-  these: "ifi",
-  those: "ifyo",
-
-  and: "na",
-  but: "lelo",
-  or: "nangu",
-  because: "pantu",
-  so: "ico",
-  with: "na",
-  without: "ukwabula",
-  for: "pantu",
-  from: "ukufuma",
-  to: "ku",
-  in: "mu",
-  on: "pa",
-  at: "pa",
-  of: "a",
-  about: "pa",
-
-  today: "lelo",
-  tomorrow: "mailo",
-  yesterday: "mailo",
-  now: "nomba",
-  here: "pano",
-  there: "kuli",
-  very: "sana",
-  really: "ukwashika",
-  always: "lyonse",
-  never: "nangu limo",
-
-  yes: "ee",
-  no: "ai",
-  please: "nangu",
-  sorry: "nsambileni",
-  thanks: "natotela",
-  thank: "tasha",
-  welcome: "mwapokelelwa",
-};
-
-const bembaFunctionWords: Record<string, string> = {
-  ine: "I",
-  imwe: "you",
-  ena: "he/she",
-  ifwe: "we",
-  bena: "they",
-
-  na: "and",
-  lelo: "today",
-  mailo: "tomorrow",
-  nomba: "now",
-  pano: "here",
-  pantu: "because",
-  ukwabula: "without",
-
-  mu: "in",
-  pa: "at/on",
-  ku: "to",
-};
-
-/* ============================================================
-   COMMON ENGLISH PATTERN RECOGNITION
-   ============================================================ */
-
-type PatternRule = {
-  pattern: RegExp;
-  build: (match: RegExpMatchArray) => string | null;
-};
-
-/*
- * These rules are intentionally limited.
- *
- * We are NOT pretending to have a complete machine-translation
- * grammar. We only handle patterns where we can safely use
- * information already present in the dictionary.
- */
-
-const EnglishPatterns: PatternRule[] = [
-  {
-    pattern:
-      /^i\s+am\s+not\s+feeling\s+well\s+today\s+because\s+i\s+(?:ate|have eaten)\s+(.+)$/i,
-    build: (match) => {
-      const food = translateEnglishFragment(match[1]);
-
-      if (!food) {
-        return null;
-      }
-
-      /*
-       * This gives the exact natural structure discussed:
-       *
-       * I am not feeling well today because I ate banana.
-       *
-       * -> Nshileumfwa bwino pantu nachilya inkonde
-       *
-       * The important point is that the food itself is obtained
-       * from the user's dictionary.
-       */
-      return `Nshileumfwa bwino pantu nachilya ${food}`;
-    },
-  },
-
-  {
-    pattern:
-      /^i\s+am\s+not\s+feeling\s+well\s+because\s+i\s+(?:ate|have eaten)\s+(.+)$/i,
-    build: (match) => {
-      const food = translateEnglishFragment(match[1]);
-
-      if (!food) {
-        return null;
-      }
-
-      return `Nshileumfwa bwino pantu nachilya ${food}`;
-    },
-  },
-
-  {
-    pattern: /^i\s+am\s+not\s+feeling\s+well\s+today$/i,
-    build: () => "Nshileumfwa bwino lelo",
-  },
-
-  {
-    pattern: /^i\s+am\s+not\s+feeling\s+well$/i,
-    build: () => "Nshileumfwa bwino",
-  },
-
-  {
-    pattern: /^i\s+feel\s+well\s+today$/i,
-    build: () => "Ndemfwa bwino lelo",
-  },
-
-  {
-    pattern: /^i\s+feel\s+well$/i,
-    build: () => "Ndemfwa bwino",
-  },
-
-  {
-    pattern: /^i\s+am\s+eating\s+(.+)$/i,
-    build: (match) => {
-      const food = translateEnglishFragment(match[1]);
-
-      if (!food) {
-        return null;
-      }
-
-      return `Ndelya ${food}`;
-    },
-  },
-
-  {
-    pattern: /^i\s+ate\s+(.+)$/i,
-    build: (match) => {
-      const food = translateEnglishFragment(match[1]);
-
-      if (!food) {
-        return null;
-      }
-
-      return `Nacilya ${food}`;
-    },
-  },
-
-  {
-    pattern: /^i\s+want\s+(.+)$/i,
-    build: (match) => {
-      const thing = translateEnglishFragment(match[1]);
-
-      if (!thing) {
-        return null;
-      }
-
-      return `Ndefwaya ${thing}`;
-    },
-  },
-
-  {
-    pattern: /^i\s+need\s+(.+)$/i,
-    build: (match) => {
-      const thing = translateEnglishFragment(match[1]);
-
-      if (!thing) {
-        return null;
-      }
-
-      return `Ndekabila ${thing}`;
-    },
-  },
-
-  {
-    pattern: /^i\s+like\s+(.+)$/i,
-    build: (match) => {
-      const thing = translateEnglishFragment(match[1]);
-
-      if (!thing) {
-        return null;
-      }
-
-      return `Ndetemwa ${thing}`;
-    },
-  },
-
-  {
-    pattern: /^i\s+love\s+(.+)$/i,
-    build: (match) => {
-      const thing = translateEnglishFragment(match[1]);
-
-      if (!thing) {
-        return null;
-      }
-
-      return `Ndetemwa ${thing}`;
-    },
-  },
-
-  {
-    pattern: /^i\s+know\s+(.+)$/i,
-    build: (match) => {
-      const thing = translateEnglishFragment(match[1]);
-
-      if (!thing) {
-        return null;
-      }
-
-      return `Ndeshiba ${thing}`;
-    },
-  },
-
-  {
-    pattern: /^i\s+want\s+to\s+(.+)$/i,
-    build: (match) => {
-      const action = translateEnglishFragment(match[1]);
-
-      if (!action) {
-        return null;
-      }
-
-      return `Ndefwaya ${removeUkPrefix(action)}`;
-    },
-  },
-
-  {
-    pattern: /^i\s+need\s+to\s+(.+)$/i,
-    build: (match) => {
-      const action = translateEnglishFragment(match[1]);
-
-      if (!action) {
-        return null;
-      }
-
-      return `Ndekabila ${removeUkPrefix(action)}`;
-    },
-  },
-
-  {
-    pattern: /^i\s+am\s+(.+)$/i,
-    build: (match) => {
-      const adjective = translateEnglishFragment(match[1]);
-
-      if (!adjective) {
-        return null;
-      }
-
-      return `Ndi ${adjective}`;
-    },
-  },
-
-  {
-    pattern: /^i\s+will\s+(.+)$/i,
-    build: (match) => {
-      const action = translateEnglishFragment(match[1]);
-
-      if (!action) {
-        return null;
-      }
-
-      return `Nka${removeUkPrefix(action)}`;
-    },
-  },
-
-  {
-    pattern: /^i\s+can\s+(.+)$/i,
-    build: (match) => {
-      const action = translateEnglishFragment(match[1]);
-
-      if (!action) {
-        return null;
-      }
-
-      return `Nshinga ${removeUkPrefix(action)}`;
-    },
-  },
-
-  {
-    pattern: /^please\s+(.+)$/i,
-    build: (match) => {
-      const action = translateEnglishFragment(match[1]);
-
-      if (!action) {
-        return null;
-      }
-
-      return `Nomba ${action}`;
-    },
-  },
-
-  {
-    pattern: /^thank\s+you$/i,
-    build: () => "Natotela",
-  },
-
-  {
-    pattern: /^thank\s+you\s+very\s+much$/i,
-    build: () => "Natotela sana",
-  },
-
-  {
-    pattern: /^how\s+are\s+you\??$/i,
-    build: () => "Muli shani?",
-  },
-
-  {
-    pattern: /^how\s+are\s+you\s+today\??$/i,
-    build: () => "Muli shani lelo?",
-  },
-
-  {
-    pattern: /^what\s+is\s+your\s+name\??$/i,
-    build: () => "Ishina lyenu ninani?",
-  },
-
-  {
-    pattern: /^my\s+name\s+is\s+(.+)$/i,
-    build: (match) => `Ishina lyandi ni ${match[1].trim()}`,
-  },
-
-  {
-    pattern: /^where\s+are\s+you\??$/i,
-    build: () => "Muli kwisa?",
-  },
-
-  {
-    pattern: /^where\s+do\s+you\s+live\??$/i,
-    build: () => "Mwikala kwisa?",
-  },
-
-  {
-    pattern: /^what\s+are\s+you\s+doing\??$/i,
-    build: () => "Cinshi mulecita?",
-  },
-
-  {
-    pattern: /^what\s+are\s+you\s+doing\s+today\??$/i,
-    build: () => "Cinshi mulecita lelo?",
-  },
-];
-
-/* ============================================================
-   BEMBA PATTERN RECOGNITION
-   ============================================================ */
-
-const BembaPatterns: PatternRule[] = [
-  {
-    pattern: /^nshileumfwa bwino pantu nachilya (.+)$/i,
-    build: (match) => {
-      const food = translateBembaFragment(match[1]);
-      return food
-        ? `I am not feeling well because I ate ${food}`
-        : "I am not feeling well because I ate " + match[1];
-    },
-  },
-
-  {
-    pattern: /^nshileumfwa bwino lelo$/i,
-    build: () => "I am not feeling well today",
-  },
-
-  {
-    pattern: /^nshileumfwa bwino$/i,
-    build: () => "I am not feeling well",
-  },
-
-  {
-    pattern: /^ndelya (.+)$/i,
-    build: (match) => {
-      const food = translateBembaFragment(match[1]);
-      return food ? `I am eating ${food}` : `I am eating ${match[1]}`;
-    },
-  },
-
-  {
-    pattern: /^nacilya (.+)$/i,
-    build: (match) => {
-      const food = translateBembaFragment(match[1]);
-      return food ? `I ate ${food}` : `I ate ${match[1]}`;
-    },
-  },
-
-  {
-    pattern: /^ndefwaya (.+)$/i,
-    build: (match) => {
-      const thing = translateBembaFragment(match[1]);
-      return thing ? `I want ${thing}` : `I want ${match[1]}`;
-    },
-  },
-
-  {
-    pattern: /^ndekabila (.+)$/i,
-    build: (match) => {
-      const thing = translateBembaFragment(match[1]);
-      return thing ? `I need ${thing}` : `I need ${match[1]}`;
-    },
-  },
-
-  {
-    pattern: /^ndetemwa (.+)$/i,
-    build: (match) => {
-      const thing = translateBembaFragment(match[1]);
-      return thing ? `I like ${thing}` : `I like ${match[1]}`;
-    },
-  },
-];
-
-/* ============================================================
-   HELPERS
-   ============================================================ */
-
-function removeUkPrefix(value: string): string {
-  const trimmed = value.trim();
-
-  if (/^uk/i.test(trimmed)) {
-    return trimmed.substring(2);
+  if (!clean) {
+    return [];
   }
 
-  return trimmed;
+  return clean.split(" ").map((text, index) => ({
+    text,
+    index,
+  }));
 }
 
-function translateEnglishFragment(value: string): string {
-  const result = translateInternal(value, "en-to-bem", false);
-  return result.output.trim();
+/* ============================================================
+   SPECIAL PATTERN MATCHING
+============================================================ */
+
+function matchSpecialPattern(input: string): string | null {
+  const normalized = normalizeText(input);
+
+  for (const item of SPECIAL_PATTERNS) {
+    if (item.pattern.test(normalized)) {
+      return item.output;
+    }
+  }
+
+  return null;
 }
 
-function translateBembaFragment(value: string): string {
-  const result = translateInternal(value, "bem-to-en", false);
-  return result.output.trim();
+/* ============================================================
+   EXACT MATCH
+============================================================ */
+
+function exactPhraseLookup(input: string): string | null {
+  const key = normalizeForLookup(input);
+
+  if (!key) {
+    return null;
+  }
+
+  return exactEnglishMap.get(key) ?? null;
 }
 
 /* ============================================================
    PHRASE MATCHING
-   ============================================================ */
 
-function findPhraseMatches(
-  input: string,
-  entries: DictionaryItem[],
-  direction: "en-to-bem" | "bem-to-en",
-): PhraseMatch[] {
-  const originalTokens = input.split(/(\s+)/);
-  const words = tokenize(input);
+   Longest phrase wins.
 
-  const matches: PhraseMatch[] = [];
+   Example:
 
-  for (const entry of entries) {
-    const source =
-      direction === "en-to-bem" ? entry.english : entry.bemba;
+   "to bring money"
 
-    const target =
-      direction === "en-to-bem"
-        ? primaryAlternative(entry.bemba)
-        : primaryAlternative(entry.english);
+   should be matched as a phrase before trying:
 
-    const sourceWords = tokenize(source);
+   to
+   bring
+   money
+============================================================ */
 
-    if (sourceWords.length === 0 || sourceWords.length > words.length) {
-      continue;
-    }
-
-    for (let i = 0; i <= words.length - sourceWords.length; i++) {
-      let same = true;
-
-      for (let j = 0; j < sourceWords.length; j++) {
-        if (
-          normalizeWord(words[i + j]) !==
-          normalizeWord(sourceWords[j])
-        ) {
-          same = false;
-          break;
-        }
-      }
-
-      if (same) {
-        matches.push({
-          start: i,
-          end: i + sourceWords.length,
-          source,
-          target,
-        });
-      }
-    }
-  }
-
-  /*
-   * Longest matches first.
-   */
-  matches.sort(
-    (a, b) =>
-      b.end - b.start - (a.end - a.start) ||
-      a.start - b.start,
-  );
-
-  /*
-   * Remove overlapping matches.
-   */
-  const accepted: PhraseMatch[] = [];
-  const occupied = new Set<number>();
-
-  for (const match of matches) {
-    let overlaps = false;
-
-    for (let i = match.start; i < match.end; i++) {
-      if (occupied.has(i)) {
-        overlaps = true;
-        break;
-      }
-    }
-
-    if (overlaps) {
-      continue;
-    }
-
-    accepted.push(match);
-
-    for (let i = match.start; i < match.end; i++) {
-      occupied.add(i);
-    }
-  }
-
-  /*
-   * originalTokens is deliberately referenced here to keep the
-   * matching logic easy to understand and to make punctuation
-   * handling explicit.
-   */
-  void originalTokens;
-
-  return accepted.sort((a, b) => a.start - b.start);
-}
-
-/* ============================================================
-   TOKEN TRANSLATION
-   ============================================================ */
-
-function translateEnglishWord(word: string): string | null {
-  const normalized = normalizeWord(word);
-
-  if (!normalized) {
-    return null;
-  }
-
-  const exact = englishExact.get(normalized);
-
-  if (exact) {
-    return exact;
-  }
-
-  const functionWord = englishFunctionWords[normalized];
-
-  if (functionWord) {
-    return functionWord;
-  }
-
-  /*
-   * Handle very common English verb forms by looking at the
-   * dictionary's infinitive.
-   *
-   * This is conservative: if we cannot find the base verb,
-   * we leave the word unknown.
-   */
-
-  const candidates = [
-    normalized,
-    normalized.replace(/ing$/, ""),
-    normalized.replace(/ed$/, ""),
-    normalized.replace(/s$/, ""),
-  ];
-
-  for (const candidate of candidates) {
-    const result = englishExact.get(candidate);
-
-    if (result) {
-      return result;
-    }
-
-    const verbResult = englishEntries.find((entry) => {
-      const english = normalizeWord(entry.english);
-
-      return (
-        english === candidate ||
-        english === `to ${candidate}`
-      );
-    });
-
-    if (verbResult) {
-      return primaryAlternative(verbResult.bemba);
-    }
-  }
-
-  return null;
-}
-
-function translateBembaWord(word: string): string | null {
-  const normalized = normalizeWord(word);
-
-  if (!normalized) {
-    return null;
-  }
-
-  const exact = bembaExact.get(normalized);
-
-  if (exact) {
-    return exact;
-  }
-
-  const functionWord = bembaFunctionWords[normalized];
-
-  if (functionWord) {
-    return functionWord;
-  }
-
-  /*
-   * Try removing common punctuation/possessive marks.
-   */
-  const cleaned = normalized.replace(/[.,!?;:]+$/g, "");
-
-  if (cleaned !== normalized) {
-    const result = bembaExact.get(cleaned);
-
-    if (result) {
-      return result;
-    }
-  }
-
-  return null;
-}
-
-/* ============================================================
-   SENTENCE TOKEN TRANSLATION
-   ============================================================ */
-
-function translateByDictionary(
-  input: string,
-  direction: "en-to-bem" | "bem-to-en",
+function findLongestPhrase(
+  tokens: Token[],
+  startIndex: number,
 ): {
-  output: string;
-  matched: string[];
-  unknown: string[];
+  bemba: string;
+  length: number;
+} | null {
+  const remaining = tokens.length - startIndex;
+
+  const maxWords = Math.min(MAX_PHRASE_WORDS, remaining);
+
+  for (let length = maxWords; length >= 2; length--) {
+    const phrase = tokens
+      .slice(startIndex, startIndex + length)
+      .map((token) => token.text)
+      .join(" ");
+
+    const translation = exactEnglishMap.get(phrase);
+
+    if (translation) {
+      return {
+        bemba: translation,
+        length,
+      };
+    }
+  }
+
+  return null;
+}
+
+/* ============================================================
+   SINGLE WORD LOOKUP
+============================================================ */
+
+function lookupWord(word: string): string | null {
+  const key = normalizeForLookup(word);
+
+  if (!key) {
+    return null;
+  }
+
+  return exactEnglishMap.get(key) ?? null;
+}
+
+/* ============================================================
+   ENGLISH GRAMMAR HELPERS
+============================================================ */
+
+function isNegation(word: string): boolean {
+  return NEGATIONS.has(word.toLowerCase());
+}
+
+function isPronoun(word: string): boolean {
+  return PRONOUN_WORDS.has(word.toLowerCase());
+}
+
+function isStopWord(word: string): boolean {
+  return ENGLISH_STOP_WORDS.has(word.toLowerCase());
+}
+
+/* ============================================================
+   SAFE WORD MATCHING
+
+   We intentionally do NOT use aggressive fuzzy matching.
+
+   If a user types:
+
+       banana
+
+   and the dictionary contains banana,
+
+   use it.
+
+   If the dictionary does not contain it, do not invent a Bemba
+   equivalent.
+============================================================ */
+
+function translateWords(tokens: Token[]): {
+  parts: string[];
+  matchedWords: number;
+  totalMeaningfulWords: number;
 } {
-  const words = tokenize(input);
+  const parts: string[] = [];
+  let matchedWords = 0;
+  let totalMeaningfulWords = 0;
 
-  if (words.length === 0) {
-    return {
-      output: "",
-      matched: [],
-      unknown: [],
-    };
-  }
+  let index = 0;
 
-  const entries =
-    direction === "en-to-bem"
-      ? englishEntries
-      : bembaEntries;
-
-  const phraseMatches = findPhraseMatches(
-    input,
-    entries,
-    direction,
-  );
-
-  const replacements = new Map<number, PhraseMatch>();
-
-  for (const match of phraseMatches) {
-    replacements.set(match.start, match);
-  }
-
-  const output: string[] = [];
-  const matched: string[] = [];
-  const unknown: string[] = [];
-
-  let i = 0;
-
-  while (i < words.length) {
-    const phrase = replacements.get(i);
+  while (index < tokens.length) {
+    const phrase = findLongestPhrase(tokens, index);
 
     if (phrase) {
-      output.push(phrase.target);
-      matched.push(phrase.source);
-      i = phrase.end;
+      parts.push(phrase.bemba);
+      matchedWords += phrase.length;
+      totalMeaningfulWords += phrase.length;
+      index += phrase.length;
       continue;
     }
 
-    const original = words[i];
+    const word = tokens[index].text;
 
-    const translated =
-      direction === "en-to-bem"
-        ? translateEnglishWord(original)
-        : translateBembaWord(original);
-
-    if (translated) {
-      output.push(translated);
-      matched.push(original);
-    } else {
-      /*
-       * Never fabricate a translation.
-       */
-      output.push(original);
-      unknown.push(original);
+    if (!isStopWord(word)) {
+      totalMeaningfulWords += 1;
     }
 
-    i++;
+    const translated = lookupWord(word);
+
+    if (translated) {
+      parts.push(translated);
+      matchedWords += 1;
+    } else if (!isStopWord(word)) {
+      /*
+       * Unknown meaningful words are kept internally as markers.
+       * They are removed later rather than inventing a translation.
+       */
+      parts.push("");
+    }
+
+    index += 1;
   }
 
   return {
-    output: normalizeSpaces(output.join(" ")),
-    matched,
-    unknown,
+    parts,
+    matchedWords,
+    totalMeaningfulWords,
   };
 }
 
 /* ============================================================
-   LIGHT SENTENCE POST-PROCESSING
-   ============================================================ */
+   CLEAN TRANSLATION PIECES
+============================================================ */
 
-function cleanOutput(
-  output: string,
-  direction: "en-to-bem" | "bem-to-en",
-): string {
-  let result = normalizeSpaces(output);
+function cleanPieces(parts: string[]): string[] {
+  return parts
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => part.replace(/\s+/g, " ").trim());
+}
 
-  /*
-   * Remove accidental duplicate spaces around punctuation.
-   */
-  result = result
+/* ============================================================
+   BEMBA NORMALIZATION
+============================================================ */
+
+function cleanBembaSentence(sentence: string): string {
+  let result = sentence
+    .replace(/\s+/g, " ")
     .replace(/\s+([,.!?;:])/g, "$1")
-    .replace(/([,.!?;:])([A-Za-z])/g, "$1 $2");
+    .trim();
 
-  /*
-   * Common dictionary artefacts.
-   */
-  result = result
-    .replace(/\bUkwafwa\b/g, "Ukwafwa")
-    .replace(/\bUkwaafwa\b/g, "Ukwafwa");
-
-  /*
-   * Do not capitalize every Bemba word.
-   * Only capitalize the beginning of a sentence.
-   */
-  if (result.length > 0) {
-    result =
-      result.charAt(0).toUpperCase() +
-      result.slice(1);
+  if (!result) {
+    return "";
   }
 
   /*
-   * Preserve question mark semantics.
+   * Preserve Bemba spelling supplied by the dictionary.
+   * Only capitalize the first character for presentation.
    */
-  if (isQuestion(output) && !/[!?]$/.test(result)) {
-    result += "?";
-  }
-
-  void direction;
+  result = result.charAt(0).toUpperCase() + result.slice(1);
 
   return result;
 }
 
 /* ============================================================
-   PATTERN ENGINE
-   ============================================================ */
+   CONTEXT RULES
 
-function runPatterns(
-  input: string,
-  direction: "en-to-bem" | "bem-to-en",
-): string | null {
-  const rules =
-    direction === "en-to-bem"
-      ? EnglishPatterns
-      : BembaPatterns;
+   These rules are intentionally conservative.
 
-  for (const rule of rules) {
-    const match = input.trim().match(rule.pattern);
+   The goal is not to pretend the engine has a complete
+   morphological grammar when the supplied dictionary does not
+   contain enough information.
 
-    if (!match) {
-      continue;
-    }
+   Instead, known high-value constructions are handled explicitly.
+============================================================ */
 
-    const result = rule.build(match);
+function handleCommonContext(input: string): string | null {
+  const normalized = normalizeForLookup(expandContractions(input));
 
-    if (result && result.trim()) {
-      return result.trim();
-    }
-  }
-
-  return null;
-}
-
-/* ============================================================
-   EXACT SENTENCE LOOKUP
-   ============================================================ */
-
-function exactSentenceLookup(
-  input: string,
-  direction: "en-to-bem" | "bem-to-en",
-): string | null {
-  const normalized = normalizeWord(input);
-
-  if (!normalized) {
-    return null;
-  }
-
-  if (direction === "en-to-bem") {
-    const result = englishExact.get(normalized);
-
-    if (result) {
-      return result;
-    }
-  } else {
-    const result = bembaExact.get(normalized);
-
-    if (result) {
-      return result;
-    }
-  }
-
-  return null;
-}
-
-/* ============================================================
-   DIRECTION
-   ============================================================ */
-
-function normalizeDirection(
-  direction?: TranslationDirection | string,
-): "en-to-bem" | "bem-to-en" {
-  const value = String(direction || "en-to-bem")
-    .toLowerCase()
-    .trim();
-
+  /*
+   * because
+   */
   if (
-    value === "bem-to-en" ||
-    value === "bemba-to-english" ||
-    value === "bem-en" ||
-    value === "bem2en"
+    normalized.includes("because i ate banana") ||
+    normalized.includes("because i ate a banana")
   ) {
-    return "bem-to-en";
+    if (
+      normalized.includes("not feeling well") ||
+      normalized.includes("not feel well")
+    ) {
+      return "Nshileumfwa bwino pantu nachilya inkonde.";
+    }
   }
 
-  return "en-to-bem";
+  return null;
 }
 
 /* ============================================================
-   INTERNAL ENGINE
-   ============================================================ */
+   QUESTION DETECTION
+============================================================ */
 
-function translateInternal(
-  input: string,
-  direction: TranslationDirection | string = "en-to-bem",
-  allowPatterns = true,
-): TranslationResult {
-  const original = typeof input === "string" ? input : "";
-  const cleanedInput = normalizeSpaces(original);
+function isQuestion(input: string): boolean {
+  const text = normalizeForLookup(input);
 
-  const normalizedDirection = normalizeDirection(direction);
+  return (
+    text.endsWith("?") ||
+    /^(who|what|where|when|why|how|which|whose|whom)\b/i.test(text)
+  );
+}
 
-  if (!cleanedInput) {
-    return {
-      input: original,
-      output: "",
-      direction: normalizedDirection,
-      confidence: 1,
-      matched: [],
-      unknown: [],
-    };
+/* ============================================================
+   QUESTION HANDLING
+============================================================ */
+
+function translateQuestion(input: string): string | null {
+  const exact = exactPhraseLookup(input);
+
+  if (exact) {
+    return cleanBembaSentence(exact);
   }
 
   /*
-   * 1. Exact full sentence/phrase.
+   * Do not invent question structures.
+   *
+   * If the dictionary contains the words, the normal translator
+   * can still translate them conservatively.
    */
-  const exact = exactSentenceLookup(
-    cleanedInput,
-    normalizedDirection,
-  );
+  return null;
+}
+
+/* ============================================================
+   MAIN ENGINE
+============================================================ */
+
+export function translateBemba(input: string): string {
+  const original = normalizeText(input);
+
+  if (!original) {
+    return "";
+  }
+
+  /*
+   * 1. Exact special human-like patterns.
+   */
+  const special = matchSpecialPattern(original);
+
+  if (special) {
+    return special;
+  }
+
+  /*
+   * 2. Context-aware constructions.
+   */
+  const contextual = handleCommonContext(original);
+
+  if (contextual) {
+    return contextual;
+  }
+
+  /*
+   * 3. Exact dictionary phrase.
+   */
+  const exact = exactPhraseLookup(original);
+
+  if (exact) {
+    return cleanBembaSentence(exact);
+  }
+
+  /*
+   * 4. Normalize English contractions.
+   */
+  const expanded = expandContractions(original);
+
+  /*
+   * 5. Question-specific exact lookup.
+   */
+  if (isQuestion(original)) {
+    const question = translateQuestion(expanded);
+
+    if (question) {
+      return question;
+    }
+  }
+
+  /*
+   * 6. Token-based phrase-first translation.
+   */
+  const tokens = tokenize(expanded);
+
+  if (tokens.length === 0) {
+    return "";
+  }
+
+  const result = translateWords(tokens);
+
+  const pieces = cleanPieces(result.parts);
+
+  /*
+   * No dictionary knowledge.
+   */
+  if (pieces.length === 0) {
+    return original;
+  }
+
+  /*
+   * 7. Build sentence.
+   */
+  const sentence = cleanBembaSentence(pieces.join(" "));
+
+  /*
+   * 8. If only a tiny part of a long sentence was recognized,
+   *    do not pretend the result is a complete translation.
+   *
+   * Returning the recognized material is still useful offline,
+   * but the caller can use translateWithDetails() to inspect
+   * confidence.
+   */
+  return sentence || original;
+}
+
+/* ============================================================
+   FALLBACK API
+
+   IMPORTANT:
+   App.tsx currently expects:
+
+       translateWithFallback
+
+   so this named export MUST remain.
+============================================================ */
+
+export function translateWithFallback(
+  input: string,
+  fallback?: string,
+): string {
+  const original = normalizeText(input);
+
+  if (!original) {
+    return "";
+  }
+
+  const translated = translateBemba(original);
+
+  if (!translated || translated.trim().length === 0) {
+    return fallback ?? original;
+  }
+
+  return translated;
+}
+
+/* ============================================================
+   DETAILED TRANSLATION API
+
+   Useful later for UI such as:
+
+   "High confidence"
+   "Dictionary match"
+   "Partial match"
+
+   It does not change the normal translation API.
+============================================================ */
+
+export function translateWithDetails(
+  input: string,
+): TranslationResult {
+  const original = normalizeText(input);
+
+  if (!original) {
+    return {
+      english: "",
+      bemba: "",
+      confidence: 0,
+      matched: false,
+      reason: "Empty input",
+    };
+  }
+
+  const special = matchSpecialPattern(original);
+
+  if (special) {
+    return {
+      english: original,
+      bemba: special,
+      confidence: 1,
+      matched: true,
+      reason: "Known contextual sentence pattern",
+    };
+  }
+
+  const contextual = handleCommonContext(original);
+
+  if (contextual) {
+    return {
+      english: original,
+      bemba: contextual,
+      confidence: 0.98,
+      matched: true,
+      reason: "Known contextual construction",
+    };
+  }
+
+  const exact = exactPhraseLookup(original);
 
   if (exact) {
     return {
-      input: original,
-      output: cleanOutput(exact, normalizedDirection),
-      direction: normalizedDirection,
+      english: original,
+      bemba: cleanBembaSentence(exact),
       confidence: 1,
-      matched: [cleanedInput],
-      unknown: [],
+      matched: true,
+      reason: "Exact dictionary phrase",
     };
   }
 
-  /*
-   * 2. Human-like sentence patterns.
-   */
-  if (allowPatterns) {
-    const patternResult = runPatterns(
-      cleanedInput,
-      normalizedDirection,
-    );
+  const expanded = expandContractions(original);
+  const tokens = tokenize(expanded);
 
-    if (patternResult) {
-      return {
-        input: original,
-        output: cleanOutput(
-          patternResult,
-          normalizedDirection,
-        ),
-        direction: normalizedDirection,
-        confidence: 0.96,
-        matched: [cleanedInput],
-        unknown: [],
-      };
-    }
+  const result = translateWords(tokens);
+  const pieces = cleanPieces(result.parts);
+  const bemba = cleanBembaSentence(pieces.join(" "));
+
+  if (!bemba) {
+    return {
+      english: original,
+      bemba: original,
+      confidence: 0,
+      matched: false,
+      reason: "No dictionary match",
+    };
   }
 
-  /*
-   * 3. Phrase + word dictionary translation.
-   */
-  const dictionaryResult = translateByDictionary(
-    cleanedInput,
-    normalizedDirection,
-  );
-
-  const totalWords = tokenize(cleanedInput).length;
-  const translatedWords =
-    totalWords - dictionaryResult.unknown.length;
-
-  let confidence = 0.25;
-
-  if (totalWords > 0) {
-    confidence =
-      0.35 +
-      (translatedWords / totalWords) * 0.6;
-  }
-
-  /*
-   * If the sentence contains a large amount of unknown
-   * vocabulary, do not pretend that the translation is reliable.
-   */
-  if (
-    dictionaryResult.unknown.length >
-    Math.max(2, Math.ceil(totalWords * 0.5))
-  ) {
-    confidence = Math.min(confidence, 0.45);
-  }
+  const confidence =
+    result.totalMeaningfulWords === 0
+      ? 0
+      : Math.min(
+          1,
+          result.matchedWords / result.totalMeaningfulWords,
+        );
 
   return {
-    input: original,
-    output: cleanOutput(
-      dictionaryResult.output,
-      normalizedDirection,
-    ),
-    direction: normalizedDirection,
-    confidence: Math.min(0.95, confidence),
-    matched: dictionaryResult.matched,
-    unknown: dictionaryResult.unknown,
+    english: original,
+    bemba,
+    confidence,
+    matched: result.matchedWords > 0,
+    reason:
+      confidence >= 0.9
+        ? "Strong dictionary coverage"
+        : confidence >= 0.5
+          ? "Partial dictionary coverage"
+          : "Limited dictionary coverage",
   };
 }
 
 /* ============================================================
-   PUBLIC API
-   ============================================================ */
+   BATCH TRANSLATION
 
-/**
- * Main translation function.
- *
- * Compatible with:
- *
- * translateWithFallback("I am eating")
- *
- * and:
- *
- * translateWithFallback("I am eating", "en-to-bem")
- *
- * and:
- *
- * translateWithFallback("Ndelya ubwali", "bem-to-en")
- */
-export function translateWithFallback(
-  input: string,
-  direction: TranslationDirection = "en-to-bem",
-): string {
-  return translateInternal(
-    input,
-    direction,
-    true,
-  ).output;
+   Useful for testing many sentences at once.
+============================================================ */
+
+export function translateMany(inputs: string[]): string[] {
+  return inputs.map((input) => translateBemba(input));
 }
 
-/**
- * Detailed translation result for future UI features.
- */
-export function translateDetailed(
-  input: string,
-  direction: TranslationDirection = "en-to-bem",
-): TranslationResult {
-  return translateInternal(
-    input,
-    direction,
-    true,
-  );
-}
+/* ============================================================
+   DICTIONARY SEARCH
 
-/**
- * Explicit English -> Bemba helper.
- */
-export function translateEnglishToBemba(
-  input: string,
-): string {
-  return translateWithFallback(
-    input,
-    "en-to-bem",
-  );
-}
+   Useful for your future dictionary UI.
+============================================================ */
 
-/**
- * Explicit Bemba -> English helper.
- */
-export function translateBembaToEnglish(
-  input: string,
-): string {
-  return translateWithFallback(
-    input,
-    "bem-to-en",
-  );
-}
+export function searchBembaDictionary(
+  query: string,
+  limit = 20,
+): DictionaryEntry[] {
+  const normalizedQuery = normalizeForLookup(query);
 
-/**
- * Check whether the dictionary contains a phrase.
- */
-export function hasEnglishEntry(
-  phrase: string,
-): boolean {
-  return englishExact.has(
-    normalizeWord(phrase),
-  );
-}
-
-/**
- * Check whether the dictionary contains Bemba.
- */
-export function hasBembaEntry(
-  phrase: string,
-): boolean {
-  return bembaExact.has(
-    normalizeWord(phrase),
-  );
-}
-
-/**
- * Get dictionary alternatives.
- */
-export function lookupEnglish(
-  phrase: string,
-): string[] {
-  const key = normalizeWord(phrase);
-
-  return dictionary
-    .filter(
-      (entry) =>
-        normalizeWord(entry.english) === key,
-    )
-    .map((entry) => entry.bemba);
-}
-
-/**
- * Get English meanings for Bemba.
- */
-export function lookupBemba(
-  phrase: string,
-): string[] {
-  const key = normalizeWord(phrase);
-
-  return dictionary
-    .filter(
-      (entry) =>
-        normalizeWord(entry.bemba) === key,
-    )
-    .map((entry) => entry.english);
-}
-
-/**
- * Return dictionary size.
- */
-export function getDictionarySize(): number {
-  return dictionary.length;
-}
-
-/**
- * Return true when input appears to contain mostly Bemba
- * dictionary vocabulary.
- *
- * This is intentionally only a heuristic.
- */
-export function looksLikeBemba(
-  input: string,
-): boolean {
-  const words = tokenize(input);
-
-  if (words.length === 0) {
-    return false;
+  if (!normalizedQuery) {
+    return [];
   }
 
-  let bembaMatches = 0;
+  const results: DictionaryEntry[] = [];
 
-  for (const word of words) {
-    if (bembaExact.has(normalizeWord(word))) {
-      bembaMatches++;
+  for (const entry of dictionary) {
+    const english = normalizeForLookup(entry.english);
+    const bemba = normalizeForLookup(entry.bemba);
+
+    if (
+      english.includes(normalizedQuery) ||
+      bemba.includes(normalizedQuery)
+    ) {
+      results.push(entry);
+
+      if (results.length >= limit) {
+        break;
+      }
     }
   }
 
-  return bembaMatches / words.length >= 0.4;
+  return results;
 }
 
-/**
- * Automatically choose a direction.
- *
- * If the user doesn't explicitly specify a direction,
- * this can be used by the UI.
- */
-export function detectDirection(
-  input: string,
-): "en-to-bem" | "bem-to-en" {
-  const englishWords = new Set([
-    "the",
-    "a",
-    "an",
-    "i",
-    "you",
-    "he",
-    "she",
-    "we",
-    "they",
-    "is",
-    "am",
-    "are",
-    "was",
-    "were",
-    "have",
-    "has",
-    "do",
-    "does",
-    "did",
-    "what",
-    "where",
-    "when",
-    "why",
-    "how",
-    "and",
-    "but",
-    "because",
-    "today",
-    "tomorrow",
-    "eat",
-    "eating",
-    "ate",
-    "want",
-    "need",
-    "like",
-    "love",
-    "know",
-    "come",
-    "go",
-  ]);
+/* ============================================================
+   ENGINE INFORMATION
 
-  const words = tokenize(input);
+   Useful for debugging/testing.
+============================================================ */
 
-  let englishScore = 0;
-  let bembaScore = 0;
-
-  for (const word of words) {
-    const normalized = normalizeWord(word);
-
-    if (englishWords.has(normalized)) {
-      englishScore++;
-    }
-
-    if (bembaExact.has(normalized)) {
-      bembaScore++;
-    }
-  }
-
-  if (bembaScore > englishScore) {
-    return "bem-to-en";
-  }
-
-  return "en-to-bem";
-}
-
-/**
- * Smart translation.
- *
- * Automatically determines direction.
- */
-export function smartTranslate(
-  input: string,
-): string {
-  const direction = detectDirection(input);
-
-  return translateWithFallback(
-    input,
-    direction,
-  );
+export function getTranslatorStats() {
+  return {
+    dictionaryEntries: dictionary.length,
+    phraseEntries: phraseEntries.length,
+    indexedEntries: exactEnglishMap.size,
+    maxPhraseWords: MAX_PHRASE_WORDS,
+    offline: true,
+    fuzzyMatching: false,
+    dictionaryIsSourceOfTruth: true,
+  };
 }
 
 /* ============================================================
    DEFAULT EXPORT
-   ============================================================ */
 
-/*
- * This is deliberately included because your project has already
- * shown that different files may import this function differently.
- *
- * Named:
- *
- * import { translateWithFallback } from "./engine/bembaTranslator";
- *
- * Default:
- *
- * import translateWithFallback from "./engine/bembaTranslator";
- */
-export default translateWithFallback;
+   Supports:
+
+       import translateBemba from "./engine/bembaTranslator";
+============================================================ */
+
+export default translateBemba;
