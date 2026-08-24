@@ -3889,7 +3889,7 @@ function conjugatePresent(
           return "batemwa";
 
         default:
-         
+      };
 }
 
 /*
