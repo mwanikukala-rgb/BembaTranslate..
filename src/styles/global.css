@@ -1430,197 +1430,6 @@ input:focus-visible {
 
   line-height: 1.4;
 }
-
-/* =========================================================
-   FIXED BOTTOM NAVIGATION
-   ========================================================= */
-
-.bottom-navigation {
-  position: fixed;
-
-  left: 0;
-  right: 0;
-
-  bottom: 0;
-
-  z-index: 50;
-
-  width: 100%;
-
-  min-height: 68px;
-
-  display: grid;
-
-  grid-template-columns:
-    repeat(5, minmax(0, 1fr));
-
-  padding:
-    7px
-    7px
-    calc(7px + var(--safe-bottom));
-
-  background:
-    rgba(7, 28, 22, 0.98);
-
-  border-top:
-    1px solid rgba(212, 175, 90, 0.15);
-
-  box-shadow:
-    0 -8px 25px rgba(0, 0, 0, 0.18);
-
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
-
-.bottom-navigation button {
-  min-width: 0;
-
-  min-height: 53px;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  gap: 4px;
-
-  color: rgba(247, 244, 235, 0.58);
-
-  background: transparent;
-
-  border-radius: 10px;
-
-  font-size: 0.55rem;
-  font-weight: 650;
-}
-
-.bottom-navigation button.active {
-  color: var(--gold-light);
-
-  background:
-    rgba(212, 175, 90, 0.08);
-}
-
-.nav-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 28px;
-  height: 25px;
-}
-
-.bottom-navigation button.active .nav-icon {
-  color: var(--gold);
-}
-
-/* =========================================================
-   LAUNCH SCREEN
-   ========================================================= */
-
-.launch-screen {
-  position: fixed;
-
-  inset: 0;
-
-  width: 100%;
-  height: 100dvh;
-  min-height: 100vh;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-
-  /*
-     THIS is important for Android status bar.
-  */
-  padding:
-    calc(28px + var(--safe-top))
-    22px
-    calc(24px + var(--safe-bottom));
-
-  background:
-    radial-gradient(
-      circle at 50% 25%,
-      rgba(212, 175, 90, 0.08),
-      transparent 35%
-    ),
-    linear-gradient(
-      145deg,
-      #071c16 0%,
-      #0b2a21 55%,
-      #071c16 100%
-    );
-
-  overflow: hidden;
-
-  overscroll-behavior: none;
-
-  z-index: 100;
-}
-
-.launch-screen::before {
-  content: "";
-
-  position: absolute;
-
-  inset: 0;
-
-  pointer-events: none;
-
-  background-image:
-    linear-gradient(
-      rgba(212, 175, 90, 0.025) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      rgba(212, 175, 90, 0.025) 1px,
-      transparent 1px
-    );
-
-  background-size: 32px 32px;
-}
-
-.launch-content {
-  width: 100%;
-  max-width: 350px;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  text-align: center;
-
-  margin: auto 0;
-
-  position: relative;
-
-  z-index: 1;
-}
-
-.launch-logo {
-  width: 68px;
-  height: 68px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  color: var(--gold);
-
-  background:
-    rgba(212, 175, 90, 0.08);
-
-  border:
-    1px solid var(--line);
-
-  border-radius: 18px;
-
-  margin-bottom: 22px;
-}
-
 .launch-kicker {
   color: var(--gold);
 
@@ -1659,732 +1468,12 @@ input:focus-visible {
   margin-bottom: 18px;
 }
 
-.launch-status-row {
-  display: flex;
-
-  justify-content: space-between;
-
-  color: var(--on-dark-soft);
-
-  font-size: 0.72rem;
-
-  margin-bottom: 8px;
-}
-
-.launch-status-row strong {
-  color: var(--gold-light);
-}
-
-.progress-track {
-  width: 100%;
-
-  height: 4px;
-
-  background:
-    rgba(255, 255, 255, 0.08);
-
-  border-radius: 99px;
-
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-
-  background: var(--gold);
-
-  transition: width 0.1s ease;
-}
-
-.launch-message {
-  display: flex;
-  align-items: center;
-
-  gap: 7px;
-
-  color: var(--on-dark-soft);
-
-  font-size: 0.65rem;
-}
-
-.status-check {
-  width: 18px;
-  height: 18px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  color: var(--gold);
-
-  background:
-    rgba(212, 175, 90, 0.08);
-
-  border:
-    1px solid var(--line);
-
-  border-radius: 50%;
-}
-
-.launch-footer {
-  position: relative;
-
-  z-index: 1;
-
-  display: flex;
-  align-items: center;
-
-  gap: 7px;
-
-  color: var(--on-dark-soft);
-
-  font-size: 0.62rem;
-}
-
-.offline-dot {
-  width: 6px;
-  height: 6px;
-
-  border-radius: 50%;
-
-  background: #75c98e;
-}
-
-/* =========================================================
-   SMALL PHONES
-   ========================================================= */
-
-@media (max-width: 360px) {
-  .page {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
-  .app-header {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
-  .welcome-card {
-    padding: 18px 15px;
-  }
-
-  .welcome-card h1 {
-    font-size: 1.45rem;
-  }
-
-  .phrase-grid,
-  .learn-grid {
-    gap: 7px;
-  }
-
-  .phrase-card,
-  .learn-card {
-    padding: 11px;
-  }
-
-  .bottom-navigation button {
-    font-size: 0.51rem;
-  }
-}
-
-/* =========================================================
-   LARGER PHONES / TABLETS
-   ========================================================= */
-
-@media (min-width: 700px) {
-  .page {
-    padding-left: 24px;
-    padding-right: 24px;
-  }
-
-  .phrase-grid {
-    grid-template-columns:
-      repeat(3, minmax(0, 1fr));
-  }
-
-  .learn-grid {
-    grid-template-columns:
-      repeat(3, minmax(0, 1fr));
-  }
-
-  .bottom-navigation {
-    max-width: 760px;
-
-    left: 50%;
-    right: auto;
-
-    transform: translateX(-50%);
-
-    border-left:
-      1px solid rgba(212, 175, 90, 0.12);
-
-    border-right:
-      1px solid rgba(212, 175, 90, 0.12);
-
-    border-radius:
-      14px
-      14px
-      0
+.0
       0;
   }
 }
-
 /* =========================================================
-   ACCESSIBILITY / REDUCED MOTION
-   ========================================================= */
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-     /* =========================================================
-   OFFLINE NAVIGATION
-   GPS + ZAMBIA MAP UI
-   ========================================================= */
-
-.navigation-page {
-  width: 100%;
-  max-width: 760px;
-
-  margin: 0 auto;
-
-  padding:
-    18px
-    16px
-    28px;
-}
-
-.navigation-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-
-  gap: 12px;
-
-  margin-bottom: 16px;
-}
-
-.navigation-heading > div {
-  min-width: 0;
-}
-
-.navigation-heading h1 {
-  color: var(--on-dark);
-
-  font-size: 1.45rem;
-  font-weight: 800;
-
-  line-height: 1.1;
-
-  margin-top: 3px;
-}
-
-.navigation-heading p {
-  max-width: 520px;
-
-  color: var(--on-dark-soft);
-
-  font-size: 0.69rem;
-
-  line-height: 1.5;
-
-  margin-top: 7px;
-}
-
-.section-label {
-  display: inline-flex;
-  align-items: center;
-
-  gap: 5px;
-
-  color: var(--gold);
-
-  font-size: 0.58rem;
-  font-weight: 800;
-
-  letter-spacing: 1.3px;
-}
-
-.clear-button {
-  flex-shrink: 0;
-
-  min-height: 32px;
-
-  padding:
-    0
-    10px;
-
-  color: var(--gold-light);
-
-  background:
-    rgba(212, 175, 90, 0.08);
-
-  border:
-    1px solid var(--line);
-
-  border-radius: 8px;
-
-  font-size: 0.63rem;
-  font-weight: 700;
-}
-
-/* =========================================================
-   GPS STATUS
-   ========================================================= */
-
-.navigation-status-card {
-  min-height: 64px;
-
-  display: flex;
-  align-items: center;
-
-  gap: 10px;
-
-  padding:
-    11px
-    12px;
-
-  margin-bottom: 12px;
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(18, 61, 48, 0.98),
-      rgba(11, 42, 33, 0.98)
-    );
-
-  border:
-    1px solid rgba(212, 175, 90, 0.14);
-
-  border-radius: 12px;
-
-  box-shadow:
-    0 7px 20px rgba(0, 0, 0, 0.10);
-}
-
-.navigation-status-icon {
-  width: 38px;
-  height: 38px;
-
-  flex: 0 0 38px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  color: var(--gold);
-
-  background:
-    rgba(212, 175, 90, 0.09);
-
-  border:
-    1px solid rgba(212, 175, 90, 0.16);
-
-  border-radius: 10px;
-}
-
-.navigation-status-card > div:nth-child(2) {
-  min-width: 0;
-
-  display: flex;
-  flex-direction: column;
-
-  gap: 3px;
-}
-
-.navigation-status-card strong {
-  color: var(--on-dark);
-
-  font-size: 0.72rem;
-
-  line-height: 1.2;
-}
-
-.navigation-status-card span:not(.gps-status-dot) {
-  color: var(--on-dark-soft);
-
-  font-size: 0.61rem;
-
-  line-height: 1.3;
-}
-
-.gps-status-dot {
-  width: 8px;
-  height: 8px;
-
-  flex: 0 0 8px;
-
-  margin-left: auto;
-
-  border-radius: 50%;
-
-  background: #737a75;
-}
-
-.gps-status-dot.active {
-  background: #75c98e;
-
-  box-shadow:
-    0 0 0 4px rgba(117, 201, 142, 0.10);
-}
-
-/* =========================================================
-   OFFLINE MAP
-   ========================================================= */
-
-.offline-map-card {
-  position: relative;
-
-  width: 100%;
-
-  min-height: 300px;
-
-  overflow: hidden;
-
-  background:
-    #d9d5c8;
-
-  border:
-    1px solid rgba(255, 255, 255, 0.12);
-
-  border-radius: 14px;
-
-  box-shadow: var(--shadow);
-}
-
-.offline-map-grid {
-  position: absolute;
-  inset: 0;
-
-  background:
-    linear-gradient(
-      35deg,
-      transparent 47%,
-      rgba(72, 92, 77, 0.20) 48%,
-      rgba(72, 92, 77, 0.20) 49%,
-      transparent 50%
-    ),
-    linear-gradient(
-      145deg,
-      transparent 47%,
-      rgba(72, 92, 77, 0.16) 48%,
-      rgba(72, 92, 77, 0.16) 49%,
-      transparent 50%
-    ),
-    linear-gradient(
-      90deg,
-      transparent 49%,
-      rgba(96, 105, 92, 0.12) 50%,
-      transparent 51%
-    ),
-    linear-gradient(
-      0deg,
-      transparent 49%,
-      rgba(96, 105, 92, 0.12) 50%,
-      transparent 51%
-    );
-
-  background-size:
-    110px 110px,
-    140px 140px,
-    70px 70px,
-    70px 70px;
-
-  opacity: 0.9;
-}
-
-.map-placeholder {
-  position: absolute;
-  inset: 0;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  gap: 7px;
-
-  padding: 25px;
-
-  color: #485148;
-
-  text-align: center;
-}
-
-.map-placeholder > svg {
-  color: var(--green-800);
-
-  opacity: 0.85;
-}
-
-.map-placeholder strong {
-  color: var(--green-900);
-
-  font-size: 0.82rem;
-
-  font-weight: 800;
-}
-
-.map-placeholder > span {
-  max-width: 260px;
-
-  color: #59625b;
-
-  font-size: 0.64rem;
-
-  line-height: 1.45;
-}
-
-.map-location-marker {
-  position: absolute;
-
-  display: flex;
-  align-items: center;
-
-  gap: 6px;
-
-  padding:
-    7px
-    9px;
-
-  color: var(--on-dark);
-
-  background:
-    var(--green-900);
-
-  border:
-    1px solid rgba(212, 175, 90, 0.35);
-
-  border-radius: 999px;
-
-  font-size: 0.61rem;
-  font-weight: 750;
-
-  box-shadow:
-    0 5px 14px rgba(0, 0, 0, 0.20);
-
-  transform:
-    translateY(78px);
-}
-
-.map-location-marker span {
-  width: 8px;
-  height: 8px;
-
-  border-radius: 50%;
-
-  background: #75c98e;
-
-  box-shadow:
-    0 0 0 4px rgba(117, 201, 142, 0.14);
-}
-
-/* =========================================================
-   GPS LOCATION CARD
-   ========================================================= */
-
-.navigation-location-card {
-  margin-top: 12px;
-
-  padding: 14px;
-
-  background: var(--surface);
-
-  border-radius: 12px;
-
-  box-shadow:
-    0 6px 18px rgba(0, 0, 0, 0.08);
-}
-
-.location-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 10px;
-
-  padding-bottom: 11px;
-
-  border-bottom:
-    1px solid var(--line-soft);
-}
-
-.location-header > div {
-  display: flex;
-  flex-direction: column;
-
-  gap: 3px;
-}
-
-.location-header span {
-  color: var(--muted-dark);
-
-  font-size: 0.57rem;
-  font-weight: 800;
-
-  letter-spacing: 1px;
-}
-
-.location-header strong {
-  color: var(--text);
-
-  font-size: 0.76rem;
-}
-
-.navigation-refresh {
-  width: 34px;
-  height: 34px;
-
-  flex: 0 0 34px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  color: var(--green-800);
-
-  background:
-    rgba(212, 175, 90, 0.13);
-
-  border:
-    1px solid rgba(212, 175, 90, 0.20);
-
-  border-radius: 9px;
-}
-
-.navigation-refresh:disabled {
-  opacity: 0.45;
-}
-
-.coordinate-grid {
-  display: grid;
-
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
-
-  gap: 8px;
-
-  margin-top: 11px;
-}
-
-.coordinate-grid > div {
-  min-width: 0;
-
-  padding: 10px;
-
-  background:
-    rgba(17, 17, 17, 0.035);
-
-  border:
-    1px solid rgba(17, 17, 17, 0.06);
-
-  border-radius: 8px;
-}
-
-.coordinate-grid span {
-  display: block;
-
-  color: var(--muted-dark);
-
-  font-size: 0.52rem;
-  font-weight: 800;
-
-  letter-spacing: 0.8px;
-
-  margin-bottom: 4px;
-}
-
-.coordinate-grid strong {
-  display: block;
-
-  color: var(--text);
-
-  font-size: 0.69rem;
-
-  word-break: break-word;
-}
-
-.location-empty {
-  padding: 18px 5px 5px;
-
-  color: var(--muted-dark);
-
-  font-size: 0.66rem;
-
-  line-height: 1.45;
-
-  text-align: center;
-}
-
-.gps-error {
-  margin-top: 10px;
-
-  padding: 9px;
-
-  color: #8b3d32;
-
-  background:
-    rgba(139, 61, 50, 0.08);
-
-  border:
-    1px solid rgba(139, 61, 50, 0.15);
-
-  border-radius: 8px;
-
-  font-size: 0.61rem;
-
-  line-height: 1.4;
-}
-
-/* =========================================================
-   NAVIGATION NEXT FEATURE
-   ========================================================= */
-
-.navigation-coming-card {
-  margin-top: 12px;
-
-  padding: 14px;
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(18, 61, 48, 0.96),
-      rgba(11, 42, 33, 0.96)
-    );
-
-  border:
-    1px solid rgba(212, 175, 90, 0.14);
-
-  border-radius: 12px;
-}
-
-.navigation-coming-card > div {
-  display: flex;
-  flex-direction: column;
-
-  gap: 6px;
-}
-
-.navigation-coming-card strong {
-  color: var(--on-dark);
-
-  font-size: 0.75rem;
-}
-
-.navigation-coming-card p {
-  color: var(--on-dark-soft);
-
-  font-size: 0.63rem;
-
-  line-height: 1.5;
-}
-
-/* =========================================================
-   SIX-ITEM BOTTOM NAVIGATION
+   FIXED BOTTOM NAVIGATION
    ========================================================= */
 
 .bottom-navigation {
@@ -2398,18 +1487,18 @@ input:focus-visible {
 
   width: 100%;
 
-  min-height: 70px;
+  min-height: 68px;
 
   display: grid;
 
   grid-template-columns:
-    repeat(6, minmax(0, 1fr));
+    repeat(5, minmax(0, 1fr));
 
   align-items: stretch;
 
   padding:
     6px
-    4px
+    6px
     calc(6px + var(--safe-bottom));
 
   background:
@@ -2418,11 +1507,11 @@ input:focus-visible {
   border-top:
     1px solid rgba(212, 175, 90, 0.16);
 
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-
   box-shadow:
-    0 -8px 25px rgba(0, 0, 0, 0.16);
+    0 -8px 24px rgba(0, 0, 0, 0.18);
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .bottom-navigation button {
@@ -2432,16 +1521,17 @@ input:focus-visible {
 
   display: flex;
   flex-direction: column;
+
   align-items: center;
   justify-content: center;
 
   gap: 3px;
 
   padding:
-    3px
-    1px;
+    4px
+    2px;
 
-  color: rgba(247, 244, 235, 0.58);
+  color: var(--on-dark-soft);
 
   background: transparent;
 
@@ -2453,6 +1543,11 @@ input:focus-visible {
   line-height: 1.1;
 
   overflow: hidden;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.1s ease;
 }
 
 .bottom-navigation button.active {
@@ -2469,6 +1564,8 @@ input:focus-visible {
 .bottom-navigation .nav-icon {
   width: 28px;
   height: 28px;
+
+  flex: 0 0 28px;
 
   display: flex;
   align-items: center;
@@ -2490,11 +1587,15 @@ input:focus-visible {
 
 @media (max-width: 360px) {
   .bottom-navigation {
-    padding-left: 2px;
-    padding-right: 2px;
+    min-height: 64px;
+
+    padding-left: 3px;
+    padding-right: 3px;
   }
 
   .bottom-navigation button {
+    min-height: 52px;
+
     font-size: 0.43rem;
 
     gap: 2px;
@@ -2503,6 +1604,8 @@ input:focus-visible {
   .bottom-navigation .nav-icon {
     width: 25px;
     height: 25px;
+
+    flex-basis: 25px;
   }
 
   .navigation-page {
