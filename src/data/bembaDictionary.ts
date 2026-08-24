@@ -1884,7 +1884,928 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "Please sweep the house", bemba: "Pyangeeniko mu ng'anda" },
   { english: "Please clean the plates", bemba: "Wamyeeniko imbale" },
   { english: "Please stop drinking beer", bemba: "Lekeeniko ukumwa ubwalwa" },
+  {
+  english: "to talk nonsense",
+  bemba: "abaila",
+  type: "verb",
+  forms: [
+    { bemba: "abaila", english: "to talk nonsense" },
+    { bemba: "uleabailafye", english: "you talk nonsense" }
+  ]
+},
+
+{
+  english: "to share / divide",
+  bemba: "abana",
+  type: "verb",
+  forms: [
+    { bemba: "abana", english: "to share" },
+    { bemba: "abana", english: "to divide" },
+    { bemba: "mwayabanina", english: "you divided" }
+  ],
+  components: [
+    { english: "why", bemba: "cinshi" },
+    { english: "these things", bemba: "ifi fintu" }
+  ],
+  examples: [
+    {
+      english: "why did you divide these things",
+      bemba: "cinshi mwayabanina ifi fintu"
+    }
+  ]
+},
+
+{
+  english: "to divide / portion out",
+  bemba: "abanya",
+  type: "verb",
+  forms: [
+    { bemba: "abanya", english: "to divide" },
+    { bemba: "abanya", english: "to portion out" }
+  ]
+},
+
+{
+  english: "many",
+  bemba: "abenshi",
+  type: "noun"
+},
+
+{
+  english: "to soak / put under water",
+  bemba: "abika",
+  type: "verb",
+  forms: [
+    { bemba: "abika", english: "to soak" },
+    { bemba: "abika", english: "to put under water" },
+    { bemba: "abika", english: "to put under a liquid substance" }
+  ]
+},
+
+{
+  english: "to soak very deep in water",
+  bemba: "abikisha",
+  type: "verb",
+  forms: [
+    { bemba: "abikisha", english: "to soak very deep in water" },
+    {
+      bemba: "abikisha",
+      english: "to keep for a long time under water"
+    }
+  ],
+  relatedTo: "abika"
+},
+
+{
+  english: "to get soaked / be put under water",
+  bemba: "abikwa",
+  type: "verb",
+  forms: [
+    { bemba: "abikwa", english: "to get soaked" },
+    { bemba: "abikwa", english: "to be put under water" },
+    {
+      bemba: "abikwa",
+      english: "to be put under a liquid substance"
+    },
+    {
+      bemba: "abikila",
+      english: "to put or soak something in water"
+    }
+  ],
+  relatedTo: "abika",
+  components: [
+    { english: "cassava", bemba: "kalundwe" },
+    { english: "where", bemba: "ni kwi" },
+    { english: "go", bemba: "kabiye" },
+    { english: "chief's village", bemba: "ku musumba" },
+    { english: "bark", bemba: "nkwa" }
+  ],
+  examples: [
+    {
+      english: "the cassava is put to soak under water",
+      bemba: "kalundwe nayabikwa"
+    },
+    {
+      english: "go and put the cassava in the water for me at the watering place",
+      bemba: "kabiye ulenjabikila kalundwe kwifwe"
+    },
+    {
+      english: "where did you soak the cassava",
+      bemba: "uko waya abikila kalundwe ni kwi"
+    },
+    {
+      english: "in the chief's village, bark is not put under water",
+      bemba: "ku musumba takwabikilwa nkwa"
+    }
+  ]
+},
+
+{
+  english: "to decide in one's favour / vindicate",
+  bemba: "abila",
+  type: "verb",
+  forms: [
+    { bemba: "abila", english: "to decide in one's favour" },
+    { bemba: "abila", english: "to vindicate" },
+    { bemba: "yamwabila", english: "decided in his favour" },
+    { bemba: "wangabila", english: "decided in my favour" },
+    { bemba: "kaliabilwe", english: "has been decided in his/her favour" }
+  ],
+  components: [
+    { english: "chief", bemba: "mfumu" },
+    { english: "ordeal by poison", bemba: "mwafi" }
+  ],
+  examples: [
+    {
+      english: "the chief decided in his favour",
+      bemba: "mfumu yamwabila"
+    },
+    {
+      english: "the ordeal by poison decided in my favour",
+      bemba: "mwafi wangabila"
+    }
+  ]
+},
+
+{
+  english: "those near to you / those",
+  bemba: "abo",
+  type: "pronoun",
+  forms: [
+    { bemba: "abo", english: "those near to you" },
+    { bemba: "abo", english: "those" }
+  ],
+  examples: [
+    {
+      english: "those near to you are schoolchildren",
+      bemba: "Abo baana beesukulu"
+    }
+  ]
+},
+
+{
+  english: "their",
+  bemba: "yabo",
+  type: "possessive",
+  examples: [
+    {
+      english: "it is their affair",
+      bemba: "Ni ncito yabo"
+    },
+    {
+      english: "their relative",
+      bemba: "Muntu wabo"
+    }
+  ]
+},
+
+{
+  english: "why",
+  bemba: "cinshi",
+  type: "question_word"
+},
+
+{
+  english: "these things",
+  bemba: "ifi fintu",
+  type: "phrase"
+},
+
+{
+  english: "cassava",
+  bemba: "kalundwe",
+  type: "noun"
+},
+
+{
+  english: "chief",
+  bemba: "mfumu",
+  type: "noun"
+},
+
+{
+  english: "where",
+  bemba: "ni kwi",
+  type: "question_word"
+},
+
+{
+  english: "those near to you",
+  bemba: "abo",
+  type: "phrase"
+}
 { english: "I/am", bemba: "ine" },
+  {
+  english: "to cross, like a river",
+  bemba: "abuka",
+  type: "verb",
+  forms: [
+    { bemba: "abuka panshi", english: "to wade across / to ford" },
+    { bemba: "abuka pa bulalo", english: "to cross over a bridge" },
+    { bemba: "abuka pa nsunsu", english: "to be carried across on shoulders" },
+    { bemba: "wayabuka", english: "you got out safely / you got out of a difficulty" },
+    { bemba: "kwabuka", english: "capable of being crossed" },
+    { bemba: "kwabukilamo", english: "to cross over in" },
+    { bemba: "kwabukila", english: "where to cross over" }
+  ],
+  components: [
+    { english: "river", bemba: "mumana" },
+    { english: "that river", bemba: "uyu mumana" },
+    { english: "cannot", bemba: "te" },
+    { english: "bridge", bemba: "bulalo" },
+    { english: "on shoulders", bemba: "pa nsunsu" }
+  ],
+  examples: [
+    {
+      english: "that river cannot be forded",
+      bemba: "uyu mumana te wa kwabuka panshi"
+    },
+    {
+      english: "a boat to cross over in",
+      bemba: "ubwato bwa kwabukilamo"
+    },
+    {
+      english: "show us where to cross over",
+      bemba: "Tulange apa kwabukila"
+    }
+  ]
+},
+
+{
+  english: "to remove from water / unsoak",
+  bemba: "abula",
+  type: "verb",
+  forms: [
+    { bemba: "kayabule", english: "go and take out" },
+    { bemba: "abule myono", english: "remove fish-traps" },
+    { bemba: "abule nama mu bucinga", english: "take an animal out of a game pit" },
+    { bemba: "abulo bwato", english: "take a sunken boat out of water" },
+    { bemba: "abulo muntu mu mulandu", english: "rescue a man from trouble" },
+    { bemba: "wabwile", english: "took out" },
+    { bemba: "yabwilwa", english: "was taken from" }
+  ],
+  components: [
+    { english: "cassava", bemba: "kalundwe" },
+    { english: "fish-traps", bemba: "myono" },
+    { english: "animal", bemba: "nama" },
+    { english: "game pit", bemba: "bu­cinga" },
+    { english: o",
+  type: "phrase"
+}
+{ english: "I/am", bemba: "ine" },
+  {
+  english: "to cross, like a river",
+  bemba: "abuka",
+  type: "verb",
+  forms: [
+    { bemba: "abuka panshi", english: "to wade across / to ford" },
+    { bemba: "abuka pa bulalo", english: "to cross over a bridge" },
+    { bemba: "abuka pa nsunsu", english: "to be carried across on shoulders" },
+    { bemba: "wayabuka", english: "you got out safely / you got out of a difficulty" },
+    { bemba: "kwabuka", english: "capable of being crossed" },
+    { bemba: "kwabukilamo", english: "to cross over in" },
+    { bemba: "kwabukila", english: "where to cross over" }
+  ],
+  components: [
+    { english: "river", bemba: "mumana" },
+    { english: "that river", bemba: "uyu mumana" },
+    { english: "cannot", bemba: "te" },
+    { english: "bridge", bemba: "bulalo" },
+    { english: "on shoulders", bemba: "pa nsunsu" }
+  ],
+  examples: [
+    {
+      english: "that river cannot be forded",
+      bemba: "uyu mumana te wa kwabuka panshi"
+    },
+    {
+      english: "a boat to cross over in",
+      bemba: "ubwato bwa kwabukilamo"
+    },
+    {
+      english: "show us where to cross over",
+      bemba: "Tulange apa kwabukila"
+    }
+  ]
+},
+
+{
+  english: "to remove from water / unsoak",
+  bemba: "abula",
+  type: "verb",
+  forms: [
+    { bemba: "kayabule", english: "go and take out" },
+    { bemba: "abule myono", english: "remove fish-traps" },
+    { bemba: "abule nama mu bucinga", english: "take an animal out of a game pit" },
+    { bemba: "abulo bwato", english: "take a sunken boat out of water" },
+    { bemba: "abulo muntu mu mulandu", english: "rescue a man from trouble" },
+    { bemba: "wabwile", english: "took out" },
+    { bemba: "yabwilwa", english: "was taken from" }
+  ],
+  components: [
+    { english: "cassava", bemba: "kalundwe" },
+    { english: "fish-traps", bemba: "myono" },
+    { english: "animal", bemba: "nama" },
+    { english: "game pit", bemba: "bu­cinga" },
+    { english: "boat", bemba: "bwato" },
+    { english: "man", bemba: "muntu" },
+    { english: "trouble", bemba: "mulandu" },
+    { english: "reeds", bemba: "matete" }
+  ],
+  examples: [
+    {
+ english: "who ...?",
+      bemba: "Ulenjabusha nani?"
+    },
+    {
+  english: "will ferry me across",
+  bemba: "ulenjabusha",
+  type: "verb phrase",
+  relatedTo: "abusha",
+  examples: [
+    {
+      english: "will ferry me across?",
+      bemba: "Ulenjabusha?"
+    }
+  ]
+},
+
+{
+  english: "the load is carried across",
+  bemba: "Icipe nacabushiwa",
+  type: "sentence",
+  components: [
+    { english: "load", bemba: "icipe" },
+    { english: "is carried across", bemba: "nacabushiwa" }
+  ],
+  examples: [
+    {
+      english: "the load is carried across",
+      bemba: "Icipe nacabushiwa"
+    }
+  ]
+},
+
+{
+  english: "it is there that you carried the loads across the river",
+  bemba: "Kulya eko wabushishe fipe",
+  type: "sentence",
+  components: [
+    { english: "there", bemba: "kulya" },
+    { english: "it is there that", bemba: "eko" },
+    { english: "you carried across", bemba: "wabushishe" },
+    { english: "loads", bemba: "fipe" }
+  ],
+  examples: [
+    {
+      english: "it is there that you carried the loads across the river",
+      bemba: "Kulya eko wabushishe fipe"
+    }
+  ]
+},
+
+{
+  english: "to ferry one another across in turn",
+  bemba: "abushanya",
+  type: "verb",
+  relatedTo: "abusha",
+  forms: [
+    {
+      bemba: "abushanya",
+      english: "to ferry one another across in turn"
+    }
+  ]
+},
+
+{
+  english: "ferry each other",
+  bemba: "abushanya"
+},
+
+{
+  english: "forsake",
+  bemba: "abwe",
+  type: "interjection"
+},
+
+{
+  english: "leave me alone",
+  bemba: "abwe",
+  type: "interjection"
+},
+
+{
+  english: "past tense of today",
+  bemba: "aci-",
+  type: "verbal_infix",
+  meaning: "verbal infix expressing the past tense of today",
+  examples: [
+    {
+      english: "where I went hunting today",
+      bemba: "uko naciya ndalunga"
+    },
+    {
+      english: "we went to show them where the game passed today",
+      bemba: "Twaya balanga no mo nama shacipita"
+    }
+  ]
+},
+
+{
+  english: "sometimes imperfect tense",
+  bemba: "aci-",
+  type: "verbal_infix",
+  examples: [
+    {
+      english: "I was still a child when he died",
+      bemba: "ilyo afwile nacili mwaice"
+    }
+  ]
+},
+
+{
+  english: "past continuance",
+  bemba: "acilaa-",
+  type: "verbal_infix",
+  examples: [
+    {
+      english: "it is what I was looking for",
+      bemba: "Eco nacilafwaya"
+    }
+  ]
+},
+
+{
+  english: "to be very difficult",
+  bemba: "afisha",
+  type: "verb",
+  forms: [
+    {
+      bemba: "afisha",
+      english: "to be very difficult"
+    },
+    {
+      bemba: "afisha",
+      english: "to be annoyed"
+    },
+    {
+      bemba: "nayafishiwa",
+      english: "I am annoyed"
+    }
+  ],
+  examples: [
+    {
+      english: "it is difficult enough, but not very very difficult",
+      bemba: "Ukwafya caliafya, nomba tacayafisha"
+    },
+    {
+      english: "I am annoyed by that bad man who came to pester me",
+      bemba: "Nayafishiwa ku mulwani uwaisa ngafya"
+    }
+  ]
+},
+
+{
+  english: "very difficult",
+  bemba: "afishisha",
+  type: "verb",
+  relatedTo: "afisha",
+  forms: [
+    {
+      bemba: "afishisha",
+      english: "to be intensely difficult"
+    }
+  ],
+  examples: [
+    {
+      english: "it is really very difficult",
+      bemba: "Cayafya, cayafishisha fye"
+    }
+  ]
+},
+
+{
+  english: "to help",
+  bemba: "afwa",
+  type: "verb",
+  forms: [
+    {
+      bemba: "afwa",
+      english: "to help"
+    },
+    {
+      bemba: "alatwafwa",
+      english: "he helps us"
+    },
+    {
+      bemba: "ngafwe",
+      english: "help me"
+    },
+    {
+      bemba: "ulemwa­fwila",
+      english: "you are helping him"
+    },
+    {
+      bemba: "namwafwila",
+      english: "I help him"
+    },
+    {
+      bemba: "nayafwilwe",
+      english: "I am helped"
+    }
+  ],
+  components: [
+    {
+      english: "work",
+      bemba: "milimo"
+    },
+    {
+      english: "help me",
+      bemba: "ngafwe"
+    }
+  ],
+  examples: [
+    {
+      english: "he helps us in our work",
+      bemba: "Alatwafwa milimo"
+    },
+    {
+      english: "come and help me",
+      bemba: "So ngafwe"
+    },
+    {
+      english: "perseverance does help",
+      bemba: "Mute uldfwa"
+    },
+    {
+      english: "laziness does not help at all",
+      bemba: "nakana bulamu tabwafwa nakalya"
+    },
+    {
+      english: "what are you helping him for?",
+      bemba: "Ulemwafwila nshi?"
+    },
+    {
+      english: "that is why I help him",
+      bemba: "Euku namwafwila"
+    },
+    {
+      english: "I am helped in the work",
+      bemba: "Nayafwilwe milimo"
+    }
+  ]
+},
+
+{
+  english: "to help one another",
+  bemba: "afwana",
+  type: "verb",
+  relatedTo: "afwa",
+  forms: [
+    {
+      bemba: "afwana",
+      english: "to help one another"
+    },
+    {
+      bemba: "bayafwene",
+      english: "they helped one another"
+    }
+  ],
+  examples: [
+    {
+      english: "good people help one another",
+      bemba: "Abantu basuma baldfwana"
+    },
+    {
+      english: "they helped one another in the work",
+      bemba: "Bayafwene milimo"
+    },
+    // ============================================================
+// BEMBA DICTIONARY — PAGES 1–10
+// ============================================================
+
+  // BASIC WORDS / EXPRESSIONS
+  { english: "if", bemba: "a" },
+  { english: "so that", bemba: "a" },
+  { english: "he", bemba: "a" },
+  { english: "she", bemba: "a" },
+  { english: "these", bemba: "aba" },
+  { english: "those who", bemba: "aba" },
+  { english: "these same persons", bemba: "aba bene" },
+
+  // INTERJECTIONS
+  { english: "ah!", bemba: "a!" },
+  { english: "surprise!", bemba: "a!" },
+  { english: "protest!", bemba: "a!" },
+  { english: "disgust!", bemba: "a!" },
+
+  // SHARING / DIVIDING
+  { english: "talk nonsense", bemba: "abaila" },
+  { english: "share", bemba: "abana" },
+  { english: "divide", bemba: "abana" },
+  { english: "divide", bemba: "abanya" },
+  { english: "portion out", bemba: "abanya" },
+
+  // SOAKING / WATER
+  { english: "soak", bemba: "abika" },
+  { english: "put under water", bemba: "abika" },
+  { english: "soak very deeply", bemba: "abikisha" },
+  { english: "keep under water for a long time", bemba: "abikisha" },
+  { english: "get soaked", bemba: "abikwa" },
+  { english: "cassava", bemba: "kalundwe" },
+
+  // DECISION / ORDEAL
+  { english: "decide in one's favour", bemba: "abila" },
+  { english: "chief", bemba: "mfumu" },
+  { english: "ordeal by poison", bemba: "mwafi" },
+
+  // POSSESSIVES
+  { english: "their", bemba: "abo" },
+  { english: "their", bemba: "yabo" },
+  { english: "their relative", bemba: "muntu wabo" },
+  { english: "their affair", bemba: "ncito yabo" },
+
+  // CROSSING
+  { english: "cross", bemba: "abuka" },
+  { english: "cross a river", bemba: "abuka" },
+  { english: "wade across", bemba: "abuka panshi" },
+  { english: "ford", bemba: "abuka panshi" },
+  { english: "cross over a bridge", bemba: "abuka pa bulalo" },
+  { english: "be carried across on shoulders", bemba: "abuka pa nsunsu" },
+  { english: "this river", bemba: "uyu mumana" },
+  { english: "not", bemba: "te" },
+  { english: "unless", bemba: "kano" },
+  { english: "throw into it", bemba: "waposapo" },
+  { english: "boat", bemba: "ubwato" },
+  { english: "cross over in", bemba: "kwabukilamo" },
+  { english: "here", bemba: "apa" },
+  { english: "where to cross over", bemba: "kwabukila" },
+
+  // REMOVING FROM WATER
+  { english: "remove from water", bemba: "abula" },
+  { english: "take out of water", bemba: "abula" },
+  { english: "remove fish-traps", bemba: "abule myono" },
+  { english: "take an animal out of a game pit", bemba: "abule nama mu bucinga" },
+  { english: "take a sunken boat out of water", bemba: "abulo bwato" },
+  { english: "rescue a man from trouble", bemba: "abulo muntu mu mulandu" },
+  { english: "reeds", bemba: "matete" },
+
+  // COMING OUT OF WATER
+  { english: "come out of water", bemba: "abuluka" },
+  { english: "rise to the surface of water", bemba: "abuluka" },
+  { english: "take out of water", bemba: "abulula" },
+  { english: "take everything out of water", bemba: "abululula" },
+  { english: "everything", bemba: "fyonse" },
+
+  // FERRYING
+  { english: "carry across", bemba: "abusha" },
+  { english: "ferry across", bemba: "abusha" },
+  { english: "ferry each other", bemba: "abushanya" },
+
+  // HELPING
+  { english: "help", bemba: "afwa" },
+  { english: "work", bemba: "milimo" },
+  { english: "perseverance", bemba: "bulamu" },
+  { english: "laziness", bemba: "nakalya" },
+  { english: "help one another", bemba: "afwana" },
+  { english: "give a helping hand", bemba: "afwilisha" },
+  { english: "help each other", bemba: "afwilishanya" },
+  { english: "lend a helping hand", bemba: "afwisha" },
+
+  // DIFFICULT / TROUBLE
+  { english: "be very difficult", bemba: "afisha" },
+  { english: "be annoyed", bemba: "afisha" },
+  { english: "be difficult", bemba: "afya" },
+  { english: "be hard", bemba: "afya" },
+  { english: "trouble", bemba: "afya" },
+  { english: "annoy", bemba: "afya" },
+  { english: "bother", bemba: "afya" },
+  { english: "puzzle", bemba: "afya" },
+  { english: "quarrel", bemba: "afyanya" },
+  { english: "dispute", bemba: "afyanya" },
+  { english: "trouble one another", bemba: "afyanya" },
+
+  // FIRE
+  { english: "catch fire", bemba: "aka" },
+  { english: "blaze", bemba: "aka" },
+  { english: "fire", bemba: "mulilo" },
+  { english: "burn well", bemba: "akisha" },
+
+  // DIVIDING / DISTRIBUTING
+  { english: "divide out", bemba: "akana" },
+  { english: "share", bemba: "akana" },
+  { english: "be divided", bemba: "akanika" },
+  { english: "divide among one another", bemba: "akanishanya" },
+  { english: "distribute", bemba: "akanishisha" },
+  { english: "divide", bemba: "akanya" },
+  { english: "portion out", bemba: "akanya" },
+
+  // SUFFERING
+  { english: "cause to suffer", bemba: "akashanya" },
+  { english: "make one another suffer", bemba: "akashanya" },
+
+  // CONDITIONAL / IMPERATIVE
+  { english: "if", bemba: "aku-" },
+  { english: "go!", bemba: "akuya" },
+  { english: "catch the ball", bemba: "akwanko mupila" },
+  { english: "ball", bemba: "mupila" },
+  { english: "go inside", bemba: "akwingilamo" },
+  { english: "give the breast to the child", bemba: "akonsha mwana" },
+  { english: "beat this bad man", bemba: "akuma uyu mulwani" },
+
+  // FUTURE
+  { english: "continuous future", bemba: "akulaa" },
+  { english: "near future", bemba: "akulaa" },
+
+  // POSSESSION
+  { english: "his", bemba: "akwe" },
+  { english: "hers", bemba: "akwe" },
+  { english: "his or her person", bemba: "muntu wakwe" },
+  { english: "his or her work", bemba: "ncito yakhe" },
+
+  // OPENING / IMMEDIATE FUTURE
+  { english: "open the hands", bemba: "ala" },
+  { english: "spread out the fingers", bemba: "ala minwe" },
+  { english: "well!", bemba: "ala!" },
+  { english: "listen", bemba: "umfwa" },
+  { english: "friend", bemba: "mune" },
+
+  // POSITION / GETTING UP
+  { english: "be high up", bemba: "alama" },
+  { english: "be on top", bemba: "alama" },
+  { english: "be perched", bemba: "alama" },
+  { english: "place high up", bemba: "alamika" },
+  { english: "perch", bemba: "alamika" },
+  { english: "get up", bemba: "alamuka" },
+  { english: "rise from bed", bemba: "alamuka" },
+  { english: "lift up", bemba: "alamuna" },
+
+  // ROLLING / TURNING
+  { english: "roll", bemba: "alangana" },
+  { english: "turn over repeatedly", bemba: "alangana" },
+  { english: "salute", bemba: "alangana" },
+  { english: "roll someone over", bemba: "alanganya" },
+
+  // MAKE KNOWN / PUBLISH
+  { english: "make known", bemba: "alasha" },
+  { english: "publish", bemba: "alasha" },
+  { english: "wealth", bemba: "fyuma" },
+  { english: "power", bemba: "bufumu" },
+  { english: "brag about one's wealth", bemba: "alasha fyuma" },
+  { english: "boast about one's power", bemba: "alasha bufumu" },
+
+  // INSPECT / RESTLESS
+  { english: "turn over and over", bemba: "alaula" },
+  { english: "inspect carefully", bemba: "alaula" },
+  { english: "be restless", bemba: "alawuka" },
+  { english: "writhe", bemba: "alawuka" },
+
+  // NEGATION / INTERJECTIONS
+  { english: "not me!", bemba: "alaye!" },
+  { english: "come!", bemba: "ale!" },
+  { english: "come on!", bemba: "ale!" },
+  { english: "go on!", bemba: "ale!" },
+
+  // PAST TENSE
+  { english: "remote past imperfect", bemba: "alee" },
+  { english: "remote past", bemba: "ali" },
+  { english: "past tense of yesterday", bemba: "alii" },
+
+  // ABUSE / QUARREL
+  { english: "abuse", bemba: "alika" },
+  { english: "talk abusively to elders", bemba: "alika" },
+  { english: "squabble", bemba: "alikana" },
+  { english: "abuse one another", bemba: "alikana" },
+  { english: "cause to squabble", bemba: "alikanya" },
+  { english: "cause to bicker", bemba: "alikanya" },
+  { english: "abuse greatly", bemba: "alikisha" },
+  { english: "abuse one another greatly", bemba: "alikishanya" },
+
+  // FISHING
+  { english: "build a fish weir", bemba: "alila" },
+  { english: "fish weir", bemba: "bwamba" },
+  { english: "fish weir", bemba: "nkumbe" },
+
+  // NUMBERS
+  { english: "one thousand", bemba: "alufu" },
+
+  // CHANGE / TURN
+  { english: "turn oneself around", bemba: "aluka" },
+  { english: "turn", bemba: "aluka" },
+  { english: "change", bemba: "aluka" },
+  { english: "alter", bemba: "aluka" },
+  { english: "become different", bemba: "aluka" },
+  { english: "change one's mind", bemba: "aluka" },
+  { english: "recant", bemba: "aluka" },
+  { english: "afterwards", bemba: "pa ntanshi" },
+  { english: "here and there", bemba: "uku no'ku" },
+  { english: "case", bemba: "mulandu" },
+    // ============================================================
+// BEMBA DICTIONARY — ADDITIONAL ENTRIES FROM THIS PAGE
+// ============================================================
+
+// -AKA-
+{ english: "catch fire", bemba: "aka" },
+{ english: "blaze", bemba: "aka" },
+{ english: "burn", bemba: "aka" },
+{ english: "come blazing like fire", bemba: "ngo mulilo" },
+{ english: "fire", bemba: "mulilo" },
+{ english: "the fire blazed", bemba: "lwayaka" },
+{ english: "the fight flared up", bemba: "lwayaka" },
+
+// NEGATIVE DISTANT FUTURE -AKA-
+{ english: "I shall not go there", bemba: "nshakayeko" },
+{ english: "you will not catch fish", bemba: "tamwakele sabi" },
+{ english: "you will not kill animals", bemba: "tamwakepaye nama" },
+{ english: "we will not quarrel with each other", bemba: "tatwakomane" },
+
+// NEGATIVE DISTANT CONTINUOUS FUTURE -AKALE-
+{ english: "you will not make salt", bemba: "tamwakaleenga mucele" },
+{ english: "he will not eat meat anymore", bemba: "takalelya nama" },
+{ english: "not anymore", bemba: "takalelya" },
+
+// -AKANA-
+{ english: "divide", bemba: "akana" },
+{ english: "portion out", bemba: "akana" },
+{ english: "divide out", bemba: "akana" },
+{ english: "share", bemba: "akana" },
+{ english: "take this away and share it with your friends", bemba: "sende ci, muleyayakana na baneenu" },
+{ english: "why have you divided these things?", bemba: "ico mwayakanina ifi fintu cinshi?" },
+{ english: "they divided the meat", bemba: "bayakana nama" },
+{ english: "they divided the meat in the bush", bemba: "bayakanina mu mpanga" },
+
+// -AKANIKA-
+{ english: "be divided", bemba: "akanika" },
+{ english: "be split", bemba: "akanika" },
+{ english: "have several meanings", bemba: "akanika" },
+{ english: "that sentence has different meanings", bemba: "ishiwi lyalola kubili, lyakanikako" },
+
+// -AKANISHANYA-
+{ english: "divide among one another", bemba: "akanishanya" },
+{ english: "divide among each other", bemba: "akanishanya" },
+
+// -AKANISHISHA-
+{ english: "distribute", bemba: "akanishisha" },
+{ english: "distribute among the poor", bemba: "twayakanisha balanda" },
+{ english: "we have distributed absolutely everything", bemba: "twayakanishisha fye" },
+{ english: "everything", bemba: "fye" },
+
+// -AKANYA-
+{ english: "divide", bemba: "akanya" },
+{ english: "portion out", bemba: "akanya" },
+{ english: "distribute", bemba: "akanya" },
+{ english: "a man forged arrows", bemba: "umuntu afule mifwi" },
+{ english: "he distributed them among his children", bemba: "ayakanya bamwane" },
+{ english: "they are distributed", bemba: "fyakanishiwa" },
+{ english: "there is nothing left now", bemba: "tapashele kantu nomba" },
+{ english: "I will distribute my wealth among the poor", bemba: "cuma candi ndeyakanisha balanda" },
+{ english: "wealth", bemba: "cuma" },
+{ english: "poor people", bemba: "balanda" },
+
+// -AKASHA-
+{ english: "cause to suffer", bemba: "akasha" },
+{ english: "suffer", bemba: "akasha" },
+{ english: "lose one's time and money", bemba: "uleiakasha" },
+{ english: "teaching a fool is losing one's time", bemba: "kufunde shilu, kuiakdsha" },
+{ english: "try in vain to push the tree", bemba: "kapoli aiakdsho muti" },
+{ english: "fool", bemba: "shilu" },
+{ english: "tree", bemba: "muti" },
+
+// -AKASHANYA-
+{ english: "make one another suffer", bemba: "akashanya" },
+{ english: "cause one another to suffer", bemba: "akashanya" },
+
+// -AKISHA-
+{ english: "burn well", bemba: "akisha" },
+{ english: "blaze", bemba: "akisha" },
+
+// AKO
+{ english: "same as aka", bemba: "ako" },
+{ english: "that small object near you", bemba: "ako" },
+
+// AKU-
+{ english: "if", bemba: "aku-" },
+{ english: "conditional mood", bemba: "aku-" },
+{ english: "imperfect conditional", bemba: "aku-" },
+{ english: "go!", bemba: "akuya" },
+{ english: "take care of my eggs for me", bemba: "akumbakilako amani" },
+{ english: "eggs", bemba: "amani" },
+{ english: "catch the ball", bemba: "akwanko mupila" },
+{ english: "ball", bemba: "mupila" },
+{ english: "go inside", bemba: "akwingilamo" },
+{ english: "give the breast to the child", bemba: "akonsha mwana" },
+{ english: "beat the bad man", bemba: "akuma uyu mulwani" },
+{ english: "bad man", bemba: "mulwani" },
+
+// -AKULAA-
+{ english: "continuous future", bemba: "akulaa" },
+{ english: "near future", bemba: "akulaa" },
+{ english: "you will do", bemba: "mwakulacita" },
+{ english: "you will continue to do", bemba: "mwakulacita" },
+{ english: "you will help each other", bemba: "mwakulayafwana" },
+{ english: "they will work", bemba: "bakulabomba" },
+{ english: "you will pay a fine", bemba: "wakulafuta" },
+{ english: "pay a fine", bemba: "fuluta" },
 ];
 
 
