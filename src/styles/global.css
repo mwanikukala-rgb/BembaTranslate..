@@ -1481,13 +1481,14 @@ input:focus-visible {
 
   left: 0;
   right: 0;
+
   bottom: 0;
 
   z-index: 100;
 
   width: 100%;
 
-  min-height: 68px;
+  min-height: 64px;
 
   display: grid;
 
@@ -1497,9 +1498,9 @@ input:focus-visible {
   align-items: stretch;
 
   padding:
-    6px
-    6px
-    calc(6px + var(--safe-bottom));
+    5px
+    5px
+    calc(5px + var(--safe-bottom));
 
   background:
     rgba(7, 28, 22, 0.98);
@@ -1517,7 +1518,7 @@ input:focus-visible {
 .bottom-navigation button {
   min-width: 0;
 
-  min-height: 56px;
+  min-height: 54px;
 
   display: flex;
   flex-direction: column;
@@ -1525,7 +1526,7 @@ input:focus-visible {
   align-items: center;
   justify-content: center;
 
-  gap: 3px;
+  gap: 2px;
 
   padding:
     4px
