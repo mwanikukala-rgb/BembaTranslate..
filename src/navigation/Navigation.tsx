@@ -12,20 +12,12 @@ type NavigationProps = { onBack?: () => void };
 
 const ZAMBIA_CENTER: [number, number] = [27.85, -13.13];
 
-/* Online first: this proves the real map/GPS layer works. Replace the raster
-   source with bundled PMTiles when the offline Zambia map package is added. */
-const MAP_STYLE: maplibregl.StyleSpecification = {
-  version: 8,
-  sources: {
-    osm: {
-      type: "raster",
-      tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-      tileSize: 256,
-      attribution: "© OpenStreetMap contributors",
-    },
-  },
-  layers: [{ id: "osm", type: "raster", source: "osm" }],
-};
+/*
+ * OpenFreeMap vector map.
+ * No API key or billing is required.
+ * GPS, routing, markers and the rest of the navigation system remain unchanged.
+ */
+const MAP_STYLE = "https://tiles.openfreemap.org/styles/liberty";
 
 const coords = (node: MapNode): [number, number] => [node.longitude, node.latitude];
 
