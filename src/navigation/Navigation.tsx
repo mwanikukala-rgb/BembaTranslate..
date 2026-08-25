@@ -130,8 +130,7 @@ export default function Navigation({ onBack }: NavigationProps) {
       const current = await getCurrentLocation();
       setLocation(current);
       mapRef.current?.easeTo({ center: [current.longitude, current.latitude], zoom: 15, duration: 650, essential: true });
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("Unable to get your location. Please enable GPS/location permission.");
     } finally { setLoading(false); }
   };
@@ -148,15 +147,15 @@ export default function Navigation({ onBack }: NavigationProps) {
       );
       setTracking(true);
       mapRef.current?.easeTo({ center: [current.longitude, current.latitude], zoom: 15, duration: 650, essential: true });
-    } catch (err) {
-      console.error(err); setTracking(false);
+    } catch {
+      setTracking(false);
       setError("Unable to start GPS tracking. Check your location permission.");
     }
   };
 
   const stopTracking = async () => {
     if (watchRef.current !== null) {
-      try { await clearLocationWatch(watchRef.current); } catch (err) { console.error(err); }
+      try { await clearLocationWatch(watchRef.current); } catch { /* cleanup failure is non-fatal */ }
       watchRef.current = null;
     }
     setTracking(false);
