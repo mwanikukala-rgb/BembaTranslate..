@@ -1630,7 +1630,7 @@ input:focus-visible {
 
   letter-spacing: 2px;
 
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .launch-content h1 {
@@ -1668,7 +1668,7 @@ input:focus-visible {
 
   font-size: 0.72rem;
 
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .launch-status-row strong {
@@ -3004,7 +3004,7 @@ input:focus-visible {
   position: absolute;
   left: 12px;
   right: 12px;
-  bottom: calc(207px + var(--safe-bottom));
+  bottom: calc(206px + var(--safe-bottom));
   z-index: 25;
   padding: 9px 11px;
   color: #ffe7e2;
@@ -3103,7 +3103,7 @@ input:focus-visible {
   display: block;
   width: 34px;
   height: 3px;
-  margin: 0 auto 7px;
+  margin: 0 auto 5px;
   border-radius: 999px;
   background: rgba(255,255,255,.18);
 }
@@ -3113,7 +3113,7 @@ input:focus-visible {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .navigation-section-heading > div { min-width: 0; }
@@ -3158,12 +3158,12 @@ input:focus-visible {
 
 .navigation-place {
   min-width: 0;
-  min-height: 48px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 7px;
-  padding: 7px 8px;
+  padding: 6px 8px;
   text-align: left;
   color: var(--on-dark);
   background: rgba(255,255,255,.048);
