@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  ArrowLeft,
   ArrowRight,
   BookOpen,
   BookMarked,
@@ -30,6 +31,7 @@ type Page =
   | "translate"
   | "dictionary"
   | "learn"
+  | "phrasebook"
   | "navigation"
   | "history"
   | "settings";
@@ -69,6 +71,27 @@ function App() {
 
   const [page, setPage] =
     useState<Page>("home");
+  const [pageHistory, setPageHistory] = useState<Page[]>([]);
+
+  const goTo = (next: Page) => {
+    if (next === page) return;
+    setPageHistory((items) => [...items, page]);
+    setPage(next);
+  };
+
+  const goBack = () => {
+    setPageHistory((items) => {
+      if (items.length === 0) {
+        setPage("home");
+        return items;
+      }
+      const previous = items[items.length - 1];
+      setPage(previous);
+      return items.slice(0, -1);
+    });
+  };
+
+  const canGoBack = page !== "home" || pageHistory.length > 0;
 
   const [english, setEnglish] = useState("");
   const [bemba, setBemba] = useState("");
@@ -209,7 +232,7 @@ function App() {
     setBemba(translation);
     setFavourite(false);
     setCopied(false);
-    setPage("translate");
+    goTo("translate");
   };
 
   /* --------------------------------------------------
@@ -337,7 +360,18 @@ function App() {
 
         {/* HEADER */}
         <header className="app-header">
-          <div className="header-title">
+          <div className="header-leading">
+            {canGoBack && (
+              <button
+                type="button"
+                className="app-back-button"
+                onClick={goBack}
+                aria-label="Go back"
+              >
+                <ArrowLeft size={20} />
+              </button>
+            )}
+            <div className="header-title">
             <span className="header-icon">
               {page === "navigation" ? (
                 <NavigationIcon size={17} />
@@ -360,7 +394,9 @@ function App() {
                       ? "Dictionary"
                       : page === "learn"
                         ? "Learn"
-                        : page === "navigation"
+                        : page === "phrasebook"
+                          ? "Phrasebook"
+                          : page === "navigation"
                           ? "Navigate"
                           : page === "history"
                             ? "History"
@@ -371,11 +407,16 @@ function App() {
                 {page === "home"
                   ? "African languages in one place"
                   : page === "navigation"
-                    ? "Explore places and routes"
+                    ? "Search places and build routes"
                     : page === "dictionary"
                       ? "Words, meanings and phrases"
-                      : "English → Bemba"}
+                      : page === "learn"
+                        ? "Vocabulary, lessons and practice"
+                        : page === "phrasebook"
+                          ? "Useful Bemba expressions"
+                          : "English → Bemba"}
               </span>
+            </div>
             </div>
           </div>
 
@@ -411,13 +452,13 @@ function App() {
 
             <div className="home-language-row">
               <div>
-                <span>Current language</span>
+                <span>ACTIVE LANGUAGE</span>
                 <strong>English ↔ Bemba</strong>
               </div>
-              <div className="home-language-next">
-                <span>Coming next</span>
-                <strong>Swahili ↔ English</strong>
-              </div>
+              <button type="button" onClick={() => goTo("dictionary")}>
+                <Search size={15} />
+                Search Bemba
+              </button>
             </div>
 
             <div className="section-title home-section-title">
@@ -430,7 +471,7 @@ function App() {
             <div className="feature-grid">
               <button
                 className="feature-card feature-card-primary"
-                onClick={() => setPage("translate")}
+                onClick={() => goTo("translate")}
               >
                 <span className="feature-image feature-image-translate">
                   <Languages size={23} />
@@ -444,7 +485,7 @@ function App() {
 
               <button
                 className="feature-card"
-                onClick={() => setPage("dictionary")}
+                onClick={() => goTo("dictionary")}
               >
                 <span className="feature-image feature-image-book">
                   <BookMarked size={22} />
@@ -458,7 +499,7 @@ function App() {
 
               <button
                 className="feature-card"
-                onClick={() => setPage("learn")}
+                onClick={() => goTo("learn")}
               >
                 <span className="feature-image feature-image-learn">
                   <Sparkles size={22} />
@@ -472,7 +513,7 @@ function App() {
 
               <button
                 className="feature-card"
-                onClick={() => setPage("translate")}
+                onClick={() => goTo("translate")}
               >
                 <span className="feature-image feature-image-speak">
                   <Mic size={22} />
@@ -486,7 +527,7 @@ function App() {
 
               <button
                 className="feature-card"
-                onClick={() => setPage("navigation")}
+                onClick={() => goTo("navigation")}
               >
                 <span className="feature-image feature-image-navigate">
                   <MapPin size={22} />
@@ -500,7 +541,7 @@ function App() {
 
               <button
                 className="feature-card"
-                onClick={() => setPage("learn")}
+                onClick={() => goTo("phrasebook")}
               >
                 <span className="feature-image feature-image-phrase">
                   <MessageCircle size={22} />
@@ -604,15 +645,24 @@ function App() {
               </div>
 
               <div className="input-label-row">
-
-                <span>
-                  English text
-                </span>
-
-                <span>
-                  {english.length}/5000
-                </span>
-
+                <span>English text</span>
+                <div className="input-meta-actions">
+                  <span>{english.length}/5000</span>
+                  {english && (
+                    <button
+                      type="button"
+                      className="input-clear-button"
+                      onClick={() => {
+                        setEnglish("");
+                        setBemba("");
+                        setCopied(false);
+                        setFavourite(false);
+                      }}
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
               </div>
 
               <textarea
@@ -1030,14 +1080,62 @@ function App() {
         )}
 
         {/* ==================================================
+            PHRASEBOOK
+        ================================================== */}
+        {page === "phrasebook" && (
+          <section className="page phrasebook-page">
+            <div className="page-intro feature-intro-card">
+              <span className="eyebrow">EVERYDAY BEMBA</span>
+              <h1>Phrasebook</h1>
+              <p>Ready-to-use expressions for real conversations, travel and daily life.</p>
+            </div>
+
+            <div className="phrasebook-category-grid">
+              {([
+                ["Greetings", "Start a conversation", "How are you?", "Mulishani"],
+                ["Travel", "Move with confidence", "Where are you?", "Ulikwisa"],
+                ["Shopping", "Useful buying phrases", "I want money", "Ndefwaya indalama"],
+                ["Daily life", "Common expressions", "Good morning", "Mwashibukeni"],
+              ] as const).map(([title, subtitle, source, translation]) => (
+                <button
+                  key={title}
+                  type="button"
+                  className="phrasebook-category"
+                  onClick={() => selectPhrase(source, translation)}
+                >
+                  <span>{title}</span>
+                  <small>{subtitle}</small>
+                  <strong>{translation}</strong>
+                </button>
+              ))}
+            </div>
+
+            <div className="section-title">
+              <div>
+                <h2>Quick phrases</h2>
+                <p>Tap a phrase to translate, copy or listen.</p>
+              </div>
+              <span className="count-pill">{quickPhrases.length}</span>
+            </div>
+
+            <div className="phrase-grid">
+              {quickPhrases.map(([source, translation]) => (
+                <button key={source} className="phrase-card" onClick={() => selectPhrase(source, translation)}>
+                  <span>{source}</span>
+                  <strong>{translation}</strong>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ==================================================
             NAVIGATION
         ================================================== */}
 
         {page === "navigation" && (
           <Navigation
-            onBack={() =>
-              setPage("translate")
-            }
+            onBack={goBack}
           />
         )}
 
@@ -1277,49 +1375,17 @@ function App() {
 
       </main>
 
-      {/* ==================================================
-          BOTTOM NAVIGATION
-      ================================================== */}
-
-      <nav className="bottom-navigation">
-
-        {navigationItems.map((item) => {
-          const Icon = item.icon;
-
-          const active =
-            page === item.id;
-
-          return (
-            <button
-              key={item.id}
-              className={
-                active
-                  ? "active"
-                  : ""
-              }
-              onClick={() =>
-                setPage(item.id)
-              }
-              aria-label={item.label}
-              aria-current={
-                active
-                  ? "page"
-                  : undefined
-              }
-            >
-
-              <span className="nav-icon">
-                <Icon size={18} />
-              </span>
-
-              <span>
-                {item.label}
-              </span>
-
-            </button>
-          );
-        })}
-
+      <nav className="bottom-navigation" aria-label="Application settings">
+        <button
+          type="button"
+          className={page === "settings" ? "active" : ""}
+          onClick={() => goTo("settings")}
+          aria-label="Settings"
+          aria-current={page === "settings" ? "page" : undefined}
+        >
+          <span className="nav-icon"><Settings size={19} /></span>
+          <span>Settings</span>
+        </button>
       </nav>
 
     </div>
