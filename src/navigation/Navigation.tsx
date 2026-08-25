@@ -156,8 +156,8 @@ export default function Navigation({ onBack }: NavigationProps) {
       );
       setTracking(true);
       mapRef.current?.easeTo({ center: [current.longitude, current.latitude], zoom: 15, duration: 650, essential: true });
-    } catch (err) {
-      console.error(err); setTracking(false);
+    } catch {
+      setTracking(false);
       setError("Unable to start GPS tracking. Check your location permission.");
     }
   };
