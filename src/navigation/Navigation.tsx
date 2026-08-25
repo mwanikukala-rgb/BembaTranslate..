@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as maplibregl from "maplibre-gl";
+import { Protocol } from "pmtiles";
 import type { GeoJSONSource, Map as MapLibreMap, Marker } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { ArrowLeft, LocateFixed, MapPin, Navigation as NavigationIcon, RefreshCw, Route } from "lucide-react";
@@ -12,9 +13,21 @@ type NavigationProps = { onBack?: () => void };
 
 const ZAMBIA_CENTER: [number, number] = [27.85, -13.13];
 
-/* Online first: this proves the real map/GPS layer works. Replace the raster
-   source with bundled PMTiles when the offline Zambia map package is added. */
-const MAP_STYLE: maplibregl.StyleSpecification = {
+/*
+ * OFFLINE MAP FOUNDATION
+ *
+ * The app is now prepared for local PMTiles map packages.
+ *
+ * Expected future package:
+ *   /maps/world-overview.pmtiles
+ *
+ * We deliberately keep the current OSM raster fallback until the actual
+ * PMTiles file is bundled. This prevents a blank map while we build and test
+ * the offline package system.
+ */
+const WORLD_OFFLINE_MAP = "/maps/world-overview.pmtiles";
+
+const ONLINE_FALLBACK_STYLE: maplibregl.StyleSpecification = {
   version: 8,
   sources: {
     osm: {
@@ -26,6 +39,18 @@ const MAP_STYLE: maplibregl.StyleSpecification = {
   },
   layers: [{ id: "osm", type: "raster", source: "osm" }],
 };
+
+const createOfflineStyle = (): maplibregl.StyleSpecification => ({
+  version: 8,
+  sources: {
+    "world-offline": {
+      type: "vector",
+      url: `pmtiles://${WORLD_OFFLINE_MAP}`,
+      attribution: "© OpenStreetMap contributors",
+    },
+  },
+  layers: [],
+});
 
 const coords = (node: MapNode): [number, number] => [node.longitude, node.latitude];
 
@@ -47,9 +72,17 @@ export default function Navigation({ onBack }: NavigationProps) {
   useEffect(() => {
     if (!mapEl.current || mapRef.current) return;
 
+    // Register PMTiles with MapLibre once for this map instance.
+    // The actual local archive will be added in the next step.
+    const protocol = new Protocol();
+    maplibregl.addProtocol("pmtiles", protocol.tile);
+
     const map = new maplibregl.Map({
       container: mapEl.current,
-      style: MAP_STYLE,
+      // Keep the known-good map until the local PMTiles package is present.
+      // Once /maps/world-overview.pmtiles is bundled, this switches to the
+      // offline vector style without changing GPS, markers, or routing.
+      style: ONLINE_FALLBACK_STYLE,
       center: ZAMBIA_CENTER,
       zoom: 5.4,
       minZoom: 3,
@@ -78,6 +111,7 @@ export default function Navigation({ onBack }: NavigationProps) {
       userMarker.current?.remove();
       destinationMarker.current?.remove();
       map.remove();
+      maplibregl.removeProtocol("pmtiles");
       mapRef.current = null;
     };
   }, []);
@@ -220,7 +254,7 @@ export default function Navigation({ onBack }: NavigationProps) {
       {error && <div className="navigation-error" role="alert">{error}</div>}
 
       <div className="offline-map-card real-map-card">
-        <div ref={mapEl} className="real-map-container" aria-label="Interactive Zambia map" />
+        <div ref={mapEl} className="real-map-container" aria-label="Interactive offline-capable world map" />
         {!mapReady && <div className="real-map-loading"><LocateFixed size={26} /><strong>Loading map...</strong><span>Preparing the interactive map.</span></div>}
       </div>
 
