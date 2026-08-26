@@ -66,61 +66,13 @@ const quickPhrases = [
 ] as const;
 
 function App() {
-  /* Professional startup loader: initialise local data/UI once when the app launches. */
   const [launching, setLaunching] = useState(true);
-  const [launchProgress, setLaunchProgress] = useState(0);
+  const [progress, setProgress] = useState(0);
 
   const [page, setPage] =
     useState<Page>("home");
   const [pageHistory, setPageHistory] = useState<Page[]>([]);
   const [phraseCategory, setPhraseCategory] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    const timers: number[] = [];
-
-    const runStartup = async () => {
-      setLaunchProgress(18);
-
-      // Give the browser one frame to mount the shell, then warm the local app data.
-      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-      if (cancelled) return;
-      setLaunchProgress(42);
-
-      try {
-        window.localStorage.getItem("bemba-learned-words");
-      } catch {
-        // Local progress is optional.
-      }
-
-      if (cancelled) return;
-      setLaunchProgress(68);
-
-      // Prime the device speech engine without speaking anything.
-      try {
-        window.speechSynthesis?.getVoices();
-      } catch {
-        // Audio is optional and may not be available on every device.
-      }
-
-      await new Promise<void>((resolve) => {
-        timers.push(window.setTimeout(resolve, 260));
-      });
-
-      if (cancelled) return;
-      setLaunchProgress(100);
-      timers.push(window.setTimeout(() => {
-        if (!cancelled) setLaunching(false);
-      }, 180));
-    };
-
-    void runStartup();
-
-    return () => {
-      cancelled = true;
-      timers.forEach(window.clearTimeout);
-    };
-  }, []);
 
   const goTo = (next: Page) => {
     if (next === page) return;
@@ -296,6 +248,49 @@ function App() {
     setTypingAnswer("");
     setTypingFeedback(null);
   };
+
+  /* --------------------------------------------------
+     Launch screen
+  -------------------------------------------------- */
+
+  const launchSteps = [
+    "Loading dictionary",
+    "Loading lessons",
+    "Preparing translation",
+    "Checking audio",
+    "Finishing setup",
+  ];
+
+  const launchStep = Math.min(
+    launchSteps.length - 1,
+    Math.floor(progress / 20),
+  );
+
+  useEffect(() => {
+    let current = 0;
+
+    const timer = window.setInterval(() => {
+      current += 2;
+
+      if (current >= 100) {
+        current = 100;
+
+        setProgress(100);
+
+        window.clearInterval(timer);
+
+        window.setTimeout(() => {
+          setLaunching(false);
+        }, 300);
+      } else {
+        setProgress(current);
+      }
+    }, 55);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, []);
 
   /* --------------------------------------------------
      Dictionary
@@ -554,42 +549,77 @@ function App() {
      Launch screen
   -------------------------------------------------- */
 
-  /* --------------------------------------------------
-     Main application
-  -------------------------------------------------- */
-
   if (launching) {
     return (
-      <div className="bt-launch-screen" role="status" aria-live="polite">
-        <div className="bt-launch-glow" aria-hidden="true" />
-        <div className="bt-launch-content">
-          <div className="bt-launch-mark">
-            <Languages size={34} strokeWidth={2.1} />
-          </div>
-          <span className="bt-launch-kicker">OFFLINE LANGUAGE PLATFORM</span>
-          <h1>BembaTranslate</h1>
-          <p>English <span>↔</span> Bemba</p>
-
-          <div className="bt-launch-loader">
-            <div className="bt-launch-loader-top">
-              <span>{launchProgress < 100 ? "Preparing your Bemba learning space" : "Ready to learn"}</span>
-              <strong>{launchProgress}%</strong>
+      <div className="launch-screen">
+        <div className="launch-hero" aria-hidden="true">
+          <div className="launch-hero-glow" />
+          <div className="launch-people">
+            <div className="launch-person launch-person-one">
+              <span />
             </div>
-            <div className="bt-launch-track" aria-hidden="true">
-              <div className="bt-launch-fill" style={{ width: `${launchProgress}%` }} />
+            <div className="launch-person launch-person-two">
+              <span />
             </div>
-          </div>
-
-          <div className="bt-launch-items">
-            <span><Check size={12} /> Dictionary</span>
-            <span><Check size={12} /> Lessons</span>
-            <span><Check size={12} /> Audio</span>
+            <div className="launch-phone">
+              <Languages size={24} />
+            </div>
           </div>
         </div>
-        <div className="bt-launch-footer"><span className="bt-launch-dot" /> Built for everyday Bemba</div>
+
+        <div className="launch-content">
+          <div className="launch-logo">
+            <Languages size={30} strokeWidth={1.7} />
+          </div>
+
+          <div className="launch-kicker">AFRICAN LANGUAGES</div>
+
+          <h1>Languages. Made Simple.</h1>
+
+          <p>
+            Translate, learn, speak and explore languages
+            across Africa.
+          </p>
+
+          <div className="launch-feature-strip" aria-label="App features">
+            <span><Languages size={13} /> Translate</span>
+            <span><BookOpen size={13} /> Dictionary</span>
+            <span><Sparkles size={13} /> Learn</span>
+          </div>
+
+          <div className="launch-status">
+            <div className="launch-status-row">
+              <span>{launchSteps[launchStep]}</span>
+              <strong>{progress}%</strong>
+            </div>
+
+            <div className="progress-track">
+              <div
+                className="progress-fill"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="launch-message">
+            <span className="status-check">
+              <Check size={12} />
+            </span>
+            <span>Private, fast and ready for everyday language use.</span>
+          </div>
+        </div>
+
+        <div className="launch-footer">
+          <span className="launch-footer-mark" />
+          <span>Built for Africa. Ready for more languages.</span>
+        </div>
       </div>
     );
   }
+
+  /* --------------------------------------------------
+     Main application
+  -------------------------------------------------- */
 
   return (
     <div className="app">
@@ -1157,7 +1187,7 @@ function App() {
                         aria-label={`Open ${title} phrases`}
                       >
                         <span>{title}</span>
-                        <small>{items.length} {(items.length as number) === 1 ? "phrase" : "phrases"}</small>
+                        <small>{items.length} {Number(items.length) === 1 ? "phrase" : "phrases"}</small>
                         <strong>{preview[1]}</strong>
                         <ArrowRight size={16} />
                       </button>
