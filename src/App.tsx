@@ -439,18 +439,51 @@ function App() {
   const phrasebookCategories = {
     Greetings: [
       ["How are you?", "Mulishani"],
+      ["I am fine", "Ndifye bwino"],
       ["Good morning", "Mwashibukeni"],
+      ["Thank you", "Natotela"],
+      ["Thank you very much", "Natotela sana"],
+      ["Please", "Mukwai"],
+      ["Sorry", "Njeleleniko"],
+      ["Goodbye", "Shalenipo"],
+      ["What is your name?", "Ni mwe banani?"],
+      ["My name is...", "Ni nebo..."],
     ],
     Travel: [
       ["Where are you?", "Ulikwisa"],
       ["Where are they?", "Balikwisa"],
+      ["Where is...?", "Kuli kwi...?"],
+      ["I want to go to...", "Ndefwaya ukuya ku..."],
+      ["Taxi", "Tekisi"],
+      ["Bus", "Basi"],
+      ["Left", "Ku kumo"],
+      ["Right", "Ku kulyo"],
+      ["Straight ahead", "Pa ntanshi"],
+      ["How much?", "Shinga?"],
     ],
     Shopping: [
-      ["I want money", "Ndefwaya indalama"],
+      ["How much is this?", "Nishinga ici?"],
+      ["I am looking for...", "Ndefwaya ko..."],
+      ["I want to buy food.", "Ndeefwaya ukushita ifyakulya."],
+      ["Do you have chicken?", "Bushe uli inkoko?"],
+      ["Do you want big or small?", "Uleefwaya inkulu nambi iinono?"],
+      ["How much is it?", "Shinga ni?"],
+      ["I have little money.", "Uli shishupa."],
+      ["Give me vegetables.", "Impa ifimbusa fye."],
+      ["I will pay now.", "Ilyo ndelipelafye."],
+      ["Thank you.", "Naimwelwela."],
     ],
     "Daily life": [
       ["I'm angry", "Nimfulwa"],
+      ["I am hungry", "Ningufwa insala"],
+      ["I want to eat", "Ndefwaya ukulya"],
+      ["I am fine", "Ndifye bwino"],
       ["Good morning", "Mwashibukeni"],
+      ["Thank you", "Natotela"],
+      ["Please", "Mukwai"],
+      ["I don't understand", "Nshumfwile"],
+      ["Please speak more slowly", "Landa panono panono"],
+      ["Please say that again", "Bwekeshapo"],
     ],
   } as const;
 
@@ -787,18 +820,6 @@ function App() {
               </button>
             </div>
 
-            <div className="home-coming-card">
-              <div className="home-coming-icon">
-                <Languages size={17} />
-              </div>
-              <div>
-                <strong>Built to grow across Africa</strong>
-                <span>
-                  Swahili ↔ English is planned alongside more
-                  languages and learning features.
-                </span>
-              </div>
-            </div>
           </section>
         )}
 
