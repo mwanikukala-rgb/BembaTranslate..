@@ -1523,79 +1523,9 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "what time is it?", bemba: "ninshita nshi?" },
   { english: "I always wake up at six o'clock", bemba: "ndabuka pa 6 koloko" },
   { english: "what day is it today?", bemba: "lelo nipalicinga?" },
-  
-  // VERBS
-  { english: "to come", bemba: "ukwisa" },
-  { english: "to play (to have fun)", bemba: "ukwangala" },
-  { english: "to comb hair", bemba: "ukusasaukala" },
-  { english: "to cook", bemba: "ukwipika" },
-  { english: "to brush the teeth", bemba: "ukukusa ameeno" },
-  { english: "to bathe", bemba: "ukusamba" },
-  { english: "to play (sport)", bemba: "ukuteya" },
-  { english: "to keep", bemba: "ukusunga" },
-  { english: "to be kept", bemba: "ukusungwa" },
-  { english: "to wash utensils", bemba: "ukusamfya" },
-  { english: "to dress", bemba: "ukufwala" },
-  { english: "to wake up", bemba: "ukububuka" },
-  { english: "to undress", bemba: "ukufuula" },
-  { english: "to sleep", bemba: "ukusendama" },
-  { english: "to shave", bemba: "ukubeya" },
 
-  // TIME-RELATED WORDS
-  { english: "clock", bemba: "koloko" },
-  { english: "in the morning", bemba: "uluucelo" },
-  { english: "evening", bemba: "icungulo" },
-  { english: "early afternoon", bemba: "akasuba" },
-  { english: "night/day", bemba: "ubushiku" },
-  { english: "around 6:00 o'clock", bemba: "kuma 6 koloko" },
-  { english: "quick / fast", bemba: "bwangu" },
-  { english: "time", bemba: "inshita" },
-  { english: "early in the morning / dawn", bemba: "pamaca" },
   
-  // HEALTH / OTHER WORDS
-  { english: "cold", bemba: "impepo" },
-  { english: "malaria", bemba: "malelya" },
-  { english: "syphilis", bemba: "akaswende" },
-  { english: "gonorrhoea", bemba: "akasele" },
-
-  // VERBS
-  { english: "to hide", bemba: "ukufisa" },
-  { english: "to be hidden", bemba: "ukufiswa" },
-  { english: "to be sick", bemba: "ukulwala" },
-  { english: "to think", bemba: "ukutontonka" },
-  { english: "to fall", bemba: "ukupona" },
-  { english: "to be happy / to like", bemba: "ukutemwa" },
-  { english: "to be beautiful / to be good", bemba: "ukuwama" },
-  { english: "to be strong / hard", bemba: "ukukosa" },
-  { english: "to burn", bemba: "ukooca/ukupya" },
-  { english: "to break", bemba: "ukukontola" },
-  { english: "to be tired", bemba: "ukunaka" },
-  { english: "to well", bemba: "ukupola" },
-  { english: "to treat / to heal", bemba: "ukuposhal/ukuundapa" },
-  
-  // BODY-RELATED WORDS
-  { english: "head", bemba: "umutwe" },
-  { english: "hair", bemba: "umushishi" },
-  { english: "eye", bemba: "iliinso" },
-  { english: "eyes", bemba: "ameenso" },
-  { english: "ear", bemba: "ukutwi" },
-  { english: "ears", bemba: "amatwi" },
-  { english: "nose", bemba: "umoonu" },
-  { english: "mouth", bemba: "akanwa" },
-  { english: "lip", bemba: "umulomo" },
-  { english: "lips", bemba: "imilomo" },
-  { english: "tongue", bemba: "ululimi" },
-  { english: "beard", bemba: "umwefu" },
-  { english: "neck", bemba: "umukoshi" },
-  { english: "chest", bemba: "icifuba" },
-  { english: "breast", bemba: "ibeele" },
-  { english: "stomach", bemba: "ulufumo" },
-  { english: "pregnancy", bemba: "ifumo" },
-  { english: "waist", bemba: "umusana" },
-  { english: "thighs", bemba: "amatanta" },
-  { english: "knee", bemba: "ikufi" },
-  { english: "feet", bemba: "amakasa" },
-
+  // 
   // ADJECTIVES — REGULAR
   { english: "near / short", bemba: "-ipi" },
   { english: "tall / far / long", bemba: "-tali" },
@@ -1606,41 +1536,7 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "lazy", bemba: "-nang'ani" },
   { english: "raw / fresh", bemba: "-bishi" },
   
-  // EXPRESSIONS AND WORDS TO NOTE
-  { english: "I am now full", bemba: "naikuta" },
-  { english: "I am full", bemba: "ninjikuta" },
-  { english: "I am thirsty", bemba: "ndi ne cilaka" },
-  { english: "I have eaten", bemba: "nindya" },
-  { english: "I haven't eaten", bemba: "nshilile" },
-  { english: "I'm hungry", bemba: "ndi ne nsala" },
-  { english: "I feel hungry", bemba: "naumfwa insala" },
-  
-  // FOOD WORDS
-  { english: "maize / corn", bemba: "amataba" },
-  { english: "water", bemba: "amenshi" },
-  { english: "eggs", bemba: "amani" },
-  { english: "egg", bemba: "ilini" },
-  { english: "salt", bemba: "umucele/soti" },
-  { english: "milk", bemba: "umukaka" },
-  { english: "rice", bemba: "umupunga/lais(i)" },
-  { english: "nshima", bemba: "ubwali" },
-  { english: "banana / bananas", bemba: "inkonde" },
-  { english: "oranges", bemba: "amacungwa/amaolenji" },
-  { english: "mango / mangoes", bemba: "mango/yembe" },
-  { english: "lemon / lemons", bemba: "indimu" },
-  { english: "avocado pear/s", bemba: "kotapela" },
-  { english: "guavas", bemba: "amapela/amaguava" },
-  { english: "apple", bemba: "amaapo" },
-  { english: "groundnuts", bemba: "imbalala" },
-  { english: "peanut butter", bemba: "icikonko/icimpondwa" },
-
-  // OTHER WORDS
-  { english: "that / which", bemba: "ico" },
-  { english: "thing", bemba: "icintu" },
-  { english: "bad (thing)", bemba: "icibi" },
-  { english: "thing without", bemba: "icabula" },
-  { english: "visitor / guest", bemba: "umweni" },
-  { english: "little things", bemba: "utunono" },
+  // 
 
   // MEAL-RELATED WORDS
   { english: "fork", bemba: "foloko" },
@@ -1670,47 +1566,8 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "to agree", bemba: "ukwiita" },
   { english: "to drink", bemba: "ukumwa" },
   
-  // OTHER WORDS
-  { english: "way of life / staying / living", bemba: "imikaliile" },
-  { english: "at the police station", bemba: "ku polisi" },
-  { english: "hospital", bemba: "icipatala" },
-  { english: "market", bemba: "maliketi/icisankano" },
-  { english: "church", bemba: "calici" },
-  { english: "well", bemba: "icishima" },
-  { english: "clinic", bemba: "kiliniki" },
-
-  // GARDEN TOOLS / IFIBOMBELO
-  { english: "slasher / sickle", bemba: "icikwakwa" },
-  { english: "hoe", bemba: "ulukasu" },
-  { english: "shovel / spade", bemba: "fosholo" },
-  { english: "rake", bemba: "leki" },
-  { english: "axe", bemba: "isembe" },
-  { english: "adze", bemba: "imbaso" },
-  { english: "wheelbarrow", bemba: "wilubala" },
-  { english: "bucket", bemba: "imbeketi" },
-  { english: "rope / string", bemba: "intambo" },
-  { english: "match", bemba: "ulupanga" },
-  { english: "bucket", bemba: "imbeketi" },
-  
-  // HOUSEHOLD WORDS
-  { english: "bed", bemba: "beeti/bedi" },
-  { english: "reedmat", bemba: "ubutanda" },
-  { english: "toilet", bemba: "icimbusu" },
-  { english: "door", bemba: "icibi" },
-  { english: "chair", bemba: "icipuna" },
-  { english: "house", bemba: "ing'anda" },
-  { english: "reedmat", bemba: "ubutanda" },
-  { english: "table", bemba: "itebulo" },
-  { english: "bathing shelter", bemba: "ululasa" },
-
-  // CLASSROOM WORDS
-  { english: "book", bemba: "ibuku" },
-  { english: "pen", bemba: "bopeni" },
-  { english: "pencil", bemba: "pensulo" },
-  { english: "board", bemba: "icipampa" },
-  { english: "chalk", bemba: "coko" },
-  { english: "bag", bemba: "icoola" },
-
+  // 
+  // 
   // VERBS
   { english: "to repeat", bemba: "ukubwekeshapo" },
   { english: "to wash clothes", bemba: "ukuwasha" },
@@ -1752,58 +1609,6 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "repeat", bemba: "bwekesh enipo/ati" },
   { english: "that", bemba: "ukuti/ati" },
   
-  // VERBS
-  { english: "to know", bemba: "ukwishiba" },
-  { english: "to sit/stay/live", bemba: "ukwikala" },
-  { english: "to show", bemba: "ukulanga" },
-  { english: "to call", bemba: "ukwita" },
-  { english: "to marry (for a man)", bemba: "ukupa" },
-  { english: "to be married (for a woman)", bemba: "ukuupwa" },
-
-  // ORDINAL NUMBERS
-  { english: "first", bemba: "bumo" },
-  { english: "second", bemba: "bubili" },
-  { english: "third", bemba: "butatu" },
-  { english: "fourth", bemba: "bune" },
-  { english: "fifth", bemba: "busano" },
-  { english: "sixth", bemba: "mutanda" },
-  { english: "seventh", bemba: "cine lubali" },
-  { english: "eighth", bemba: "cine konsek onse" },
-  { english: "ninth", bemba: "pabula" },
-  { english: "tenth", bemba: "ikumi" },
-
-  // QUASI NUMBERS
-  { english: "alone (I)", bemba: "neka" },
-  { english: "you alone", bemba: "mwe eka" },
-  { english: "he/she alone", bemba: "beeka" },
-  { english: "we alone", bemba: "fweeka" },
-  { english: "last", bemba: "kulekelesha" },
-
-  // NOUNS
-  { english: "father", bemba: "bataata" },
-  { english: "mother", bemba: "bamaayo" },
-  { english: "uncle", bemba: "bayama" },
-  { english: "brother", bemba: "ndume" },
-  { english: "sister", bemba: "nkashi" },
-  { english: "a boy", bemba: "umulumendo" },
-  { english: "a girl", bemba: "umukashana" },
-  { english: "a doctor", bemba: "bashing'anga" },
-  { english: "grandfather", bemba: "bashikulu" },
-  { english: "grandmother", bemba: "bamaama" },
-  { english: "chief", bemba: "imfumu" },
-  { english: "a cook", bemba: "kepika/kuki" },
-  { english: "man/male", bemba: "umwaume" },
-  { english: "female/woman", bemba: "umwanakashi" },
-  { english: "a person", bemba: "umuntu" },
-  { english: "wife", bemba: "umukashi" },
-  { english: "husband", bemba: "umulume" },
-  { english: "aunt", bemba: "bamayo senge" },
-  { english: "last born", bemba: "kasuli" },
-  { english: "first born", bemba: "ibeli" },
-  { english: "twins", bemba: "bampundu" },
-  { english: "born after twins", bemba: "chola" },
-  { english: "parents", bemba: "abafyashi" },
-
   // OTHER WORDS
   { english: "all / everything", bemba: "fyonse/bonse/konse etc." },
   { english: "or / may be / another time", bemba: "limbi" },
@@ -1824,14 +1629,7 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "Sweep", bemba: "Pyangeeni" },
   { english: "Stop", bemba: "Lekeeni" },
 
-  // POLITE COMMANDS
-  { english: "Please enter", bemba: "Ingileeniko" },
-  { english: "Please put", bemba: "Bikeeniko" },
-  { english: "Please close", bemba: "Isaleeniko" },
-  { english: "Please open", bemba: "Isuleeniko" },
-  { english: "Please sweep", bemba: "Pyangeeniko" },
-  { english: "Please stop", bemba: "Lekeeniko" },
-
+  // 
   // FIRST PERSON PLURAL COMMANDS
 
   { english: "Let me eat nshima", bemba: "Ndye ubwali" },
@@ -1839,16 +1637,7 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   { english: "Let them eat rice", bemba: "Balye mupunga" },
   { english: "Let us eat chicken", bemba: "Tulye inkoko" },
 
-  // POLITE COMMAND EXAMPLES
-  { english: "Please enter the hut", bemba: "Ingileeniko mu nsaka" },
-  { english: "Please dance to the rhumba", bemba: "Shaneeniko rhumba" },
-  { english: "Please open the door", bemba: "Isuleeniko icibi" },
-  { english: "Please close the door", bemba: "Isaleeniko icibi" },
-  { english: "Please sweep the house", bemba: "Pyangeeniko mu ng'anda" },
-  { english: "Please clean the plates", bemba: "Wamyeeniko imbale" },
-  { english: "Please stop drinking beer", bemba: "Lekeeniko ukumwa ubwalwa" },
-{ english: "I/am", bemba: "ine" },
-];
+  
 
 
 export default bembaDictionary;
