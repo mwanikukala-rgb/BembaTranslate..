@@ -24,7 +24,7 @@ export const bembaDictionary: BembaDictionaryEntry[] = [
   {
     english: "respect must be shown to the chief in speech and",
     bemba: "Mufwile ukulanga umucinshi ku mfumu mukula..."
-  },
+  }
     { english: "untie", bemba: "Ukukakula" },
   { english: "be upright/walk on two legs or stretch", bemba: "Ukoloka" },
   { english: "uproot", bemba: "Unukula" },
